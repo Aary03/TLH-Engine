@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import {
   AlertCircle, CheckCircle2, ArrowRight, ChevronLeft, ChevronRight,
-  Info, FileText, Globe, Sparkles, Building2, TriangleAlert,
+  Info, FileText, Globe, Sparkles, Building2, TriangleAlert, Home, Plane,
 } from "lucide-react";
 
 /* ── Helpers ─────────────────────────────────────────── */
@@ -16,41 +16,12 @@ const INR_L = (n: number) => {
   if (Math.abs(n) >= 1e5) return `₹${(n / 1e5).toFixed(2)} L`;
   return INR(n);
 };
-const PCT = (n: number) => `${(n * 100).toFixed(1)}%`;
+const PCT  = (n: number) => `${(n * 100).toFixed(1)}%`;
 const PCT2 = (n: number) => `${(n * 100).toFixed(3).replace(/\.?0+$/, "")}%`;
 
-/* ══════════════════════════════════════════════════════
-   NRI COUNTRY DATA  (unchanged)
-══════════════════════════════════════════════════════ */
-
-interface CountryData {
-  flag: string;
-  name: string;
-  dividendWHT: number;
-  cgRate: number;
-  interestWHT: number;
-  typicalMarginalRate: number;
-  cgNote?: string;
-  hint: string;
-}
-
-// India appears FIRST so the picker grid renders it at top-left
-const COUNTRIES: Record<string, CountryData> = {
-  India:       { flag: "🇮🇳", name: "India (Resident Indian)", dividendWHT: 0, cgRate: 0.125, interestWHT: 0, typicalMarginalRate: 0, hint: "You are a Resident Indian. India taxes your worldwide income. Source countries deduct WHT before paying you — claim it back as Foreign Tax Credit via Form 67." },
-  UAE:         { flag: "🇦🇪", name: "UAE",         dividendWHT: 0.10, cgRate: 0.125, interestWHT: 0.10, typicalMarginalRate: 0.00, hint: "UAE has no personal income tax. Indian DTAA WHT is the only tax." },
-  UK:          { flag: "🇬🇧", name: "UK",          dividendWHT: 0.15, cgRate: 0.125, interestWHT: 0.15, typicalMarginalRate: 0.40, hint: "UK marginal rate: 45% for income above £125,140. Dividend rate: 39.35% for additional-rate taxpayers." },
-  USA:         { flag: "🇺🇸", name: "USA",         dividendWHT: 0.25, cgRate: 0.125, interestWHT: 0.15, typicalMarginalRate: 0.37, hint: "US federal top rate: 37%. State taxes add 0–13%. Long-term CG rate: 20%+3.8% NIIT." },
-  Singapore:   { flag: "🇸🇬", name: "Singapore",  dividendWHT: 0.15, cgRate: 0.125, interestWHT: 0.10, typicalMarginalRate: 0.22, hint: "Singapore top personal rate: 22%. No capital gains tax. Dividend income: 0% (one-tier system)." },
-  Canada:      { flag: "🇨🇦", name: "Canada",     dividendWHT: 0.25, cgRate: 0.125, interestWHT: 0.15, typicalMarginalRate: 0.33, hint: "Canada federal top rate: 33%. Provinces add 12–25%. Capital gains: 50% inclusion at marginal rate." },
-  Australia:   { flag: "🇦🇺", name: "Australia",  dividendWHT: 0.15, cgRate: 0.125, interestWHT: 0.10, typicalMarginalRate: 0.45, hint: "Australia top rate: 45% for income above AUD 180,001. CGT: 50% discount if held 12+ months." },
-  Germany:     { flag: "🇩🇪", name: "Germany",    dividendWHT: 0.10, cgRate: 0.125, interestWHT: 0.10, typicalMarginalRate: 0.42, hint: "Germany: flat 25% Abgeltungsteuer (capital gains tax) + solidarity surcharge + church tax." },
-  Netherlands: { flag: "🇳🇱", name: "Netherlands",dividendWHT: 0.10, cgRate: 0.125, interestWHT: 0.10, typicalMarginalRate: 0.37, hint: "Netherlands: Box 3 wealth tax at assumed 6.17% return taxed at 36%. Top income rate: 49.5%." },
-  Mauritius:   { flag: "🇲🇺", name: "Mauritius",  dividendWHT: 0.05, cgRate: 0.00,  interestWHT: 0.00, typicalMarginalRate: 0.15, hint: "Mauritius-India treaty: 5% WHT on dividends. Capital gains EXEMPT in India under old protocol. No CG tax in Mauritius.", cgNote: "CG may be exempt under Mauritius protocol — verify with CA" },
-  Japan:       { flag: "🇯🇵", name: "Japan",      dividendWHT: 0.10, cgRate: 0.125, interestWHT: 0.10, typicalMarginalRate: 0.45, hint: "Japan top rate: 55% (national 45% + local 10%). Listed securities gains: flat 20.315%." },
-  Other:       { flag: "🌍", name: "Other",        dividendWHT: 0.30, cgRate: 0.125, interestWHT: 0.20, typicalMarginalRate: 0.30, hint: "Without a DTAA, India charges full domestic WHT (20% for dividends). Check treaties at incometaxindia.gov.in." },
-};
-
-type IncomeType = "dividends" | "capital_gains" | "interest" | "other";
+/* ── Types ─────────────────────────────────────────────── */
+type InvestorType = "resident" | "nri" | null;
+type IncomeType   = "dividends" | "capital_gains" | "interest" | "other";
 
 const INCOME_LABELS: Record<IncomeType, string> = {
   dividends:     "Dividends",
@@ -59,17 +30,7 @@ const INCOME_LABELS: Record<IncomeType, string> = {
   other:         "Other income",
 };
 
-const NON_DTAA_RATES: Record<IncomeType, number> = {
-  dividends:     0.30,
-  capital_gains: 0.125,
-  interest:      0.20,
-  other:         0.30,
-};
-
-/* ══════════════════════════════════════════════════════
-   INDIA-SPECIFIC DATA
-══════════════════════════════════════════════════════ */
-
+/* ── India slab rates ─────────────────────────────────── */
 const INDIA_SLABS = [
   { label: "Up to ₹3L — 0%",   rate: 0.00 },
   { label: "₹3L–₹7L — 5%",    rate: 0.05 },
@@ -79,25 +40,21 @@ const INDIA_SLABS = [
   { label: "Above ₹15L — 30%", rate: 0.30 },
 ];
 
-interface SourceCountry {
-  flag: string;
-  name: string;
-  wht: number;       // dividend WHT imposed by that country on Indian residents
-  manual?: boolean;  // user must enter WHT manually
-}
+/* ── Source countries (income origin for Resident Indians) */
+interface SourceCountry { flag: string; name: string; wht: number; manual?: boolean }
 
 const SOURCE_COUNTRIES: Record<string, SourceCountry> = {
-  USA:         { flag: "🇺🇸", name: "USA",         wht: 0.25 },
-  UK:          { flag: "🇬🇧", name: "UK",          wht: 0.20 },
-  Singapore:   { flag: "🇸🇬", name: "Singapore",  wht: 0.00 },
-  Germany:     { flag: "🇩🇪", name: "Germany",    wht: 0.26375 },
-  Netherlands: { flag: "🇳🇱", name: "Netherlands",wht: 0.15 },
-  Mauritius:   { flag: "🇲🇺", name: "Mauritius",  wht: 0.00 },
-  Japan:       { flag: "🇯🇵", name: "Japan",      wht: 0.15 },
-  Other:       { flag: "🌍", name: "Other",        wht: 0, manual: true },
+  USA:         { flag: "🇺🇸", name: "USA",          wht: 0.25 },
+  UK:          { flag: "🇬🇧", name: "UK",           wht: 0.20 },
+  Singapore:   { flag: "🇸🇬", name: "Singapore",   wht: 0.00 },
+  Germany:     { flag: "🇩🇪", name: "Germany",     wht: 0.26375 },
+  Netherlands: { flag: "🇳🇱", name: "Netherlands", wht: 0.15 },
+  Mauritius:   { flag: "🇲🇺", name: "Mauritius",   wht: 0.00 },
+  Japan:       { flag: "🇯🇵", name: "Japan",       wht: 0.15 },
+  Other:       { flag: "🌍",  name: "Other",        wht: 0, manual: true },
 };
 
-/* ── Sub-components ──────────────────────────────────── */
+/* ── Small reusable bits ─────────────────────────────── */
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -131,88 +88,398 @@ function InfoBox({
 }
 
 /* ══════════════════════════════════════════════════════
-   MAIN COMPONENT
+   NRI EXPLAINER (Card B content)
+══════════════════════════════════════════════════════ */
+
+const NRI_ROWS = [
+  {
+    icon: "📈",
+    title: "Capital Gains on GIFT City Cat III AIF",
+    indiaTax: "0%",
+    indiaTaxLabel: "Exempt — Section 10(23FBC)",
+    description: "Non-resident investors in IFSC Category III AIFs are fully exempt from Indian tax on income and gains. India does not tax this at all. DTAA is not needed.",
+    tag: "No DTAA needed — India charges nothing",
+    tagColor: "#05A049",
+    tagBg: "rgba(5,160,73,0.1)",
+    isException: false,
+  },
+  {
+    icon: "🇺🇸",
+    title: "Gains on US Stocks via Valura GIFT City Account",
+    indiaTax: "0%",
+    indiaTaxLabel: "Not India-sourced",
+    description: "When you buy Apple or an S&P 500 ETF via your Valura account, the underlying asset is a US security. For NRIs, India only taxes India-sourced income. Gains on US stocks are US-sourced — India does not tax them.",
+    tag: "No DTAA needed — India not involved",
+    tagColor: "#05A049",
+    tagBg: "rgba(5,160,73,0.1)",
+    isException: false,
+  },
+  {
+    icon: "💰",
+    title: "Interest on GIFT City Bonds / Deposits",
+    indiaTax: "0%",
+    indiaTaxLabel: "Exempt — Section 10(15)(ix)",
+    description: "Interest paid to non-residents on IFSC securities is fully exempt in India. Your residence country will tax it, but India takes nothing. DTAA is not needed.",
+    tag: "No DTAA needed — already 0% in India",
+    tagColor: "#05A049",
+    tagBg: "rgba(5,160,73,0.1)",
+    isException: false,
+  },
+  {
+    icon: "⚠️",
+    title: "Indian Securities via GIFT City (Edge Case)",
+    indiaTax: "12.5% LTCG",
+    indiaTaxLabel: "India-sourced income — LTCG applies",
+    description: "If you use your GIFT City account to invest in Indian stocks or Indian funds, that is India-sourced income. India taxes it at 12.5% LTCG (14.95% effective). Your residence country may also tax it. Here DTAA does apply — your residence country gives you FTC credit for the 12.5% Indian tax.",
+    tag: "DTAA applies — FTC in your residence country",
+    tagColor: "#B8913A",
+    tagBg: "rgba(184,145,58,0.1)",
+    isException: true,
+  },
+];
+
+function NRIExplainer({ onSwitchToResident }: { onSwitchToResident: () => void }) {
+  return (
+    <div className="space-y-6">
+      {/* Section title */}
+      <div className="rounded-2xl p-6" style={{ background: "#fff", border: "1px solid #E5E7EB" }}>
+        <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#9CA3AF" }}>
+          Why DTAA mostly doesn&apos;t apply to NRIs investing via GIFT City
+        </p>
+        <p className="text-sm text-gray-500 leading-relaxed max-w-2xl">
+          India has structured GIFT City IFSC to be a near-zero-tax environment for non-residents.
+          Most income types are already 0% in India — so there is nothing to credit against your residence country tax.
+          DTAA only matters in the one edge case below.
+        </p>
+      </div>
+
+      {/* 4 rows */}
+      <div className="space-y-3">
+        {NRI_ROWS.map((row) => (
+          <div
+            key={row.title}
+            className="rounded-2xl overflow-hidden"
+            style={{
+              border: row.isException ? "2px solid #E8C97A" : "1px solid #E5E7EB",
+              background: "#fff",
+            }}
+          >
+            <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] gap-4 items-start">
+              {/* Icon + title */}
+              <div className="flex items-center gap-3">
+                <span className="text-3xl leading-none">{row.icon}</span>
+              </div>
+              <div>
+                <p className="text-sm font-bold mb-1" style={{ fontFamily: "var(--font-manrope)", color: "#00111B" }}>
+                  {row.title}
+                </p>
+                <p className="text-xs text-gray-500 leading-relaxed">{row.description}</p>
+              </div>
+              {/* Tax + tag */}
+              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                <div className="text-right">
+                  <p className="text-xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: row.isException ? "#B8913A" : "#05A049" }}>
+                    {row.indiaTax}
+                  </p>
+                  <p className="text-[10px]" style={{ color: row.isException ? "#B8913A" : "#05A049" }}>{row.indiaTaxLabel}</p>
+                </div>
+                <span
+                  className="rounded-full px-2.5 py-0.5 text-[10px] font-bold whitespace-nowrap"
+                  style={{ background: row.tagBg, color: row.tagColor }}
+                >
+                  {row.tag}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Summary callout — dark */}
+      <div className="rounded-2xl p-6" style={{ background: "#00111B" }}>
+        <p className="text-sm font-bold mb-4" style={{ fontFamily: "var(--font-manrope)", color: "#B4E3C8" }}>
+          The real advantage of GIFT City for NRIs is not DTAA
+        </p>
+        <div className="space-y-3">
+          {[
+            ["Ireland UCITS ETF route", "Dividend WHT drops from 25% (direct US stocks) to ~15% via UCITS fund structure — no DTAA needed, just better fund domicile."],
+            ["US Estate Tax eliminated", "IFSC fund units are not US-situs assets. $0 estate tax vs up to 40% for direct US holdings above $60,000."],
+            ["Zero Indian tax on gains", "Cat III AIF exemption (Section 10(23FBC)) means India never touches your investment returns — regardless of DTAA."],
+          ].map(([title, body]) => (
+            <div key={title} className="flex items-start gap-3">
+              <CheckCircle2 className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#05A049" }} />
+              <div>
+                <p className="text-xs font-bold text-white">{title}</p>
+                <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-5 flex flex-col sm:flex-row gap-3">
+          <a
+            href="/calculators/estate-tax"
+            className="flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all hover:opacity-90"
+            style={{ background: "#05A049", color: "#fff" }}
+          >
+            See the Estate Tax Calculator <ArrowRight className="h-4 w-4" />
+          </a>
+          <button
+            onClick={onSwitchToResident}
+            className="flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all"
+            style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.15)" }}
+          >
+            I hold Indian securities via GIFT City — calculate my DTAA
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════
+   UNIFIED REFERENCE TABLE (shown for both paths)
+══════════════════════════════════════════════════════ */
+
+function ReferenceTable({ highlightResident }: { highlightResident: boolean }) {
+  const TABLE_ROWS = [
+    {
+      income: "Capital Gains",
+      resident: "12.5% LTCG after 730 days + FTC from source country",
+      nriCat3: "0% — Sec 10(23FBC) exempt",
+      nriIndian: "12.5% LTCG — FTC in residence country",
+      residentColor: "#374151",
+      nriCat3Color: "#05A049",
+      nriIndianColor: "#B8913A",
+    },
+    {
+      income: "Dividends (US stocks)",
+      resident: "Slab rate + FTC via Form 67",
+      nriCat3: "0% — not India-sourced",
+      nriIndian: "N/A",
+      residentColor: "#374151",
+      nriCat3Color: "#05A049",
+      nriIndianColor: "#9CA3AF",
+    },
+    {
+      income: "Interest (GIFT City)",
+      resident: "Slab rate — NOT exempt",
+      nriCat3: "0% — Sec 10(15)(ix)",
+      nriIndian: "0% — Sec 10(15)(ix)",
+      residentColor: "#DC2626",
+      nriCat3Color: "#05A049",
+      nriIndianColor: "#05A049",
+    },
+    {
+      income: "US Estate Tax",
+      resident: "Up to 40% (direct) / $0 via IFSC",
+      nriCat3: "$0 — IFSC units not US-situs",
+      nriIndian: "$0 — IFSC units not US-situs",
+      residentColor: "#B8913A",
+      nriCat3Color: "#05A049",
+      nriIndianColor: "#05A049",
+    },
+  ];
+
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid #E5E7EB", background: "#fff" }}>
+      <div className="px-6 py-4 border-b" style={{ borderColor: "#F3F4F6" }}>
+        <p className="text-sm font-bold" style={{ fontFamily: "var(--font-manrope)", color: "#00111B" }}>
+          Tax Treatment by Investor Type — GIFT City Investments
+        </p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr style={{ background: "#F9FAFB" }}>
+              <th className="px-4 py-3 text-left font-semibold text-gray-500 uppercase tracking-wide">Income Type</th>
+              <th
+                className="px-4 py-3 text-center font-bold uppercase tracking-wide"
+                style={{ color: "#05A049", background: highlightResident ? "rgba(5,160,73,0.06)" : undefined }}
+              >
+                🇮🇳 Resident Indian
+                {highlightResident && (
+                  <span className="ml-1.5 rounded-full px-1.5 py-0.5 text-[9px]" style={{ background: "#05A049", color: "#fff" }}>YOU</span>
+                )}
+              </th>
+              <th className="px-4 py-3 text-center font-semibold text-gray-500 uppercase tracking-wide">NRI — Cat III AIF</th>
+              <th className="px-4 py-3 text-center font-semibold text-gray-500 uppercase tracking-wide">NRI — Indian Securities</th>
+            </tr>
+          </thead>
+          <tbody>
+            {TABLE_ROWS.map((row, i) => (
+              <tr key={i} className="border-t" style={{ borderColor: "#F3F4F6" }}>
+                <td className="px-4 py-3 font-semibold" style={{ color: "#00111B" }}>{row.income}</td>
+                <td
+                  className="px-4 py-3 text-center"
+                  style={{ color: row.residentColor, background: highlightResident ? "rgba(5,160,73,0.03)" : undefined }}
+                >
+                  {row.resident}
+                </td>
+                <td className="px-4 py-3 text-center" style={{ color: row.nriCat3Color }}>{row.nriCat3}</td>
+                <td className="px-4 py-3 text-center" style={{ color: row.nriIndianColor }}>{row.nriIndian}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="px-6 py-3 border-t" style={{ borderColor: "#F3F4F6" }}>
+        <p className="text-[10px]" style={{ color: "#9CA3AF" }}>
+          NRI exemptions under Sections 10(23FBC) and 10(15)(ix) apply to income from IFSC entities. Subject to conditions. Consult your CA.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════
+   PATH SELECTOR
+══════════════════════════════════════════════════════ */
+
+function PathSelector({
+  selected,
+  onSelect,
+}: {
+  selected: InvestorType;
+  onSelect: (t: InvestorType) => void;
+}) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-[1.4fr_1fr] gap-4">
+      {/* Card A — Resident Indian (PRIMARY) */}
+      <button
+        onClick={() => onSelect("resident")}
+        className="text-left rounded-2xl p-6 transition-all"
+        style={{
+          background: selected === "resident" ? "#00111B" : "#0d1f2d",
+          border: selected === "resident" ? "2px solid #05A049" : "2px solid rgba(5,160,73,0.3)",
+          boxShadow: selected === "resident" ? "0 8px 32px rgba(5,160,73,0.25)" : "none",
+        }}
+      >
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <span
+            className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest"
+            style={{ background: "rgba(180,227,200,0.2)", color: "#B4E3C8" }}
+          >
+            Most Relevant to You
+          </span>
+          {selected === "resident" && (
+            <span
+              className="flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold"
+              style={{ background: "#05A049", color: "#fff" }}
+            >
+              <CheckCircle2 className="h-3 w-3" /> Selected
+            </span>
+          )}
+        </div>
+        <div className="text-3xl mb-3">🇮🇳</div>
+        <p
+          className="text-xl font-extrabold text-white mb-1"
+          style={{ fontFamily: "var(--font-bricolage)" }}
+        >
+          Resident Indian
+        </p>
+        <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.6)" }}>
+          You live in India and invest globally via GIFT City
+        </p>
+        <p className="text-xs leading-relaxed mb-5" style={{ color: "rgba(255,255,255,0.45)" }}>
+          India taxes your worldwide income. Foreign countries also deduct withholding tax before paying you.
+          Foreign Tax Credit (FTC) via Form 67 prevents double taxation. This calculator shows exactly how much you save.
+        </p>
+        <div
+          className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold"
+          style={{ background: "#05A049", color: "#fff" }}
+        >
+          Calculate my FTC savings <ArrowRight className="h-4 w-4" />
+        </div>
+      </button>
+
+      {/* Card B — NRI (SECONDARY, dimmed) */}
+      <button
+        onClick={() => onSelect("nri")}
+        className="text-left rounded-2xl p-5 transition-all"
+        style={{
+          background: selected === "nri" ? "#F0F4F0" : "#F7F5F0",
+          border: selected === "nri" ? "2px solid #B8913A" : "1.5px solid #D4E8DC",
+          opacity: selected === "resident" ? 0.7 : 1,
+        }}
+      >
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <span
+            className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest"
+            style={{ background: "rgba(184,145,58,0.12)", color: "#B8913A" }}
+          >
+            Limited Applicability
+          </span>
+          {selected === "nri" && (
+            <span
+              className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
+              style={{ background: "#B8913A", color: "#fff" }}
+            >
+              <CheckCircle2 className="h-3 w-3" /> Selected
+            </span>
+          )}
+        </div>
+        <div className="text-2xl mb-2">✈️</div>
+        <p
+          className="text-lg font-extrabold mb-1"
+          style={{ fontFamily: "var(--font-bricolage)", color: "#374151" }}
+        >
+          NRI via GIFT City
+        </p>
+        <p className="text-xs mb-3 text-gray-400">You live abroad and invest through your Valura GIFT City account</p>
+        <p className="text-xs leading-relaxed mb-4 text-gray-400">
+          India taxes almost nothing for NRIs investing via GIFT City. DTAA is largely not relevant here. See why below.
+        </p>
+        <div
+          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold"
+          style={{ background: "#E5E7EB", color: "#6B7280" }}
+        >
+          Understand why <ArrowRight className="h-3.5 w-3.5" />
+        </div>
+      </button>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════
+   MAIN PAGE
 ══════════════════════════════════════════════════════ */
 
 export default function DTAACalculator() {
-  /* Wizard state */
+  /* ── Path state ── */
+  const [investorType, setInvestorType] = useState<InvestorType>(null);
+
+  /* ── Wizard state (Resident Indian) ── */
   const [step, setStep] = useState(1);
 
-  /* Step 1 inputs */
-  const [countryKey, setCountryKey] = useState<keyof typeof COUNTRIES>("UAE");
-  const [incomeType, setIncomeType] = useState<IncomeType>("dividends");
-  const [incomeCurrency, setIncomeCurrency] = useState<"INR" | "USD">("INR");
-  const [incomeAmount, setIncomeAmount] = useState(1_000_000);
+  /* Step 1 — source country + income */
+  const [sourceCountryKey, setSourceCountryKey] = useState<keyof typeof SOURCE_COUNTRIES>("USA");
+  const [incomeType, setIncomeType]             = useState<IncomeType>("dividends");
+  const [incomeCurrency, setIncomeCurrency]     = useState<"INR" | "USD">("INR");
+  const [incomeAmount, setIncomeAmount]         = useState(1_000_000);
   const [incomeAmountInput, setIncomeAmountInput] = useState("10");
+  const [sourceWHTManual, setSourceWHTManual]   = useState(0);
 
-  /* Step 2 — NRI inputs (unchanged) */
-  const [foreignMarginalRate, setForeignMarginalRate] = useState<number>(COUNTRIES["UAE"].typicalMarginalRate);
+  /* Step 2 — Indian tax profile */
+  const [indianSlabRate, setIndianSlabRate]     = useState(0.30);
   const [indianTDSDeducted, setIndianTDSDeducted] = useState(0);
 
-  /* Step 2 — India (Resident Indian) inputs */
-  const [indianSlabRate, setIndianSlabRate] = useState(0.30);
-  const [sourceCountryKey, setSourceCountryKey] = useState<keyof typeof SOURCE_COUNTRIES>("USA");
-  const [sourceWHTManual, setSourceWHTManual] = useState(0);
-
-  const isIndiaResident = countryKey === "India";
-  const country = COUNTRIES[countryKey];
+  /* ── Derived values ── */
   const incomeINR = incomeCurrency === "USD" ? incomeAmount * 84.5 : incomeAmount;
-
-  /* ── Resident India effective WHT ── */
   const sourceCountry = SOURCE_COUNTRIES[sourceCountryKey];
   const effectiveSourceWHT = sourceCountry.manual ? sourceWHTManual / 100 : sourceCountry.wht;
 
-  /* ══════════════════════════════════
-     NRI CALCULATIONS  (unchanged)
-  ══════════════════════════════════ */
-  const calc = useMemo(() => {
-    let dtaaRate = 0;
-    let nonDtaaRate = NON_DTAA_RATES[incomeType];
-    if (incomeType === "dividends")      dtaaRate = country.dividendWHT;
-    else if (incomeType === "capital_gains") { dtaaRate = country.cgRate; nonDtaaRate = 0.125; }
-    else if (incomeType === "interest")  dtaaRate = country.interestWHT;
-    else                                 dtaaRate = 0.30;
-
-    const isGiftCityInterest = incomeType === "interest";
-    const withoutDtaaIndianTax  = incomeINR * nonDtaaRate;
-    const withoutDtaaForeignTax = incomeINR * foreignMarginalRate;
-    const withoutDtaaTotal      = withoutDtaaIndianTax + withoutDtaaForeignTax;
-    const withoutDtaaRate       = incomeINR > 0 ? withoutDtaaTotal / incomeINR : 0;
-    const withDtaaIndianTax     = incomeINR * (isGiftCityInterest ? 0 : dtaaRate);
-    const grossForeignTax       = incomeINR * foreignMarginalRate;
-    const ftc                   = Math.min(withDtaaIndianTax, grossForeignTax);
-    const netForeignTax         = Math.max(0, grossForeignTax - ftc);
-    const withDtaaTotal         = withDtaaIndianTax + netForeignTax;
-    const withDtaaRate          = incomeINR > 0 ? withDtaaTotal / incomeINR : 0;
-    const netPayable            = Math.max(0, withDtaaTotal - indianTDSDeducted);
-    const saving                = withoutDtaaTotal - withDtaaTotal;
-    const savingPct             = incomeINR > 0 ? saving / incomeINR : 0;
-
-    return {
-      dtaaRate, nonDtaaRate, isGiftCityInterest,
-      withoutDtaaIndianTax, withoutDtaaForeignTax, withoutDtaaTotal, withoutDtaaRate,
-      withDtaaIndianTax, grossForeignTax, ftc, netForeignTax, withDtaaTotal, withDtaaRate,
-      netPayable, saving, savingPct,
-    };
-  }, [country, incomeType, incomeINR, foreignMarginalRate, indianTDSDeducted]);
-
-  /* ══════════════════════════════════
-     INDIA-SPECIFIC CALCULATIONS
-  ══════════════════════════════════ */
+  /* ── FTC calculations ── */
   const calcIndia = useMemo(() => {
-    const sourceWHTAmount   = incomeINR * effectiveSourceWHT;
+    const sourceWHTAmount     = incomeINR * effectiveSourceWHT;
     const indianSlabTaxAmount = incomeINR * indianSlabRate;
-    // Without FTC: both stacked
-    const withoutFTCTotal   = sourceWHTAmount + indianSlabTaxAmount;
-    const withoutFTCRate    = incomeINR > 0 ? withoutFTCTotal / incomeINR : 0;
-    // FTC = min(source WHT, Indian tax) — capped, excess not refundable
-    const ftcAmount         = Math.min(sourceWHTAmount, indianSlabTaxAmount);
-    const withFTCTotal      = Math.max(sourceWHTAmount, indianSlabTaxAmount); // pay the higher
-    const withFTCRate       = incomeINR > 0 ? withFTCTotal / incomeINR : 0;
-    const saving            = withoutFTCTotal - withFTCTotal;
-    const savingPct         = incomeINR > 0 ? saving / incomeINR : 0;
-    const sourceExceedsIndia = sourceWHTAmount > indianSlabTaxAmount;
-
+    const withoutFTCTotal     = sourceWHTAmount + indianSlabTaxAmount;
+    const withoutFTCRate      = incomeINR > 0 ? withoutFTCTotal / incomeINR : 0;
+    const ftcAmount           = Math.min(sourceWHTAmount, indianSlabTaxAmount);
+    const withFTCTotal        = Math.max(sourceWHTAmount, indianSlabTaxAmount);
+    const withFTCRate         = incomeINR > 0 ? withFTCTotal / incomeINR : 0;
+    const saving              = withoutFTCTotal - withFTCTotal;
+    const savingPct           = incomeINR > 0 ? saving / incomeINR : 0;
+    const sourceExceedsIndia  = sourceWHTAmount > indianSlabTaxAmount;
     return {
       sourceWHTAmount, indianSlabTaxAmount,
       withoutFTCTotal, withoutFTCRate,
@@ -221,161 +488,175 @@ export default function DTAACalculator() {
     };
   }, [incomeINR, effectiveSourceWHT, indianSlabRate]);
 
-  /* ── Event handlers ── */
-  const handleCountryChange = (k: keyof typeof COUNTRIES) => {
-    setCountryKey(k);
-    if (k !== "India") {
-      setForeignMarginalRate(COUNTRIES[k].typicalMarginalRate);
-      setIndianTDSDeducted(Math.round(incomeINR * COUNTRIES[k].dividendWHT));
-    }
-  };
-
   const handleIncomeInput = (v: string) => {
     setIncomeAmountInput(v);
     const n = parseFloat(v) * 1e5;
     if (!isNaN(n) && n > 0) setIncomeAmount(incomeCurrency === "USD" ? parseFloat(v) * 100 : n);
   };
 
-  /* ══════════════════════════════════════════════════════
+  /* ── On path selection, reset wizard ── */
+  const handlePathSelect = (t: InvestorType) => {
+    setInvestorType(t);
+    setStep(1);
+  };
+
+  /* ════════════════════════════════════════════════════
      RENDER
-  ══════════════════════════════════════════════════════ */
+  ════════════════════════════════════════════════════ */
   return (
     <div className="min-h-screen" style={{ background: "#FFFFFC" }}>
 
       {/* ── Header ── */}
       <div className="border-b px-8 py-6" style={{ background: "#fff", borderColor: "#E5E7EB" }}>
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
               <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest" style={{ background: "rgba(5,160,73,0.1)", color: "#05A049" }}>
-                Calculator
+                Calculator · FTC & DTAA
               </span>
-              <span className="text-[10px] text-gray-400">DTAA rates · FY 2025-26 · Form 67</span>
-              {isIndiaResident && (
-                <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest" style={{ background: "rgba(255,153,0,0.1)", color: "#D97706" }}>
-                  🇮🇳 Resident Indian flow
-                </span>
-              )}
+              <span className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest" style={{ background: "#F3F4F6", color: "#6B7280" }}>
+                Primarily for Resident Indians
+              </span>
+              <span className="text-[10px] text-gray-400">FY 2025-26 · Form 67 · Section 90/91</span>
             </div>
-            <h1 className="text-3xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: "var(--font-bricolage)", color: "#00111B" }}>
-              {isIndiaResident ? "Foreign Tax Credit (FTC) Calculator" : "DTAA Tax Credit Calculator"}
+            <h1
+              className="text-3xl font-extrabold leading-tight tracking-tight"
+              style={{ fontFamily: "var(--font-bricolage)", color: "#00111B" }}
+            >
+              {investorType === "resident"
+                ? "Foreign Tax Credit Calculator"
+                : "Foreign Tax Credit & DTAA Calculator"}
             </h1>
             <p className="mt-1 text-sm text-gray-500 max-w-xl">
-              {isIndiaResident
-                ? "As a Resident Indian, source countries deduct WHT before paying you. Claim it back as FTC via Form 67 and pay only the higher of the two rates."
-                : "Quantify how treaty protection eliminates double taxation on Indian-source income for NRIs."}
+              {investorType === "resident"
+                ? "Resident Indians — avoid double taxation on foreign investment income via Form 67 FTC"
+                : "Understand DTAA and FTC — and discover why GIFT City makes both largely irrelevant for NRIs"}
             </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {["Resident Indian", "FTC", "Form 67"].map((t) => (
+                <span key={t} className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: "#F3F4F6", color: "#6B7280" }}>{t}</span>
+              ))}
+            </div>
           </div>
-          {/* Savings badge */}
-          {isIndiaResident
-            ? calcIndia.saving > 100 && (
-              <div className="hidden md:flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: "#EDFAF3", border: "1px solid #B4E3C8" }}>
-                <Sparkles className="h-5 w-5" style={{ color: "#05A049" }} />
-                <div>
-                  <p className="text-xs font-semibold" style={{ color: "#05A049" }}>FTC saves you</p>
-                  <p className="text-2xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: "#05A049" }}>{INR_L(calcIndia.saving)}</p>
-                </div>
+          {/* Savings badge — only for resident Indian once calculated */}
+          {investorType === "resident" && calcIndia.saving > 100 && (
+            <div className="hidden md:flex items-center gap-3 rounded-xl px-4 py-3 flex-shrink-0" style={{ background: "#EDFAF3", border: "1px solid #B4E3C8" }}>
+              <Sparkles className="h-5 w-5" style={{ color: "#05A049" }} />
+              <div>
+                <p className="text-xs font-semibold" style={{ color: "#05A049" }}>FTC saves you</p>
+                <p className="text-2xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: "#05A049" }}>{INR_L(calcIndia.saving)}</p>
               </div>
-            )
-            : calc.saving > 0 && (
-              <div className="hidden md:flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: "#EDFAF3", border: "1px solid #B4E3C8" }}>
-                <Sparkles className="h-5 w-5" style={{ color: "#05A049" }} />
-                <div>
-                  <p className="text-xs font-semibold" style={{ color: "#05A049" }}>DTAA saves you</p>
-                  <p className="text-2xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: "#05A049" }}>{INR_L(calc.saving)}</p>
-                </div>
-              </div>
-            )}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
 
-        {/* ── Progress ── */}
-        <div className="flex items-center gap-3">
-          {[1, 2].map((s) => (
-            <div key={s} className="flex items-center gap-2">
-              <button
-                onClick={() => setStep(s)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-all"
-                style={{ background: step === s ? "#00111B" : step > s ? "#05A049" : "#E5E7EB", color: step >= s ? "#fff" : "#6B7280" }}
-              >
-                {step > s ? "✓" : s}
-              </button>
-              <span className="text-sm font-medium" style={{ color: step === s ? "#00111B" : "#9CA3AF" }}>
-                {s === 1 ? "Income Details" : isIndiaResident ? "Indian Tax Profile" : "Tax Rates"}
-              </span>
-              {s < 2 && <div className="h-px w-12 mx-1" style={{ background: step > s ? "#05A049" : "#E5E7EB" }} />}
-            </div>
-          ))}
+        {/* ── INVESTOR TYPE SELECTOR (always visible) ── */}
+        <div>
+          {investorType && (
+            <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: "#9CA3AF" }}>
+              Your investor type — click to change
+            </p>
+          )}
+          <PathSelector selected={investorType} onSelect={handlePathSelect} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.6fr] gap-6">
-
-          {/* ═══════════════════════════════
-              WIZARD INPUTS
-          ═══════════════════════════════ */}
-          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid #E5E7EB", background: "#fff", boxShadow: "0 2px 12px rgba(0,17,27,0.05)" }}>
-
-            {/* ─ STEP 1 (shared) ─ */}
-            {step === 1 && (
-              <div className="p-6 space-y-5">
-                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#05A049" }}>
-                  Step 1 — Income Details
-                </p>
-
-                {/* Country picker */}
-                <div>
-                  <SectionLabel>Country of residence</SectionLabel>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                    {Object.entries(COUNTRIES).map(([k, c]) => {
-                      const isIndia = k === "India";
-                      const isActive = countryKey === k;
-                      return (
-                        <button
-                          key={k}
-                          onClick={() => handleCountryChange(k as keyof typeof COUNTRIES)}
-                          className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-all text-left"
-                          style={{
-                            background: isActive
-                              ? (isIndia ? "#00111B" : "#00111B")
-                              : isIndia ? "#FFF7ED" : "#F9FAFB",
-                            color: isActive ? "#fff" : isIndia ? "#92400E" : "#374151",
-                            border: isActive
-                              ? `1px solid #00111B`
-                              : isIndia ? "1px solid #FDE68A" : "1px solid #E5E7EB",
-                          }}
-                        >
-                          <span className="text-lg leading-none">{c.flag}</span>
-                          <span className="text-xs font-semibold leading-tight">
-                            {k === "India" ? "India" : k}
-                            {k === "India" && <span className="block text-[9px] font-normal opacity-70">Resident Indian</span>}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="mt-3 rounded-xl px-3 py-2 text-[11px]" style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", color: "#6B7280" }}>
-                    <Info className="h-3 w-3 inline mr-1" />{country.hint}
-                  </div>
+        {/* ═══════════════════════════════════════
+            RESIDENT INDIAN FLOW
+        ═══════════════════════════════════════ */}
+        {investorType === "resident" && (
+          <>
+            {/* Wizard progress */}
+            <div className="flex items-center gap-3">
+              {[1, 2].map((s) => (
+                <div key={s} className="flex items-center gap-2">
+                  <button
+                    onClick={() => setStep(s)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-all"
+                    style={{ background: step === s ? "#00111B" : step > s ? "#05A049" : "#E5E7EB", color: step >= s ? "#fff" : "#6B7280" }}
+                  >
+                    {step > s ? "✓" : s}
+                  </button>
+                  <span className="text-sm font-medium" style={{ color: step === s ? "#00111B" : "#9CA3AF" }}>
+                    {s === 1 ? "Income Details" : "Indian Tax Profile"}
+                  </span>
+                  {s < 2 && <div className="h-px w-12 mx-1" style={{ background: step > s ? "#05A049" : "#E5E7EB" }} />}
                 </div>
+              ))}
+            </div>
 
-                {/* Income type */}
-                <div>
-                  <SectionLabel>Type of income</SectionLabel>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(Object.keys(INCOME_LABELS) as IncomeType[]).map((t) => (
-                      <button key={t} onClick={() => setIncomeType(t)}
-                        className="rounded-xl px-3 py-2.5 text-sm font-semibold transition-all"
-                        style={{ background: incomeType === t ? "#00111B" : "#F9FAFB", color: incomeType === t ? "#fff" : "#374151", border: incomeType === t ? "1px solid #00111B" : "1px solid #E5E7EB" }}>
-                        {INCOME_LABELS[t]}
-                      </button>
-                    ))}
-                  </div>
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.6fr] gap-6">
 
-                  {/* Income type context notes */}
-                  {isIndiaResident ? (
-                    <>
+              {/* ── WIZARD PANEL ── */}
+              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid #E5E7EB", background: "#fff", boxShadow: "0 2px 12px rgba(0,17,27,0.05)" }}>
+
+                {/* STEP 1 */}
+                {step === 1 && (
+                  <div className="p-6 space-y-5">
+                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#05A049" }}>
+                      Step 1 — Income Details
+                    </p>
+
+                    {/* Source country */}
+                    <div>
+                      <SectionLabel>Source country of income</SectionLabel>
+                      <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
+                        Which country is the source of the income you received? (You are a Resident Indian — India taxes your worldwide income at slab rates)
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {Object.entries(SOURCE_COUNTRIES).map(([k, sc]) => (
+                          <button
+                            key={k}
+                            onClick={() => setSourceCountryKey(k as keyof typeof SOURCE_COUNTRIES)}
+                            className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-all text-left"
+                            style={{
+                              background: sourceCountryKey === k ? "#00111B" : "#F9FAFB",
+                              color: sourceCountryKey === k ? "#fff" : "#374151",
+                              border: sourceCountryKey === k ? "1px solid #00111B" : "1px solid #E5E7EB",
+                            }}
+                          >
+                            <span className="text-lg leading-none">{sc.flag}</span>
+                            <div>
+                              <span className="text-xs font-semibold block">{k}</span>
+                              <span className="text-[9px] opacity-60">{sc.manual ? "Enter WHT below" : `${PCT2(sc.wht)} WHT`}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      {sourceCountry.manual && (
+                        <div className="mt-3">
+                          <label className="text-[11px] font-semibold text-gray-500 block mb-1">WHT rate in source country (%)</label>
+                          <input
+                            type="number" min={0} max={50} step={0.1} value={sourceWHTManual}
+                            onChange={(e) => setSourceWHTManual(Number(e.target.value))}
+                            className="w-full rounded-lg border px-3 py-2 text-sm font-bold focus:outline-none"
+                            style={{ borderColor: "#E5E7EB", color: "#00111B" }} placeholder="15"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Income type */}
+                    <div>
+                      <SectionLabel>Type of income</SectionLabel>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(Object.keys(INCOME_LABELS) as IncomeType[]).map((t) => (
+                          <button key={t} onClick={() => setIncomeType(t)}
+                            className="rounded-xl px-3 py-2.5 text-sm font-semibold transition-all"
+                            style={{
+                              background: incomeType === t ? "#00111B" : "#F9FAFB",
+                              color: incomeType === t ? "#fff" : "#374151",
+                              border: incomeType === t ? "1px solid #00111B" : "1px solid #E5E7EB",
+                            }}
+                          >
+                            {INCOME_LABELS[t]}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Income type context notes (Resident Indian) */}
                       {incomeType === "dividends" && (
                         <div className="mt-2 rounded-xl px-3 py-2 flex items-start gap-2" style={{ background: "#F0FAF5", border: "1px solid #B4E3C8" }}>
                           <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#05A049" }} />
@@ -388,209 +669,112 @@ export default function DTAACalculator() {
                         <div className="mt-2 rounded-xl px-3 py-2 flex items-start gap-2" style={{ background: "#F0FAF5", border: "1px solid #B4E3C8" }}>
                           <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#05A049" }} />
                           <p className="text-xs" style={{ color: "#374151" }}>
-                            India taxes at <strong>12.5% LTCG</strong> (730+ days) or slab rate for STCG. Source countries generally do not tax Indian residents' CG on their own securities under most treaties.
+                            India taxes at <strong>12.5% LTCG</strong> (730+ days) or slab rate for STCG. Source countries generally do not tax Indian residents&apos; CG on their own securities under most treaties.
                           </p>
                         </div>
                       )}
                       {incomeType === "interest" && (
-                        <div className="mt-2 rounded-xl px-3 py-2 flex items-start gap-2" style={{ background: "#FFFBF0", border: "1px solid #FDE68A" }}>
-                          <TriangleAlert className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#D97706" }} />
-                          <p className="text-xs" style={{ color: "#92400E" }}>
-                            <strong>GIFT City interest is NOT exempt for Resident Indians.</strong> Section 10(15)(ix) applies only to non-residents. You pay your full slab rate on all interest income from IFSC funds.
+                        <div className="mt-2 rounded-xl px-3 py-2 flex items-start gap-2" style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
+                          <TriangleAlert className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#DC2626" }} />
+                          <p className="text-xs leading-relaxed" style={{ color: "#374151" }}>
+                            <strong style={{ color: "#DC2626" }}>Important: GIFT City interest income is NOT exempt for Resident Indians.</strong>{" "}
+                            Section 10(15)(ix) applies only to non-residents. As a Resident Indian, you pay slab rate on all GIFT City interest income. Consider growth-oriented funds over income-distributing funds to minimize taxable interest.
                           </p>
                         </div>
                       )}
-                    </>
-                  ) : (
-                    <>
-                      {incomeType === "interest" && (
-                        <div className="mt-2 rounded-xl px-3 py-2 flex items-start gap-2" style={{ background: "#EDFAF3", border: "1px solid #B4E3C8" }}>
-                          <CheckCircle2 className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#05A049" }} />
-                          <p className="text-xs" style={{ color: "#05A049" }}>
-                            <strong>Interest from GIFT City IFSC bonds is already 0% in India</strong> under Section 10(15)(ix). DTAA is not needed for this income type.
-                          </p>
-                        </div>
-                      )}
-                      {incomeType === "capital_gains" && country.cgNote && (
-                        <div className="mt-2 rounded-xl px-3 py-2 flex items-start gap-2" style={{ background: "#FFFBF0", border: "1px solid #E8C97A" }}>
-                          <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#B8913A" }} />
-                          <p className="text-xs" style={{ color: "#B8913A" }}>{country.cgNote}</p>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {/* Income amount */}
-                <div>
-                  <SectionLabel>Income amount</SectionLabel>
-                  <div className="flex rounded-xl overflow-hidden mb-3" style={{ border: "1px solid #E5E7EB" }}>
-                    {(["INR", "USD"] as const).map((c) => (
-                      <button key={c} onClick={() => setIncomeCurrency(c)} className="flex-1 py-2 text-sm font-semibold transition-all"
-                        style={{ background: incomeCurrency === c ? "#00111B" : "#fff", color: incomeCurrency === c ? "#fff" : "#6B7280" }}>
-                        {c === "INR" ? "₹ INR" : "$ USD"}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input type="number" value={incomeAmountInput} onChange={(e) => handleIncomeInput(e.target.value)}
-                      className="flex-1 rounded-lg border px-3 py-2.5 text-sm font-bold focus:outline-none"
-                      style={{ borderColor: "#E5E7EB", color: "#00111B" }} placeholder="10" />
-                    <span className="text-sm text-gray-400">{incomeCurrency === "INR" ? "Lakhs" : "USD"}</span>
-                  </div>
-                  <p className="text-[11px] text-gray-400 mt-1">
-                    ≈ {INR_L(incomeINR)} {incomeCurrency === "USD" ? "@ ₹84.50/$" : ""}
-                  </p>
-                </div>
-
-                <button onClick={() => setStep(2)}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all"
-                  style={{ background: "#05A049", color: "#fff" }}>
-                  Next — {isIndiaResident ? "Indian Tax Profile" : "Tax Rates"} <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-
-            {/* ─ STEP 2 — NRI (unchanged) ─ */}
-            {step === 2 && !isIndiaResident && (
-              <div className="p-6 space-y-5">
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setStep(1)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 transition-colors">
-                    <ChevronLeft className="h-3.5 w-3.5" /> Back
-                  </button>
-                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#05A049" }}>Step 2 — Tax Rates</p>
-                </div>
-
-                <div>
-                  <SectionLabel>Your marginal rate in {country.name}</SectionLabel>
-                  <input type="range" min={0} max={55} step={0.5} value={foreignMarginalRate * 100}
-                    onChange={(e) => setForeignMarginalRate(Number(e.target.value) / 100)}
-                    className="w-full h-2 appearance-none rounded-full cursor-pointer mb-2"
-                    style={{ accentColor: "#DC2626" }} />
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-gray-400">0%</span>
-                    <span className="text-lg font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: "#DC2626" }}>{PCT(foreignMarginalRate)}</span>
-                    <span className="text-[10px] text-gray-400">55%</span>
-                  </div>
-                  <div className="mt-2 rounded-xl px-3 py-2 text-[11px]" style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", color: "#6B7280" }}>
-                    💡 Typical {country.name} rate: <strong>{PCT(country.typicalMarginalRate)}</strong> — {country.hint.split(".")[0]}
-                  </div>
-                </div>
-
-                <div>
-                  <SectionLabel>Indian TDS / WHT already deducted (₹)</SectionLabel>
-                  <input type="number" value={indianTDSDeducted} onChange={(e) => setIndianTDSDeducted(Number(e.target.value))}
-                    className="w-full rounded-lg border px-3 py-2.5 text-sm font-bold focus:outline-none"
-                    style={{ borderColor: "#E5E7EB", color: "#00111B" }} placeholder="0" />
-                  <p className="text-[11px] text-gray-400 mt-1">
-                    DTAA-capped WHT would be: {INR_L(incomeINR * (incomeType === "dividends" ? country.dividendWHT : incomeType === "interest" ? 0 : country.cgRate))}
-                  </p>
-                </div>
-
-                <div className="rounded-xl p-4" style={{ background: "#F0FAF5", border: "1px solid #B4E3C8" }}>
-                  <p className="text-xs font-bold" style={{ color: "#05A049" }}>
-                    {country.flag} {country.name} | {INCOME_LABELS[incomeType]} | {INR_L(incomeINR)}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-1">
-                    DTAA rate: {PCT(calc.dtaaRate)} · Foreign marginal: {PCT(foreignMarginalRate)} · Without DTAA: {PCT(calc.nonDtaaRate)}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* ─ STEP 2 — RESIDENT INDIAN ─ */}
-            {step === 2 && isIndiaResident && (
-              <div className="p-6 space-y-5">
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setStep(1)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 transition-colors">
-                    <ChevronLeft className="h-3.5 w-3.5" /> Back
-                  </button>
-                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#05A049" }}>Step 2 — Indian Tax Profile</p>
-                </div>
-
-                {/* Indian slab rate */}
-                <div>
-                  <SectionLabel>Your Indian income tax slab</SectionLabel>
-                  <select
-                    value={indianSlabRate}
-                    onChange={(e) => setIndianSlabRate(Number(e.target.value))}
-                    className="w-full rounded-lg border px-3 py-2.5 text-sm font-bold focus:outline-none bg-white"
-                    style={{ borderColor: "#E5E7EB", color: "#00111B" }}
-                  >
-                    {INDIA_SLABS.map((s) => (
-                      <option key={s.rate} value={s.rate}>{s.label}</option>
-                    ))}
-                  </select>
-                  <p className="text-[11px] text-gray-400 mt-1">
-                    New Tax Regime FY 2025-26 slabs. For Old Regime, select the equivalent rate.
-                  </p>
-                </div>
-
-                {/* Source country */}
-                <div>
-                  <SectionLabel>Which country is the source of this income?</SectionLabel>
-                  <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(SOURCE_COUNTRIES).map(([k, sc]) => (
-                      <button key={k} onClick={() => setSourceCountryKey(k as keyof typeof SOURCE_COUNTRIES)}
-                        className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-all text-left"
-                        style={{
-                          background: sourceCountryKey === k ? "#00111B" : "#F9FAFB",
-                          color: sourceCountryKey === k ? "#fff" : "#374151",
-                          border: sourceCountryKey === k ? "1px solid #00111B" : "1px solid #E5E7EB",
-                        }}>
-                        <span className="text-lg leading-none">{sc.flag}</span>
-                        <div>
-                          <span className="text-xs font-semibold block">{k}</span>
-                          <span className="text-[9px] opacity-60">{sc.manual ? "Enter WHT below" : `${PCT2(sc.wht)} WHT`}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                  {sourceCountry.manual && (
-                    <div className="mt-3">
-                      <label className="text-[11px] font-semibold text-gray-500 block mb-1">WHT rate in source country (%)</label>
-                      <input type="number" min={0} max={50} step={0.1} value={sourceWHTManual}
-                        onChange={(e) => setSourceWHTManual(Number(e.target.value))}
-                        className="w-full rounded-lg border px-3 py-2 text-sm font-bold focus:outline-none"
-                        style={{ borderColor: "#E5E7EB", color: "#00111B" }} placeholder="15" />
                     </div>
-                  )}
-                </div>
 
-                {/* Indian TDS already deducted */}
-                <div>
-                  <SectionLabel>Indian TDS / WHT already deducted (₹)</SectionLabel>
-                  <input type="number" value={indianTDSDeducted} onChange={(e) => setIndianTDSDeducted(Number(e.target.value))}
-                    className="w-full rounded-lg border px-3 py-2.5 text-sm font-bold focus:outline-none"
-                    style={{ borderColor: "#E5E7EB", color: "#00111B" }} placeholder="0" />
-                </div>
+                    {/* Income amount */}
+                    <div>
+                      <SectionLabel>Income amount</SectionLabel>
+                      <div className="flex rounded-xl overflow-hidden mb-3" style={{ border: "1px solid #E5E7EB" }}>
+                        {(["INR", "USD"] as const).map((c) => (
+                          <button key={c} onClick={() => setIncomeCurrency(c)} className="flex-1 py-2 text-sm font-semibold transition-all"
+                            style={{ background: incomeCurrency === c ? "#00111B" : "#fff", color: incomeCurrency === c ? "#fff" : "#6B7280" }}>
+                            {c === "INR" ? "₹ INR" : "$ USD"}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number" value={incomeAmountInput}
+                          onChange={(e) => handleIncomeInput(e.target.value)}
+                          className="flex-1 rounded-lg border px-3 py-2.5 text-sm font-bold focus:outline-none"
+                          style={{ borderColor: "#E5E7EB", color: "#00111B" }} placeholder="10"
+                        />
+                        <span className="text-sm text-gray-400">{incomeCurrency === "INR" ? "Lakhs" : "USD"}</span>
+                      </div>
+                      <p className="text-[11px] text-gray-400 mt-1">
+                        ≈ {INR_L(incomeINR)} {incomeCurrency === "USD" ? "@ ₹84.50/$" : ""}
+                      </p>
+                    </div>
 
-                {/* Summary pill */}
-                <div className="rounded-xl p-4" style={{ background: "#FFF7ED", border: "1px solid #FDE68A" }}>
-                  <p className="text-xs font-bold" style={{ color: "#92400E" }}>
-                    🇮🇳 Resident Indian | {INCOME_LABELS[incomeType]} | {INR_L(incomeINR)}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-1">
-                    Source: {sourceCountry.flag} {sourceCountryKey} @ {PCT2(effectiveSourceWHT)} WHT ·
-                    Indian slab: {PCT(indianSlabRate)} ·
-                    You pay: {PCT(calcIndia.withFTCRate)} (higher of two)
-                  </p>
-                </div>
+                    <button
+                      onClick={() => setStep(2)}
+                      className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all"
+                      style={{ background: "#05A049", color: "#fff" }}
+                    >
+                      Next — Indian Tax Profile <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+
+                {/* STEP 2 — Indian Tax Profile */}
+                {step === 2 && (
+                  <div className="p-6 space-y-5">
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setStep(1)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 transition-colors">
+                        <ChevronLeft className="h-3.5 w-3.5" /> Back
+                      </button>
+                      <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#05A049" }}>Step 2 — Indian Tax Profile</p>
+                    </div>
+
+                    <div>
+                      <SectionLabel>Your Indian income tax slab</SectionLabel>
+                      <select
+                        value={indianSlabRate}
+                        onChange={(e) => setIndianSlabRate(Number(e.target.value))}
+                        className="w-full rounded-lg border px-3 py-2.5 text-sm font-bold focus:outline-none bg-white"
+                        style={{ borderColor: "#E5E7EB", color: "#00111B" }}
+                      >
+                        {INDIA_SLABS.map((s) => (
+                          <option key={s.rate} value={s.rate}>{s.label}</option>
+                        ))}
+                      </select>
+                      <p className="text-[11px] text-gray-400 mt-1">
+                        New Tax Regime FY 2025-26. For Old Regime, select the equivalent rate.
+                      </p>
+                    </div>
+
+                    <div>
+                      <SectionLabel>Indian TDS / WHT already deducted (₹)</SectionLabel>
+                      <input
+                        type="number" value={indianTDSDeducted}
+                        onChange={(e) => setIndianTDSDeducted(Number(e.target.value))}
+                        className="w-full rounded-lg border px-3 py-2.5 text-sm font-bold focus:outline-none"
+                        style={{ borderColor: "#E5E7EB", color: "#00111B" }} placeholder="0"
+                      />
+                    </div>
+
+                    {/* Summary pill */}
+                    <div className="rounded-xl p-4" style={{ background: "#FFF7ED", border: "1px solid #FDE68A" }}>
+                      <p className="text-xs font-bold" style={{ color: "#92400E" }}>
+                        🇮🇳 Resident Indian | {INCOME_LABELS[incomeType]} | {INR_L(incomeINR)}
+                      </p>
+                      <p className="text-[11px] text-gray-500 mt-1">
+                        Source: {sourceCountry.flag} {sourceCountryKey} @ {PCT2(effectiveSourceWHT)} WHT ·
+                        Indian slab: {PCT(indianSlabRate)} ·
+                        You pay: {PCT(calcIndia.withFTCRate)} (higher of two)
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* ═══════════════════════════════
-              OUTPUT SECTION
-          ═══════════════════════════════ */}
-          <div className="space-y-4">
+              {/* ── OUTPUT PANEL ── */}
+              <div className="space-y-4">
 
-            {/* ════════════════════════════
-                INDIA OUTPUT
-            ════════════════════════════ */}
-            {isIndiaResident ? (
-              <>
-                {/* India savings banner */}
+                {/* Savings banner */}
                 {calcIndia.saving > 100 && (
                   <div className="rounded-2xl px-6 py-4 flex items-center justify-between" style={{ background: "#00111B" }}>
                     <div>
@@ -616,10 +800,9 @@ export default function DTAACalculator() {
                   </div>
                 )}
 
-                {/* India: two scenario cards */}
+                {/* Two scenario cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                  {/* Card LEFT — Without FTC */}
+                  {/* Without FTC */}
                   <div className="rounded-2xl overflow-hidden" style={{ border: "2px solid #FECACA", background: "#fff" }}>
                     <div className="px-5 py-4" style={{ background: "#FEF2F2" }}>
                       <div className="flex items-center gap-2 mb-1">
@@ -653,7 +836,7 @@ export default function DTAACalculator() {
                     </div>
                   </div>
 
-                  {/* Card RIGHT — With FTC */}
+                  {/* With FTC */}
                   <div className="rounded-2xl overflow-hidden" style={{ border: "2px solid #05A049", background: "#fff" }}>
                     <div className="px-5 py-4" style={{ background: "#EDFAF3" }}>
                       <div className="flex items-center gap-2 mb-1">
@@ -703,7 +886,7 @@ export default function DTAACalculator() {
                   </p>
                 </div>
 
-                {/* India-specific GIFT City callout */}
+                {/* GIFT City callout for Resident Indians */}
                 <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid #B4E3C8", borderLeft: "4px solid #05A049", background: "rgba(180,227,200,0.08)" }}>
                   <div className="px-5 py-4 border-b flex items-center gap-2" style={{ borderColor: "#B4E3C8" }}>
                     <Building2 className="h-5 w-5" style={{ color: "#05A049" }} />
@@ -712,61 +895,57 @@ export default function DTAACalculator() {
                     </p>
                   </div>
                   <div className="divide-y" style={{ borderColor: "#E5E7EB" }}>
-                    {/* Row 1 — Interest */}
-                    <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-[1fr_1.5fr] gap-3">
-                      <div>
-                        <p className="text-xs font-bold" style={{ color: "#00111B" }}>GIFT City bond / fund interest</p>
-                        <div className="mt-1.5 space-y-1">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[9px] font-bold rounded-full px-1.5" style={{ background: "#EDFAF3", color: "#05A049" }}>NRI</span>
-                            <span className="text-[11px] font-semibold" style={{ color: "#05A049" }}>0% — exempt under Sec 10(15)(ix)</span>
+                    {[
+                      {
+                        label: "GIFT City bond / fund interest",
+                        nri: { badge: "NRI", color: "#05A049", bg: "#EDFAF3", text: "0% — exempt under Sec 10(15)(ix)" },
+                        resident: { badge: "Resident", color: "#DC2626", bg: "#FEF2F2", text: "Taxable at slab rate (up to 30%)" },
+                        action: "Structure investments in growth-oriented IFSC funds rather than income-distributing bonds to minimise interest income taxable at slab rate.",
+                        actionBg: "#FFF7ED", actionBorder: "#FDE68A", actionColor: "#92400E",
+                      },
+                      {
+                        label: "Capital Gains on GIFT City funds",
+                        resident: { badge: "Resident", color: "#05A049", bg: "#EDFAF3", text: "12.5% LTCG after 730 days — same as NRI. Surcharge capped at 15%." },
+                        action: "Hold for 730+ days to lock in the 14.95% effective maximum rate (12.5% base × 1.15 surcharge × 1.04 cess).",
+                        actionBg: "#EDFAF3", actionBorder: "#B4E3C8", actionColor: "#374151",
+                      },
+                      {
+                        label: "Schedule FA disclosure (mandatory)",
+                        resident: { badge: "Resident", color: "#374151", bg: "#F3F4F6", text: "GIFT City IFSC investments are treated as foreign assets under FEMA. Must be disclosed in Schedule FA of ITR-2/3 every year." },
+                        warning: "Failure to disclose = penalty ₹10 lakh per year under the Black Money Act.",
+                        action: "Valura auto-generates your Schedule FA data — download from the Compliance section before filing your ITR.",
+                        actionBg: "#F0FAF5", actionBorder: "#B4E3C8", actionColor: "#374151",
+                      },
+                    ].map((row, i) => (
+                      <div key={i} className="px-5 py-4 grid grid-cols-1 sm:grid-cols-[1fr_1.5fr] gap-3">
+                        <div>
+                          <p className="text-xs font-bold mb-1.5" style={{ color: "#00111B" }}>{row.label}</p>
+                          {"nri" in row && row.nri && (
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span className="text-[9px] font-bold rounded-full px-1.5" style={{ background: "#EDFAF3", color: "#05A049" }}>NRI</span>
+                              <span className="text-[11px] font-semibold" style={{ color: "#05A049" }}>{row.nri.text}</span>
+                            </div>
+                          )}
+                          <div className="flex items-start gap-1.5">
+                            <span className="text-[9px] font-bold rounded-full px-1.5 mt-0.5" style={{ background: row.resident.bg, color: row.resident.color }}>Resident</span>
+                            <span className="text-[11px]" style={{ color: "#374151" }}>{row.resident.text}</span>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[9px] font-bold rounded-full px-1.5" style={{ background: "#FEF2F2", color: "#DC2626" }}>Resident</span>
-                            <span className="text-[11px] font-semibold" style={{ color: "#DC2626" }}>Taxable at slab rate (up to 30%)</span>
-                          </div>
+                          {"warning" in row && row.warning && (
+                            <div className="mt-2 flex items-start gap-1.5 rounded-lg px-2 py-1.5" style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
+                              <TriangleAlert className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" style={{ color: "#DC2626" }} />
+                              <p className="text-[10px] font-bold" style={{ color: "#DC2626" }}>{row.warning}</p>
+                            </div>
+                          )}
+                        </div>
+                        <div className="rounded-xl px-3 py-2 text-xs" style={{ background: row.actionBg, border: `1px solid ${row.actionBorder}`, color: row.actionColor }}>
+                          <strong>Action:</strong> {row.action}
                         </div>
                       </div>
-                      <div className="rounded-xl px-3 py-2 text-xs" style={{ background: "#FFF7ED", border: "1px solid #FDE68A", color: "#92400E" }}>
-                        <strong>Action:</strong> Structure investments in growth-oriented IFSC funds rather than income-distributing bonds to minimise interest income taxable at slab rate.
-                      </div>
-                    </div>
-                    {/* Row 2 — LTCG */}
-                    <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-[1fr_1.5fr] gap-3">
-                      <div>
-                        <p className="text-xs font-bold" style={{ color: "#00111B" }}>Capital Gains on GIFT City funds</p>
-                        <div className="mt-1.5 flex items-center gap-1.5">
-                          <span className="text-[9px] font-bold rounded-full px-1.5" style={{ background: "#EDFAF3", color: "#05A049" }}>Resident</span>
-                          <span className="text-[11px] font-semibold" style={{ color: "#05A049" }}>12.5% LTCG after 730 days — same as NRI. Surcharge capped at 15%.</span>
-                        </div>
-                      </div>
-                      <div className="rounded-xl px-3 py-2 text-xs" style={{ background: "#EDFAF3", border: "1px solid #B4E3C8", color: "#374151" }}>
-                        <strong>Action:</strong> Hold for 730+ days to lock in the 14.95% effective maximum rate (12.5% base × 1.15 surcharge × 1.04 cess).
-                      </div>
-                    </div>
-                    {/* Row 3 — Schedule FA */}
-                    <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-[1fr_1.5fr] gap-3">
-                      <div>
-                        <p className="text-xs font-bold" style={{ color: "#00111B" }}>Schedule FA disclosure (mandatory)</p>
-                        <div className="mt-1.5 flex items-start gap-1.5">
-                          <span className="text-[9px] font-bold rounded-full px-1.5 mt-0.5" style={{ background: "#FEF2F2", color: "#DC2626" }}>Resident</span>
-                          <span className="text-[11px]" style={{ color: "#374151" }}>GIFT City IFSC investments are treated as foreign assets under FEMA. Must be disclosed in Schedule FA of ITR-2/3 every year.</span>
-                        </div>
-                        <div className="mt-2 flex items-start gap-1.5 rounded-lg px-2 py-1.5" style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
-                          <TriangleAlert className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" style={{ color: "#DC2626" }} />
-                          <p className="text-[10px] font-bold" style={{ color: "#DC2626" }}>
-                            Failure to disclose = penalty ₹10 lakh per year under the Black Money Act.
-                          </p>
-                        </div>
-                      </div>
-                      <div className="rounded-xl px-3 py-2 text-xs" style={{ background: "#F0FAF5", border: "1px solid #B4E3C8", color: "#374151" }}>
-                        <strong>Action:</strong> Valura auto-generates your Schedule FA data — download from the Compliance section before filing your ITR.
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* India reference table */}
+                {/* Resident Indian: source country reference table */}
                 <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid #E5E7EB", background: "#fff" }}>
                   <div className="px-6 py-3 border-b flex items-center gap-2" style={{ borderColor: "#F3F4F6" }}>
                     <Globe className="h-4 w-4" style={{ color: "#6B7280" }} />
@@ -776,19 +955,16 @@ export default function DTAACalculator() {
                     <table className="w-full text-xs">
                       <thead>
                         <tr style={{ background: "#F9FAFB" }}>
-                          <th className="px-3 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">Country</th>
-                          <th className="px-3 py-2.5 text-center font-semibold text-gray-500 uppercase tracking-wide">Source WHT</th>
-                          <th className="px-3 py-2.5 text-center font-semibold text-gray-500 uppercase tracking-wide">Your Slab</th>
-                          <th className="px-3 py-2.5 text-center font-semibold text-gray-500 uppercase tracking-wide">FTC Applied</th>
-                          <th className="px-3 py-2.5 text-center font-semibold text-gray-500 uppercase tracking-wide">You Pay</th>
-                          <th className="px-3 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">GIFT City Route</th>
+                          {["Country", "Source WHT", "Your Slab", "FTC Applied", "You Pay", "GIFT City Route"].map((h) => (
+                            <th key={h} className="px-3 py-2.5 text-center font-semibold text-gray-500 uppercase tracking-wide first:text-left">{h}</th>
+                          ))}
                         </tr>
                       </thead>
                       <tbody>
                         {Object.entries(SOURCE_COUNTRIES).filter(([k]) => k !== "Other").map(([k, sc]) => {
                           const isActive = k === sourceCountryKey;
-                          const ftcRow = Math.min(sc.wht, indianSlabRate);
-                          const youPay = Math.max(sc.wht, indianSlabRate);
+                          const ftcRow   = Math.min(sc.wht, indianSlabRate);
+                          const youPay   = Math.max(sc.wht, indianSlabRate);
                           return (
                             <tr key={k} className="border-t" style={{ borderColor: "#F3F4F6", background: isActive ? "#F0FAF5" : "transparent" }}>
                               <td className="px-3 py-2.5 font-medium" style={{ color: isActive ? "#05A049" : "#374151" }}>
@@ -798,11 +974,12 @@ export default function DTAACalculator() {
                               <td className="px-3 py-2.5 text-center font-mono font-bold" style={{ color: sc.wht > indianSlabRate ? "#DC2626" : "#374151" }}>
                                 {PCT2(sc.wht)}
                               </td>
-                              <td className="px-3 py-2.5 text-center font-mono" style={{ color: "#374151" }}>{PCT(indianSlabRate)}</td>
+                              <td className="px-3 py-2.5 text-center font-mono">{PCT(indianSlabRate)}</td>
                               <td className="px-3 py-2.5 text-center font-mono font-semibold" style={{ color: "#05A049" }}>
                                 {ftcRow === 0 ? "—" : PCT2(ftcRow)}
                               </td>
-                              <td className="px-3 py-2.5 text-center font-mono font-extrabold" style={{ color: youPay > 0.25 ? "#DC2626" : youPay === indianSlabRate ? "#374151" : "#B8913A" }}>
+                              <td className="px-3 py-2.5 text-center font-mono font-extrabold"
+                                style={{ color: youPay > 0.25 ? "#DC2626" : youPay === indianSlabRate ? "#374151" : "#B8913A" }}>
                                 {PCT2(youPay)}
                               </td>
                               <td className="px-3 py-2.5 text-[10px]" style={{ color: "#6B7280" }}>
@@ -815,210 +992,66 @@ export default function DTAACalculator() {
                     </table>
                   </div>
                 </div>
-              </>
-            ) : (
 
-            /* ════════════════════════════
-               NRI OUTPUT (unchanged)
-            ════════════════════════════ */
-            <>
-              {calc.saving > 100 && (
-                <div className="rounded-2xl px-6 py-4 flex items-center justify-between" style={{ background: "#00111B" }}>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "rgba(180,227,200,0.6)" }}>
-                      Treaty benefit on {INR_L(incomeINR)} income
-                    </p>
-                    <div className="flex items-end gap-3">
-                      <p className="text-3xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: "#05A049" }}>{INR_L(calc.saving)}</p>
-                      <p className="text-lg font-semibold mb-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>saved</p>
-                    </div>
-                    <p className="text-[11px] mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
-                      File Form 67 by March 31 of Assessment Year to claim this benefit
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-gray-400">Effective saving rate</p>
-                    <p className="text-2xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: "#B4E3C8" }}>{PCT(calc.savingPct)}</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded-2xl overflow-hidden" style={{ border: "2px solid #FECACA", background: "#fff" }}>
-                  <div className="px-5 py-4" style={{ background: "#FEF2F2" }}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <AlertCircle className="h-5 w-5" style={{ color: "#DC2626" }} />
-                      <p className="font-bold text-sm" style={{ fontFamily: "var(--font-manrope)", color: "#DC2626" }}>Without Treaty Protection</p>
-                    </div>
-                    <p className="text-[10px] text-gray-500">Full double taxation — both countries tax independently</p>
-                  </div>
-                  <div className="p-5 space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Indian tax (full domestic WHT {PCT(calc.nonDtaaRate)})</span>
-                      <span className="font-bold" style={{ color: "#DC2626" }}>{INR_L(calc.withoutDtaaIndianTax)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Foreign tax ({country.name} @ {PCT(foreignMarginalRate)})</span>
-                      <span className="font-bold" style={{ color: "#DC2626" }}>{INR_L(calc.withoutDtaaForeignTax)}</span>
-                    </div>
-                    <div className="border-t pt-3" style={{ borderColor: "#FECACA" }}>
-                      <div className="flex justify-between">
-                        <span className="text-sm font-bold" style={{ color: "#DC2626" }}>Total double taxation</span>
-                        <span className="text-sm font-extrabold" style={{ color: "#DC2626" }}>{INR_L(calc.withoutDtaaTotal)}</span>
-                      </div>
-                      <div className="flex justify-between mt-1">
-                        <span className="text-xs text-gray-400">Combined effective rate</span>
-                        <span className="text-xs font-bold text-gray-600">{PCT(calc.withoutDtaaRate)}</span>
+                {/* Form 67 */}
+                <InfoBox icon={FileText} title="Form 67 — Do not miss this deadline" variant="gold"
+                  body={
+                    <div className="space-y-2 text-sm">
+                      <p><strong>File Form 67 by March 31 of the Assessment Year.</strong></p>
+                      <p className="text-gray-500">Must match Schedule FSI in ITR-2 or ITR-3. Missing the deadline means <strong style={{ color: "#DC2626" }}>permanently losing the Foreign Tax Credit</strong> — you cannot file it late or carry it forward.</p>
+                      <div className="mt-3 rounded-lg px-3 py-2 text-[11px]" style={{ background: "#fff", border: "1px solid #E8C97A" }}>
+                        <p><strong>Checklist:</strong> TDS certificate from payer · Foreign tax receipt · Form 67 on e-filing portal · Match Schedule FSI and TR in ITR</p>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl overflow-hidden" style={{ border: "2px solid #05A049", background: "#fff" }}>
-                  <div className="px-5 py-4" style={{ background: "#EDFAF3" }}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <CheckCircle2 className="h-5 w-5" style={{ color: "#05A049" }} />
-                      <p className="font-bold text-sm" style={{ fontFamily: "var(--font-manrope)", color: "#05A049" }}>With DTAA Protection</p>
-                    </div>
-                    <p className="text-[10px] text-gray-500">Treaty caps Indian WHT + Foreign Tax Credit via Form 67</p>
-                  </div>
-                  <div className="p-5 space-y-3">
-                    {calc.isGiftCityInterest ? (
-                      <div className="rounded-xl px-3 py-2" style={{ background: "#EDFAF3" }}>
-                        <p className="text-sm font-bold" style={{ color: "#05A049" }}>0% in India — Section 10(15)(ix)</p>
-                        <p className="text-xs text-gray-500 mt-1">GIFT City IFSC interest is fully exempt. Only foreign tax applies.</p>
-                      </div>
-                    ) : (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Indian DTAA-capped WHT ({PCT(calc.dtaaRate)})</span>
-                        <span className="font-bold" style={{ color: "#00111B" }}>{INR_L(calc.withDtaaIndianTax)}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Gross foreign tax ({PCT(foreignMarginalRate)})</span>
-                      <span className="font-bold" style={{ color: "#00111B" }}>{INR_L(calc.grossForeignTax)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Less: Foreign Tax Credit (Form 67)</span>
-                      <span className="font-bold" style={{ color: "#05A049" }}>−{INR_L(calc.ftc)}</span>
-                    </div>
-                    <div className="border-t pt-3" style={{ borderColor: "#B4E3C8" }}>
-                      <div className="flex justify-between">
-                        <span className="text-sm font-bold" style={{ color: "#05A049" }}>Total tax actually paid</span>
-                        <span className="text-sm font-extrabold" style={{ color: "#05A049" }}>{INR_L(calc.withDtaaTotal)}</span>
-                      </div>
-                      <div className="flex justify-between mt-1">
-                        <span className="text-xs text-gray-400">Combined effective rate</span>
-                        <span className="text-xs font-bold text-gray-600">{PCT(calc.withDtaaRate)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  }
+                />
               </div>
-
-              {/* NRI: DTAA reference table */}
-              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid #E5E7EB", background: "#fff" }}>
-                <div className="px-6 py-3 border-b flex items-center gap-2" style={{ borderColor: "#F3F4F6" }}>
-                  <Globe className="h-4 w-4" style={{ color: "#6B7280" }} />
-                  <p className="text-sm font-bold" style={{ color: "#00111B" }}>India DTAA Dividend WHT Reference</p>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr style={{ background: "#F9FAFB" }}>
-                        <th className="px-4 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">Country</th>
-                        <th className="px-4 py-2.5 text-center font-semibold text-gray-500 uppercase tracking-wide">Dividend WHT</th>
-                        <th className="px-4 py-2.5 text-center font-semibold text-gray-500 uppercase tracking-wide">CG Rate (India)</th>
-                        <th className="px-4 py-2.5 text-center font-semibold text-gray-500 uppercase tracking-wide">GIFT City Interest</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(COUNTRIES).filter(([k]) => k !== "Other" && k !== "India").map(([k, c]) => {
-                        const isActive = k === countryKey;
-                        return (
-                          <tr key={k} className="border-t" style={{ borderColor: "#F3F4F6", background: isActive ? "#F0FAF5" : k === "Mauritius" ? "#FFFBF0" : "transparent" }}>
-                            <td className="px-4 py-2.5 font-medium" style={{ color: isActive ? "#05A049" : "#374151" }}>
-                              {c.flag} {c.name}
-                              {isActive && <span className="ml-1 text-[9px] rounded-full px-1.5 font-bold" style={{ background: "#05A049", color: "#fff" }}>YOU</span>}
-                              {k === "Mauritius" && <span className="ml-1 text-[9px] rounded-full px-1.5 font-bold" style={{ background: "#E8C97A", color: "#B8913A" }}>Lowest WHT</span>}
-                            </td>
-                            <td className="px-4 py-2.5 text-center font-mono font-bold" style={{ color: c.dividendWHT <= 0.10 ? "#05A049" : "#DC2626" }}>{PCT(c.dividendWHT)}</td>
-                            <td className="px-4 py-2.5 text-center font-mono" style={{ color: "#374151" }}>{c.cgRate === 0 ? "0% (treaty)" : "12.5% LTCG"}</td>
-                            <td className="px-4 py-2.5 text-center font-semibold text-[11px]" style={{ color: "#05A049" }}>0% (Sec 10(15)(ix))</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* NRI: GIFT City callout */}
-              <InfoBox icon={Building2} title="Why GIFT City makes this even better" variant="mint"
-                body={
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <span className="font-bold" style={{ color: "#05A049" }}>0%</span>
-                      <span><strong>Interest income:</strong> Already exempt in India under Section 10(15)(ix). DTAA not needed — you only pay foreign country tax.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="font-bold" style={{ color: "#05A049" }}>~15%</span>
-                      <span><strong>Dividends via Ireland UCITS ETF route:</strong> ≈15% WHT vs 25% direct US stocks — treaty-optimized structure.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="font-bold" style={{ color: "#05A049" }}>12.5%</span>
-                      <span><strong>Capital gains:</strong> Standard LTCG rate with zero US estate tax risk (critical for USD assets above $60,000).</span>
-                    </li>
-                  </ul>
-                }
-              />
-            </>
-            )}
-
-            {/* Form 67 reminder (always shown) */}
-            <InfoBox icon={FileText} title="Form 67 — Do not miss this deadline" variant="gold"
-              body={
-                <div className="space-y-2 text-sm">
-                  <p><strong>File Form 67 by March 31 of the Assessment Year.</strong></p>
-                  <p className="text-gray-500">Must match Schedule FSI in ITR-2 or ITR-3. Missing the deadline means <strong style={{ color: "#DC2626" }}>permanently losing the Foreign Tax Credit</strong> — you cannot file it late for a revised return.</p>
-                  <div className="mt-3 rounded-lg px-3 py-2 text-[11px]" style={{ background: "#fff", border: "1px solid #E8C97A" }}>
-                    <p><strong>Checklist:</strong> TDS certificate from Indian payer · Foreign tax receipt · Form 67 online on e-filing portal · Match with Schedule FSI in ITR</p>
-                  </div>
-                </div>
-              }
-            />
-
-            {/* CTA */}
-            <div className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style={{ background: "#00111B" }}>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: "rgba(180,227,200,0.6)" }}>
-                  {isIndiaResident ? "Resident Indian GIFT City account" : "NRI GIFT City account"}
-                </p>
-                <p className="text-lg font-extrabold text-white" style={{ fontFamily: "var(--font-bricolage)" }}>
-                  {isIndiaResident ? "Open your Resident Indian Valura GIFT City account" : "Open your NRI Valura GIFT City account"}
-                </p>
-                <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  {isIndiaResident
-                    ? "Auto Schedule FA · Form 67 reminders · LTCG tracking · IFSC fund access"
-                    : "Automatic DTAA optimisation · Form 67 reminders · GIFT City IFSC funds"}
-                </p>
-              </div>
-              <a href="/signup" className="flex-shrink-0 flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold transition-all hover:opacity-90" style={{ background: "#05A049", color: "#fff" }}>
-                Open Account <ArrowRight className="h-4 w-4" />
-              </a>
             </div>
+          </>
+        )}
 
-            {/* Disclaimers */}
-            <p className="text-[10px] text-center pb-1" style={{ color: "#9CA3AF" }}>
-              DTAA rates as of FY 2025-26. Individual treaty articles, beneficial ownership conditions, and Principal Purpose Test (PPT) may vary. Foreign Tax Credit subject to Section 90/91 limits. Consult your CA before filing.
-            </p>
-            {isIndiaResident && (
-              <p className="text-[10px] text-center pb-3" style={{ color: "#9CA3AF" }}>
-                For Resident Indians: Foreign Tax Credit under Section 90/91 is subject to conditions including filing Form 67 by March 31 of the Assessment Year, Schedule FA disclosure in ITR-2/ITR-3, and matching entries in Schedule FSI and TR. Excess FTC (WHT greater than Indian tax) is not refundable and cannot be carried forward. Consult your CA.
+        {/* ═══════════════════════════════════════
+            NRI EXPLAINER FLOW
+        ═══════════════════════════════════════ */}
+        {investorType === "nri" && (
+          <NRIExplainer onSwitchToResident={() => handlePathSelect("resident")} />
+        )}
+
+        {/* ═══════════════════════════════════════
+            UNIFIED REFERENCE TABLE (both paths)
+        ═══════════════════════════════════════ */}
+        {investorType && (
+          <ReferenceTable highlightResident={investorType === "resident"} />
+        )}
+
+        {/* ─ CTA ─ */}
+        {investorType && (
+          <div className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style={{ background: "#00111B" }}>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: "rgba(180,227,200,0.6)" }}>
+                {investorType === "resident" ? "Resident Indian GIFT City account" : "NRI GIFT City account"}
               </p>
-            )}
+              <p className="text-lg font-extrabold text-white" style={{ fontFamily: "var(--font-bricolage)" }}>
+                {investorType === "resident" ? "Open your Resident Indian Valura GIFT City account" : "Open your NRI Valura GIFT City account"}
+              </p>
+              <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>
+                {investorType === "resident"
+                  ? "Auto Schedule FA · Form 67 reminders · LTCG tracking · IFSC fund access"
+                  : "Cat III AIF exemption · US Estate Tax protection · Ireland UCITS ETF route"}
+              </p>
+            </div>
+            <a href="/signup" className="flex-shrink-0 flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold transition-all hover:opacity-90" style={{ background: "#05A049", color: "#fff" }}>
+              Open Account <ArrowRight className="h-4 w-4" />
+            </a>
           </div>
-        </div>
+        )}
+
+        {/* Disclaimers */}
+        {investorType && (
+          <p className="text-[10px] text-center pb-3 leading-relaxed" style={{ color: "#9CA3AF" }}>
+            For Resident Indians: FTC under Section 90/91 requires filing Form 67 by March 31 of the Assessment Year. Must match Schedule FSI and TR entries in ITR-2 or ITR-3. Excess WHT over Indian tax liability is not refundable. For NRIs: tax exemptions under Sections 10(23FBC) and 10(15)(ix) are subject to conditions including non-resident status and IFSC fund classification. Consult a qualified CA before filing.
+          </p>
+        )}
       </div>
     </div>
   );
