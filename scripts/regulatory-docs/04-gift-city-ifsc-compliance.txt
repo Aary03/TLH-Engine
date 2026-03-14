@@ -1,0 +1,152 @@
+GIFT CITY IFSC COMPLIANCE — SCHEDULE FA, FSI, FORM 67
+Income Tax Act, FEMA, Black Money Act
+
+=============================================================================
+SECTION 1: WHY GIFT CITY IFSC IS TREATED AS FOREIGN
+=============================================================================
+
+Despite being physically located in India (Gandhinagar, Gujarat), 
+GIFT City IFSC entities are treated as "persons resident outside India" 
+under FEMA 1999.
+
+This creates important compliance obligations:
+
+1. Remittances to GIFT City IFSC funds = LRS transactions (attract TCS)
+2. Holdings in GIFT City IFSC funds = FOREIGN ASSETS for disclosure purposes
+3. Schedule FA of ITR must be filled (not optional)
+4. CRS/FATCA reporting may apply
+
+Section 206C(1G)(a) was specifically amended to omit "out of India" to ensure
+TCS applies to GIFT City remittances. Parliament explicitly intended GIFT City
+funds to be treated as foreign investments for TCS purposes.
+
+=============================================================================
+SECTION 2: SCHEDULE FA — FOREIGN ASSET DISCLOSURE
+=============================================================================
+
+WHO MUST FILE SCHEDULE FA:
+Any resident individual or HUF holding foreign assets during the relevant year.
+This INCLUDES GIFT City IFSC fund holdings.
+
+WHEN TO USE:
+- ITR-2: For individuals with no business income
+- ITR-3: For individuals with business/professional income
+- ITR-1 and ITR-4 CANNOT be used if you have foreign assets
+
+WHAT TO DISCLOSE (per account/investment):
+- Country code: IN (India — since IFSC is in India, though treated as foreign under FEMA)
+- Name of institution/AMC
+- Account/folio number
+- Opening balance (January 1 of calendar year)
+- Peak balance during the year
+- Closing balance (December 31 of calendar year)
+- INR equivalent at SBI TTBR rate
+
+REPORTING PERIOD: CALENDAR YEAR (January 1 – December 31)
+This differs from the Indian financial year (April 1 – March 31).
+Schedule FA uses calendar year reporting even when filed in ITR for Indian FY.
+
+PENALTY FOR NON-DISCLOSURE:
+Under the Black Money (Undisclosed Foreign Income and Assets) and 
+Imposition of Tax Act, 2015:
+- Penalty: Rs. 10 LAKH per year of non-disclosure
+- This applies even if the income is otherwise properly reported in ITR
+- Prosecution: 6 months to 7 YEARS imprisonment for willful non-disclosure
+- The penalty is per asset, per year — multiple years × multiple assets = severe penalties
+
+BUDGET 2024 RELIEF: No penalty for non-immovable foreign assets below 
+AGGREGATE value of Rs. 20 lakh. This provides some relief for small holdings.
+
+=============================================================================
+SECTION 3: SCHEDULE FSI — FOREIGN SOURCE INCOME
+=============================================================================
+
+Schedule FSI captures all income from sources outside India, including:
+- Dividends from IFSC funds
+- Interest from IFSC instruments
+- Capital gains on IFSC fund redemptions
+
+Each income item must show:
+- Country of source
+- Income amount in foreign currency
+- INR equivalent
+- Tax paid in foreign country (for FTC calculation)
+- Applicable DTAA
+
+=============================================================================
+SECTION 4: SCHEDULE TR — TAX RELIEF CLAIMED
+=============================================================================
+
+Schedule TR summarizes tax relief claimed under:
+- Section 90 (DTAA relief)
+- Section 91 (unilateral relief for non-DTAA countries)
+
+For each relief:
+- Country of income source
+- Tax paid in foreign country
+- Foreign tax credit claimed
+- Method: Exemption or Credit
+
+=============================================================================
+SECTION 5: FORM 67 — FOREIGN TAX CREDIT
+=============================================================================
+
+Form 67 must be filed ELECTRONICALLY to claim Foreign Tax Credit (FTC) 
+under Section 90/91 of the IT Act.
+
+DEADLINE: End of assessment year (March 31 of AY) — per CBDT Notification 100/2022
+Example: For FY 2025-26 → File Form 67 by March 31, 2027
+
+WHAT'S NEEDED:
+- Certificate from foreign tax authority OR broker confirmation of WHT
+- Proof of tax paid in foreign country
+- Self-attestation
+- Currency conversion at SBI TTBR on last day of preceding month
+
+FTC CALCULATION:
+FTC = Lower of:
+(a) Tax paid in foreign country on specific income
+(b) Indian tax on that specific income (computed proportionately)
+
+COMMON MISTAKES IN FORM 67:
+1. Late filing (after March 31 of AY) — FTC claim denied
+2. Mismatch between Form 67 and ITR — triggers notice
+3. Wrong currency conversion date (must be last day of preceding month)
+4. Claiming FTC on disputed/contested taxes (not allowed)
+
+=============================================================================
+SECTION 6: CONSISTENCY REQUIREMENT
+=============================================================================
+
+ALL FOUR FILINGS must be INTERNALLY CONSISTENT:
+- Schedule FA (foreign assets)
+- Schedule FSI (foreign source income)
+- Schedule TR (tax relief)
+- Form 67 (foreign tax credit)
+
+Mismatches between these four trigger automatic compliance notices from 
+the Income Tax Department.
+
+The Department also receives CRS/FATCA data from foreign financial institutions
+and will independently know about undisclosed foreign holdings.
+
+=============================================================================
+SECTION 7: COMPLIANCE CALENDAR
+=============================================================================
+
+FY 2025-26 Compliance Timeline:
+
+Date              | Action Required
+Mar 31, 2026      | LAST TLH WINDOW — Book losses before FY end
+Mar 15, 2026      | Q4 Advance Tax (15% installment) — offset TCS
+Jun 15, 2026      | Q1 Advance Tax (15% installment)
+Sep 15, 2026      | Q2 Advance Tax (45% installment)
+Dec 15, 2026      | Q3 Advance Tax (75% installment)
+Jul 31, 2026      | ITR filing deadline — MANDATORY for carry-forward preservation
+Mar 15, 2027      | Q4 Advance Tax (100% installment)
+Mar 31, 2027      | Form 67 filing deadline (for FY 2025-26 FTC claims)
+
+CRITICAL: File ITR BY JULY 31 to preserve capital loss carry-forward rights.
+A belated ITR (filed after July 31) results in PERMANENT FORFEITURE of 
+the right to carry forward capital losses from that year.
+This cannot be rectified by filing a revised return.

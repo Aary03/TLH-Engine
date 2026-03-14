@@ -1,0 +1,113 @@
+CAPITAL GAINS TAXATION ON IFSC/OVERSEAS FUNDS
+Income Tax Act 1961 — Sections 112, 111A, 48
+Applicable: FY 2025-26 and onwards
+
+=============================================================================
+SECTION 1: CLASSIFICATION OF IFSC/OVERSEAS FUNDS
+=============================================================================
+
+GIFT City IFSC funds investing in overseas equities are classified as 
+NON-EQUITY/OVERSEAS FUNDS because they fail the 65% domestic equity threshold 
+required for "equity-oriented" fund status.
+
+Classification test:
+- If fund invests ≥65% in domestic listed equity: Equity fund (Sec 111A rates)
+- If fund invests <65% in domestic equity (including overseas/global funds): Non-equity fund (Sec 112 rates)
+
+GIFT City IFSC funds typically invest in:
+- Ireland-domiciled UCITS ETFs (which invest in US/global equities)
+- Direct overseas equities
+Result: Always classified as non-equity funds
+
+IMPORTANT HISTORICAL NOTE:
+- FY 2023-24 and FY 2024-25: These funds were treated as "specified mutual funds" 
+  under Section 50AA — gains taxed as STCG at slab rate regardless of holding period
+- FY 2025-26 ONWARDS: Section 50AA treatment ended. Standard STCG/LTCG treatment applies.
+
+=============================================================================
+SECTION 2: APPLICABLE TAX RATES (FY 2025-26)
+=============================================================================
+
+LONG-TERM CAPITAL GAINS (LTCG):
+- Section: 112 of the Income Tax Act
+- Rate: 12.5% FLAT (no indexation available)
+- Holding period: MORE THAN 24 MONTHS (730 days)
+- Surcharge: CAPPED at 15% (regardless of income level)
+- Health and Education Cess: 4%
+- Effective maximum rate: 12.5% × (1 + 15%) × (1 + 4%) = 14.95%
+- Rs. 1.25 lakh annual exemption: NOT APPLICABLE (only for domestic listed equity with STT)
+- Indexation benefit: NOT AVAILABLE
+
+SHORT-TERM CAPITAL GAINS (STCG):
+- Section: Taxed at investor's income slab rate
+- Rate: At applicable income tax slab rate
+- Holding period: UP TO 24 MONTHS (≤730 days)
+- Surcharge: NO CAP — full surcharge applies based on income
+- Health and Education Cess: 4%
+
+=============================================================================
+SECTION 3: EFFECTIVE RATE TABLE
+=============================================================================
+
+LTCG EFFECTIVE RATES (12.5% base, 15% surcharge cap, 4% cess):
+Income Level          | Effective LTCG Rate
+Up to Rs. 50 lakh     | 12.5% × 1.00 × 1.04 = 13.00%
+Rs. 50L – Rs. 1Cr     | 12.5% × 1.10 × 1.04 = 14.30%
+Rs. 1Cr – Rs. 2Cr     | 12.5% × 1.15 × 1.04 = 14.95%
+Rs. 2Cr – Rs. 5Cr     | 12.5% × 1.15 × 1.04 = 14.95% (surcharge capped at 15%)
+Above Rs. 5Cr         | 12.5% × 1.15 × 1.04 = 14.95% (surcharge capped at 15%)
+
+The 15% surcharge cap on LTCG is a crucial benefit under Sec 112.
+Normally, income above Rs. 5Cr attracts 37% surcharge (old regime) or 25% (new).
+But for Section 112 LTCG, the surcharge is capped at 15%.
+
+STCG EFFECTIVE RATES (slab rate, NO surcharge cap, 4% cess):
+Income Level          | Slab Rate | Surcharge | STCG Effective Rate
+Up to Rs. 50 lakh     | 30%       | 0%        | 30% × 1.04 = 31.20%
+Rs. 50L – Rs. 1Cr     | 30%       | 10%       | 30% × 1.10 × 1.04 = 34.32%
+Rs. 1Cr – Rs. 2Cr     | 30%       | 15%       | 30% × 1.15 × 1.04 = 35.88%
+Rs. 2Cr – Rs. 5Cr     | 30%       | 25%       | 30% × 1.25 × 1.04 = 39.00%
+Above Rs. 5Cr (old)   | 30%       | 37%       | 30% × 1.37 × 1.04 = 42.744%
+Above Rs. 5Cr (new)   | 30%       | 25%       | 30% × 1.25 × 1.04 = 39.00%
+
+=============================================================================
+SECTION 4: KEY TAX PLANNING IMPLICATIONS
+=============================================================================
+
+THE SPREAD: At income above Rs. 5Cr (old regime):
+- STCG rate: 42.74%
+- LTCG rate: 14.95%
+- Spread: 27.79 percentage points
+
+This enormous spread means:
+1. Holding for 730+ days saves up to 27.79% on gains
+2. Harvesting STCL (short-term capital losses) is worth up to 42.74% per rupee
+3. LTCL (long-term capital losses) is worth only 14.95% per rupee
+
+STCL SUPERIOR TO LTCL: A short-term capital loss is almost always more valuable
+than an equivalent long-term capital loss because:
+- STCL can offset BOTH STCG (at 42.74%) AND LTCG (at 14.95%)
+- LTCL can ONLY offset LTCG (at 14.95%)
+
+WHEN TO TAKE STCG: Generally avoid unless you have STCL to offset it.
+The 42.74% tax on STCG significantly erodes returns.
+
+COST BASIS: New regime vs Old regime implications:
+- New regime: Max STCG rate = 39% (no benefit of old regime deductions)
+- Old regime: Max STCG rate = 42.74% (but deductions reduce taxable income)
+
+=============================================================================
+SECTION 5: HOLDING PERIOD CALCULATION
+=============================================================================
+
+For mutual funds and ETFs:
+- Purchase date: date of allotment of units
+- Sale date: date of redemption/sale
+- Period: computed in days (730 days = long-term threshold)
+- 730 days = exactly 2 years
+
+Example: Bought on June 15, 2024 → held until June 14, 2026 = 730 days = STCG
+         Bought on June 15, 2024 → held until June 15, 2026 = 731 days = LTCG
+
+IMPORTANT: The 24-month threshold is 730 days, NOT simply "after 2 years" in calendar terms.
+Leap years affect the exact date. Always count in actual days.

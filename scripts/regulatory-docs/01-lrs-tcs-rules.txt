@@ -1,0 +1,119 @@
+LIBERALISED REMITTANCE SCHEME (LRS) AND TAX COLLECTED AT SOURCE (TCS)
+Indian Income Tax Act and RBI Master Directions
+Effective: April 1, 2025 (Budget 2025 amendments)
+
+=============================================================================
+SECTION 1: LRS OVERVIEW
+=============================================================================
+
+The Liberalised Remittance Scheme (LRS) permits each resident individual to 
+remit up to USD 250,000 per financial year for permissible current or capital 
+account transactions under FEMA 1999.
+
+Key points:
+- Limit: USD 250,000 per resident individual per financial year (April–March)
+- Each adult family member has their own independent USD 250,000 limit
+- Minors are eligible with natural guardian signing Form A2
+- Transactions tracked via Form A2 at Authorized Dealer (AD) Category-I/II banks
+
+Permissible purposes under LRS:
+- Investment in overseas securities, mutual funds, ETFs
+- Investment in GIFT City IFSC funds (treated as foreign under FEMA)
+- Education (self-funded or with education loan)
+- Medical treatment abroad
+- Overseas tour packages
+- Maintenance of close relatives abroad
+- Gifts to non-residents
+
+=============================================================================
+SECTION 2: TCS RATES AND THRESHOLDS (Budget 2025 Amendment)
+=============================================================================
+
+Section 206C(1G) of the Income Tax Act governs TCS on LRS remittances.
+
+TCS THRESHOLD: Rs. 10 lakh (Rs. 10,00,000) per PAN per financial year
+This threshold applies to the TOTAL of ALL LRS purposes combined, tracked per PAN.
+
+TCS RATE TABLE (Effective April 1, 2025):
+
+Purpose                               | Up to Rs. 10L  | Above Rs. 10L
+--------------------------------------|----------------|---------------
+Education (loan from Sec 80E inst.)   | 0%             | 0%
+Education (self-funded)               | 0%             | 5%
+Medical treatment abroad              | 0%             | 5%
+Overseas tour packages                | 5% (from Re 1) | 20%
+All other purposes (investment,       | 0%             | 20%
+gifts, maintenance, GIFT City funds)  |                |
+
+IMPORTANT NOTE: Air tickets and hotel bookings processed as LRS by banks 
+fall under "any other purpose" (0% up to Rs. 10L) — NOT tour packages (5%).
+This is a meaningful optimization for travelers.
+
+GIFT CITY IFSC REMITTANCES: Section 206C(1G)(a) was amended to omit "out of India"
+specifically to ensure TCS applies to GIFT City IFSC remittances. GIFT City entities
+are "persons resident outside India" under FEMA, so remittances to them via LRS
+attract TCS at the same rates as any other investment remittance.
+
+=============================================================================
+SECTION 3: CALCULATION EXAMPLES
+=============================================================================
+
+Example 1: Rs. 80 lakh investment remittance (single PAN)
+- First Rs. 10 lakh: 0% TCS = Rs. 0
+- Next Rs. 70 lakh: 20% TCS = Rs. 14 lakh
+- Total TCS = Rs. 14 lakh
+
+Example 2: Rs. 80 lakh split across 4 family members
+- Each remits Rs. 20 lakh
+- Each: Rs. 10 lakh at 0% + Rs. 10 lakh at 20% = Rs. 2 lakh per person
+- Total TCS = Rs. 8 lakh (vs Rs. 14 lakh without splitting = Rs. 6 lakh saved)
+
+Example 3: Cross-FY strategy
+- Rs. 10 lakh before March 31 (FY end): 0% TCS
+- Rs. 10 lakh after April 1 (new FY): 0% TCS
+- Total Rs. 20 lakh at 0% TCS = Rs. 0 TCS paid
+- vs Rs. 2 lakh TCS if remitted in same FY (Rs. 10L above threshold × 20%)
+
+=============================================================================
+SECTION 4: TCS CREDIT AND REFUND
+=============================================================================
+
+TCS appears in Form 26AS (Part F) within days of bank deposit.
+Claim in ITR under "Taxes Paid → TCS Details" with Collector TAN.
+Refund typically processes in 7–45 days post e-verification of ITR.
+
+OPPORTUNITY COST OF TCS:
+At 20% TCS on Rs. 1 crore above threshold:
+- Rs. 20 lakh locked for 6–15 months until ITR refund
+- At 12% expected returns: ~Rs. 2.4 lakh opportunity cost
+- Mitigation: offset TCS against advance tax installments (June 15, Sep 15, Dec 15, Mar 15)
+
+=============================================================================
+SECTION 5: CIMS TRACKING (From January 1, 2026)
+=============================================================================
+
+Since January 1, 2026, RBI's Centralised Information Management System (CIMS)
+enables real-time cross-bank PAN-wise cumulative LRS tracking via mandatory 
+daily returns from all AD Category-I/II banks and FFMCs.
+
+Self-declaration alone no longer suffices. All LRS remittances are tracked 
+in real-time across all banks by PAN. Undisclosed or duplicate declarations
+are detectable immediately.
+
+=============================================================================
+SECTION 6: FAMILY SPLITTING RULES
+=============================================================================
+
+Each adult resident individual gets their own Rs. 10 lakh TCS-free threshold.
+A family of 4 adults can collectively remit up to USD 1,000,000/year with
+Rs. 40 lakh completely TCS-free.
+
+Requirements for valid family splitting:
+1. Each remitter must independently fill Form A2
+2. Each must provide their own valid PAN
+3. Funds must genuinely belong to the remitter (not artificially transferred)
+4. Each family member must have independent income/assets to justify the remittance
+
+GAAR (General Anti-Avoidance Rules) considerations: Legitimate family 
+splitting for genuine investment purposes is fully legal. Artificial 
+arrangements without commercial substance could attract GAAR scrutiny.

@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Shadcn/ui light-theme CSS variables ── */
+    --background: 60 33% 99%;        /* #FFFFFC */
+    --foreground: 205 100% 5%;       /* #00111B */
+    --card: 0 0% 100%;
+    --card-foreground: 205 100% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 205 100% 5%;
+    --primary: 149 92% 32%;          /* #05A049 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 205 100% 5%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 148 46% 86%;           /* #B4E3C8 mint */
+    --accent-foreground: 205 100% 5%;
+    --destructive: 0 72% 51%;        /* #DC2626 */
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 20% 90%;
+    --input: 214 20% 94%;
+    --ring: 149 92% 32%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-inter), system-ui, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    background-color: #FFFFFC;
+  }
+  h1, h2, h3 { font-family: var(--font-manrope), sans-serif; }
+}
+
+/* ── Custom scrollbar (light) ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #F5F5F3; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #05A049; }
+
+/* ── Brand utilities ── */
+.font-display { font-family: var(--font-bricolage), sans-serif; font-weight: 800; }
+.font-heading  { font-family: var(--font-manrope), sans-serif; font-weight: 600; }
+.font-body     { font-family: var(--font-inter), sans-serif; font-weight: 400; }
+
+.text-gain { color: #05A049; }
+.text-loss { color: #DC2626; }
+.bg-gain   { background-color: #EDFAF3; }
+.bg-loss   { background-color: #FEF2F2; }
+.border-gain { border-color: #B4E3C8; }
+.border-loss { border-color: #FECACA; }
+
+/* ── Brand green gradient ── */
+.gradient-brand {
+  background: linear-gradient(135deg, #05A049 0%, #028037 100%);
+}
+.gradient-text {
+  background: linear-gradient(135deg, #05A049, #028037);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Card elevation levels ── */
+.card-flat    { background: #fff; border: 1px solid #E5E7EB; }
+.card-raised  { background: #fff; border: 1px solid #E5E7EB; box-shadow: 0 1px 4px rgba(0,17,27,0.06); }
+.card-lifted  { background: #fff; border: 1px solid #D1D5DB; box-shadow: 0 4px 16px rgba(0,17,27,0.08); }
+
+/* ── Section with mint tint ── */
+.section-mint { background-color: #F0FAF5; border: 1px solid #B4E3C8; }
+.section-gold { background-color: #FFFBF0; border: 1px solid #E8C97A; }
+
+/* ── Input styling ── */
+input[type=range] { accent-color: #05A049; }
+
+/* ── Recharts tooltip ── */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: #fff !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 8px !important;
+  color: #00111B !important;
+  font-size: 11px !important;
+  box-shadow: 0 4px 16px rgba(0,17,27,0.1) !important;
+}
+
+/* ── Animation ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-green {
+  0%,100% { box-shadow: 0 0 0 0 rgba(5,160,73,0.3); }
+  50%      { box-shadow: 0 0 0 8px rgba(5,160,73,0); }
+}
+.animate-fade-up { animation: fade-up 0.35s ease-out; }
+.animate-pulse-green { animation: pulse-green 2s ease-in-out infinite; }
+
+/* ── Tooltip ── */
+[data-tooltip] { position: relative; cursor: help; }
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #00111B;
+  color: #fff;
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  max-width: 260px;
+  white-space: normal;
+  text-align: center;
+  z-index: 50;
+  pointer-events: none;
+  line-height: 1.4;
+}

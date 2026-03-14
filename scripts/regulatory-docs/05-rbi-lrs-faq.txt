@@ -1,0 +1,236 @@
+RBI OFFICIAL FAQ — LIBERALISED REMITTANCE SCHEME (LRS)
+Reserve Bank of India
+Updated: April 06, 2023
+Source: rbi.org.in — Banker and Debt Manager to Government
+
+Legal Framework: Foreign Exchange Management Act, 1999 (FEMA), in force from June 1, 2000.
+All foreign exchange transactions by residents are either current or capital account transactions under FEMA.
+
+=============================================================================
+Q1. What is the Liberalised Remittance Scheme (LRS) of USD 2,50,000?
+=============================================================================
+
+Under the Liberalised Remittance Scheme, all resident individuals, including minors, are allowed to
+freely remit up to USD 2,50,000 per financial year (April – March) for any permissible current or
+capital account transaction or a combination of both.
+
+Resident individuals can avail foreign exchange facility for purposes mentioned in Para 1 of Schedule III
+of FEM (CAT) Amendment Rules 2015, dated May 26, 2015, within the limit of USD 2,50,000 only.
+
+The Scheme was introduced on February 4, 2004, with a limit of USD 25,000.
+The LRS limit has been revised in stages consistent with prevailing macro and micro economic conditions.
+
+In case of remitter being a minor, the LRS declaration form must be countersigned by the minor's
+natural guardian.
+
+The Scheme is NOT available to: corporates, partnership firms, HUF, Trusts etc.
+
+=============================================================================
+Q2. What are the prohibited items under the Scheme?
+=============================================================================
+
+The remittance facility under the Scheme is NOT available for:
+
+1. Remittance for any purpose specifically prohibited under Schedule-I (lottery tickets, proscribed
+   magazines, etc.) or any item restricted under Schedule II of Foreign Exchange Management
+   (Current Account Transactions) Rules, 2000.
+
+2. Remittance from India for margins or margin calls to overseas exchanges / overseas counterparty.
+
+3. Remittances for purchase of FCCBs issued by Indian companies in the overseas secondary market.
+
+4. Remittance for trading in foreign exchange abroad.
+
+5. Capital account remittances, directly or indirectly, to countries identified by FATF as
+   "non-cooperative countries and territories".
+
+6. Remittances directly or indirectly to individuals and entities identified as posing significant
+   risk of committing acts of terrorism.
+
+7. Gifting by a resident to another resident, in foreign currency, for credit of the latter's
+   foreign currency account held abroad under LRS.
+
+=============================================================================
+Q3. What purposes can resident individuals use LRS for?
+=============================================================================
+
+Individuals can avail foreign exchange facility for the following purposes within USD 2,50,000 per FY:
+
+- Private visits to any country (except Nepal and Bhutan)
+- Gift or donation
+- Going abroad for employment
+- Emigration
+- Maintenance of close relatives abroad
+- Travel for business, or attending a conference or specialised training
+- Meeting expenses for medical treatment / check-up abroad
+- Studies abroad
+- Any other current account transaction not covered under FEMA 1999 definition
+
+The AD bank may undertake remittance for all residual current account transactions not prohibited
+under Schedule I, II or III of FEM (CAT) Rules, 2000.
+
+=============================================================================
+Q4. Are resident individuals required to repatriate income earned on overseas investments?
+=============================================================================
+
+The investor who remitted funds under LRS can retain and reinvest the income earned from investments
+made under the Scheme.
+
+However, received/realised/unspent/unused foreign exchange, unless reinvested, shall be repatriated
+and surrendered to an authorised person within 180 days from the date of receipt/realisation/purchase/
+acquisition or date of return to India.
+
+Additional repatriation requirements under Overseas Investments Rules and Regulations 2022 must also
+be adhered to.
+
+=============================================================================
+Q5. Can remittances under LRS be consolidated in respect of family members?
+=============================================================================
+
+Remittances under LRS can be consolidated in respect of family members subject to each individual
+family member complying with the terms and conditions of the Scheme.
+
+IMPORTANT RESTRICTION: Clubbing is NOT permitted by other family members for capital account
+transactions such as opening a bank account and investment, if they are not the co-owners/co-partners
+of the investment/overseas bank account.
+
+Remittances for acquiring immovable property outside India may be consolidated in respect of relatives
+if such relatives, being persons resident in India, comply with the terms and conditions of the Scheme.
+
+=============================================================================
+Q6. Is the AD required to verify permissibility of remittances?
+=============================================================================
+
+AD will be guided by the nature of transaction as declared by the remitter in Form A2 and will certify
+that the remittance is in conformity with RBI instructions.
+
+However, the ULTIMATE RESPONSIBILITY is of the remitter to ensure compliance with FEMA rules/regulations.
+
+=============================================================================
+Q7. Is PAN mandatory for LRS remittances?
+=============================================================================
+
+YES. It is mandatory for the resident individual to provide his/her Permanent Account Number (PAN)
+for ALL transactions under LRS made through Authorized Persons.
+
+=============================================================================
+Q8. Are there restrictions on frequency of remittances?
+=============================================================================
+
+There are NO restrictions on the frequency of remittances under LRS.
+
+However, the TOTAL amount of foreign exchange purchased from or remitted through ALL sources in India
+during a financial year should be within the cumulative limit of USD 2,50,000.
+
+CRITICAL: Once a remittance is made for an amount up to USD 2,50,000 during the financial year,
+a resident individual would NOT be eligible to make any further remittances under this scheme,
+EVEN IF the proceeds of the investments have been brought back into the country.
+
+=============================================================================
+Q10. Does the 1-year bank account requirement apply to current account transactions?
+=============================================================================
+
+NO. The 1-year minimum bank account maintenance requirement applies ONLY to capital account transactions.
+
+For current account transactions under Schedule III (private/business visits up to USD 250,000),
+FFMCs can also process these without the 1-year requirement. However, KYC and AML rules apply.
+
+=============================================================================
+Q12. What are the requirements to be complied with by the remitter?
+=============================================================================
+
+1. The individual must designate a branch of an AD through which all capital account remittances
+   under the Scheme will be made.
+
+2. The applicant should have maintained the bank account with the bank for a minimum period of
+   ONE YEAR prior to the remittance (for capital account transactions).
+
+3. For new customers: AD should carry out due diligence and obtain bank statement for the previous
+   year OR copies of latest Income Tax Assessment Order or Return filed.
+
+4. Furnish Form A-2 regarding the purpose of remittance and declare that:
+   - Funds belong to the remitter
+   - Will not be used for prohibited purposes under the Scheme
+
+=============================================================================
+Q13. Can remittances be made only in US Dollars?
+=============================================================================
+
+NO. Remittances can be made in ANY freely convertible foreign currency.
+
+=============================================================================
+Q15. Are there restrictions on quality of investments under LRS?
+=============================================================================
+
+NO ratings or guidelines have been prescribed under LRS of USD 2,50,000 on the quality of
+investment an individual can make.
+
+However, the individual investor is expected to exercise due diligence and investments shall be
+in accordance with Overseas Investment Rules and Regulations, 2022 and directions thereunder.
+
+=============================================================================
+Q22. Remittance by sole proprietor under LRS
+=============================================================================
+
+In a sole proprietorship, there is NO legal distinction between the individual/owner.
+
+If a sole proprietor remits USD 250,000 in their individual capacity, they CANNOT remit another
+USD 250,000 as owner of the sole proprietorship — there is no legal distinction.
+
+=============================================================================
+Q25. Can a resident make a rupee loan to NRI/PIO relative?
+=============================================================================
+
+YES, subject to conditions:
+(i) Loan must be free of interest; minimum maturity of one year
+(ii) Loan amount must be within overall LRS limit of USD 2,50,000 per FY
+(iii) Loan shall be utilised for meeting borrower's personal requirements or own business in India
+(iv) Loan shall NOT be used for: chit fund, Nidhi Company, agricultural/plantation/real estate,
+     trading in TDRs
+(v) Loan amount credited to the NRO account of the NRI/PIO
+(vi) Loan amount shall NOT be remitted outside India
+
+=============================================================================
+DEFINITION OF "PERSON RESIDENT IN INDIA" (Section 2(v), FEMA 1999)
+=============================================================================
+
+A person residing in India for more than 182 days during the course of the preceding financial year
+BUT does NOT include:
+(A) A person who has gone out of India or stays outside India for:
+    (a) Employment outside India
+    (b) Carrying on business/vocation outside India
+    (c) Any other purpose indicating intention to stay outside India for an uncertain period
+
+(B) A person who has come to or stays in India for:
+    (a) Employment in India
+    (b) Carrying on business/vocation in India
+    (c) Any other purpose indicating intention to stay in India for an uncertain period
+
+Also included:
+(ii) Any person or body corporate registered or incorporated in India
+(iii) An office, branch or agency in India owned or controlled by a person resident outside India
+(iv) An office, branch or agency outside India owned or controlled by a person resident in India
+
+=============================================================================
+ADDITIONAL CONTEXT: LRS AND GIFT CITY IFSC
+=============================================================================
+
+GIFT City IFSC (Gujarat International Finance Tec-City International Financial Services Centre):
+- IFSC entities are treated as "persons resident outside India" under FEMA 1999
+- Therefore, remittances to GIFT City IFSC funds = LRS transactions
+- Subject to USD 250,000 per person per FY limit
+- Subject to TCS under Section 206C(1G) of the Income Tax Act
+- Section 206C(1G)(a) was amended to remove "out of India" to specifically include GIFT City
+
+This means:
+- Resident individual investing in PPFAS IFSC, Tata S&P 500 IFSC, Mirae IFSC, etc. must use LRS
+- TCS applies: 0% up to ₹10L per PAN per FY, 20% above (for investment purpose)
+- The ₹10L threshold is tracked per PAN across ALL banks via CIMS (from Jan 2026)
+- Family members each have independent ₹10L TCS-free buckets under their own PANs
+- Form A2 must be filed for each remittance
+
+KEY ADVANTAGE OF GIFT CITY IFSC (beyond LRS scope):
+- Once remitted, gains can be reinvested within IFSC without fresh LRS remittance
+- Zero STT, zero stamp duty, zero GST on IFSC transactions
+- No SEBI $7B overseas investment cap (unlike INR-route domestic feeder funds)
+- US estate tax eliminated by holding via Ireland UCITS ETF wrappers

@@ -1,0 +1,166 @@
+TAX LOSS HARVESTING IN INDIA — NO WASH SALE RULES
+Income Tax Act 1961 — Sections 70, 71, 72, 74, 94(7), 94(8)
+
+=============================================================================
+SECTION 1: INDIA HAS NO WASH SALE RULES
+=============================================================================
+
+CRITICAL FACT: India's Income Tax Act does NOT have wash sale rules 
+equivalent to Section 1091 of the US Internal Revenue Code.
+
+In the United States:
+- If you sell a security at a loss, you cannot buy the "substantially identical" 
+  security within 30 days before or after the sale
+- Violation results in disallowance of the loss for tax purposes
+
+In India:
+- NO such 30-day or 61-day disallowance period exists
+- NO "substantially identical securities" concept
+- An investor can sell a security at a loss and IMMEDIATELY rebuy the same 
+  security on the SAME DAY
+- The loss is fully recognized for tax purposes
+- The new cost basis is the repurchase price (stepped down)
+
+This has been confirmed by:
+- Zerodha Tax P&L reports
+- ClearTax guidance
+- Angel One tax documentation
+- Multiple chartered accountant interpretations
+- No CBDT notification has created any wash sale equivalent
+
+=============================================================================
+SECTION 2: GAAR CONSIDERATIONS
+=============================================================================
+
+GAAR (General Anti-Avoidance Rules, Chapter X-A of the IT Act, effective April 2017)
+can theoretically deny tax benefits to transactions lacking commercial substance.
+
+In practice:
+- Genuine market transactions at market prices on recognized exchanges are SAFE
+- The key risk boundary: avoid CIRCULAR trading with NO change in position 
+  purely for loss generation
+- Example of SAFE practice: Sell Fund A at a loss, immediately rebuy Fund A.
+  New cost basis established. Transaction is at market prices. Fully legal.
+- Example of risky practice: Prearranged circular trades between related 
+  parties purely to generate paper losses without any economic substance
+
+TAX LOSS HARVESTING at market prices with genuine securities is explicitly 
+considered a legitimate tax planning strategy — not tax evasion.
+
+=============================================================================
+SECTION 3: SET-OFF AND CARRY-FORWARD RULES
+=============================================================================
+
+Section 70: Intra-head set-off (within capital gains)
+Section 71: Inter-head set-off (between different heads)
+Section 72: Carry-forward of business losses
+Section 74: Carry-forward of capital losses
+
+SET-OFF TABLE:
+Loss Type | Can Offset Against
+STCL      | STCG (current year) AND LTCG (current year) — BOTH types
+LTCL      | LTCG ONLY — CANNOT offset STCG
+
+STCL is SUPERIOR because:
+- STCL has broader offset capability
+- STCL offsets STCG at up to 42.74%
+- STCL offsets LTCG at up to 14.95%
+- LTCL can only offset LTCG at 14.95%
+
+CAPITAL LOSSES CANNOT OFFSET:
+- Salary income
+- House property income
+- Business/professional income
+- Other sources income
+
+CARRY-FORWARD RULES:
+- Duration: 8 ASSESSMENT YEARS from year of loss
+- Both STCL and LTCL can be carried forward
+- CRITICAL: ITR must be filed ON OR BEFORE the due date (typically July 31)
+  to preserve carry-forward rights
+- Belated ITR filing = LOSS OF CARRY-FORWARD RIGHTS PERMANENTLY
+- Even if income is below taxable limit, file ITR to preserve carry-forwards
+
+INTRA-YEAR ORDER OF SET-OFF:
+1. Intra-head set-off first (STCL vs STCG within capital gains)
+2. Then STCL vs LTCG
+3. Then LTCL vs LTCG
+4. Remaining unabsorbed losses carry forward
+
+=============================================================================
+SECTION 4: SECTION 94(8) — BONUS STRIPPING (The Only Wash-Sale-Like Rule)
+=============================================================================
+
+Section 94(8) of the IT Act disallows losses on mutual fund units in a 
+specific bonus stripping scenario:
+
+CONDITIONS FOR DISALLOWANCE:
+1. Investor acquires MF units within 3 months BEFORE the record date
+2. Receives bonus units on the record date
+3. Sells the ORIGINAL units at a loss within 9 months AFTER the record date
+
+EFFECT: The loss on original units is ignored. It is deemed to be the 
+cost of the bonus units received.
+
+This is NARROWLY targeted at bonus stripping. It is NOT a general wash sale 
+provision and does NOT apply to:
+- Normal tax loss harvesting without bonus units
+- Selling and rebuying without any bonus units involved
+- Any other scenario not involving MF bonus units
+
+=============================================================================
+SECTION 5: THE TLH ALGORITHM FOR INDIAN INVESTORS
+=============================================================================
+
+Priority ranking (highest tax savings to lowest):
+1. STCL offsetting EXISTING STCG → saves 42.74% (highest value)
+2. STCL offsetting EXISTING LTCG → saves 14.95%
+3. LTCL offsetting EXISTING LTCG → saves 14.95%
+4. STCL for carry-forward → future savings (8 years)
+5. LTCL for carry-forward → limited future use (only vs LTCG)
+
+CALCULATION:
+net_benefit = (loss_amount × effective_tax_rate) - transaction_costs
+
+Where transaction_costs include:
+- Brokerage commission (typically 0.05–0.15%)
+- Bid-ask spread
+- Exit loads (if applicable for MF)
+- Impact cost (for large trades)
+
+MINIMUM THRESHOLD: Generally Rs. 10,000–50,000 in net benefit to justify execution.
+For HNI portfolios with high STCG exposure, even smaller losses may be worth harvesting.
+
+TIMING STRATEGY:
+- January–March: MOST CRITICAL window (final opportunity before March 31)
+- March 25–31: Last-chance trades (ensure settlement before March 31)
+- Post-budget July–August: Volatility creates opportunities
+- Any market correction: Opportunistic harvesting regardless of calendar
+
+Continuous weekly harvesting is superior to year-end-only harvesting because:
+- Losses present in Q1-Q2 may disappear by Q4 if markets recover
+- Earlier harvesting = earlier tax benefit
+- Spread execution across the year avoids market impact
+
+=============================================================================
+SECTION 6: NEW COST BASIS AND DOCUMENTATION
+=============================================================================
+
+After tax loss harvesting:
+1. Old units sold at market price → STCL/LTCL recognized
+2. New units purchased at market price → new (lower) cost basis established
+3. New holding period RESTARTS from purchase date
+4. The new cost basis is the repurchase price (not the original cost)
+
+DOCUMENTATION REQUIRED:
+- Broker trade confirmations for sale and rebuy
+- Statement showing old cost basis and new cost basis
+- Capital gains statement from broker/AMC
+- Portfolio statement showing lot-level details
+- CA sign-off for large harvesting operations (recommended)
+
+AUDIT TRAIL: Maintain clear records showing:
+- Business purpose: Establishing lower cost basis for future gains reduction
+- Market prices used for both buy and sell
+- No circular trading with related parties
+- Genuine change in cost basis achieved
