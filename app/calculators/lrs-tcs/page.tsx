@@ -280,7 +280,7 @@ export default function LRSTCSCalculator() {
     <div className="min-h-screen" style={{ background: "#FFFFFC" }}>
       {/* ── Page Header ── */}
       <div
-        className="border-b px-8 py-6"
+        className="border-b px-4 sm:px-6 md:px-8 py-6"
         style={{ background: "#fff", borderColor: "#E5E7EB" }}
       >
         <div className="flex items-start justify-between">
@@ -295,7 +295,7 @@ export default function LRSTCSCalculator() {
               <span className="text-[10px] text-gray-400">Finance Act 2025 · Effective 1 Apr 2025</span>
             </div>
             <h1
-              className="text-3xl font-extrabold leading-tight tracking-tight"
+              className="text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight"
               style={{ fontFamily: "var(--font-bricolage)", color: "#00111B" }}
             >
               LRS & TCS Calculator

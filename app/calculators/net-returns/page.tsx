@@ -332,7 +332,7 @@ export default function NetReturnsPage() {
     <div className="min-h-screen" style={{ background: "#FFFFFC" }} id="net-returns-page">
 
       {/* HEADER */}
-      <div className="border-b px-8 py-6" style={{ background: "#fff", borderColor: "#E5E7EB" }}>
+      <div className="border-b px-4 sm:px-6 md:px-8 py-6" style={{ background: "#fff", borderColor: "#E5E7EB" }}>
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -798,12 +798,12 @@ export default function NetReturnsPage() {
 
             {/* ── FULL-WIDTH CTA ── */}
             <div className="rounded-2xl overflow-hidden" style={{ border: "2px solid #05A049", boxShadow: "0 8px 32px rgba(5,160,73,0.18)" }}>
-              <div className="px-8 py-7 flex flex-col sm:flex-row items-center justify-between gap-6" style={{ background: "#00111B" }}>
+              <div className="px-4 sm:px-6 md:px-8 py-7 flex flex-col sm:flex-row items-center justify-between gap-6" style={{ background: "#00111B" }}>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "rgba(180,227,200,0.6)" }}>
                     The closing argument
                   </p>
-                  <p className="text-2xl font-extrabold text-white mb-1.5" style={{ fontFamily: "var(--font-bricolage)" }}>
+                  <p className="text-xl sm:text-2xl font-extrabold text-white mb-1.5" style={{ fontFamily: "var(--font-bricolage)" }}>
                     Start investing via Valura GIFT City
                   </p>
                   <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.45)" }}>
@@ -825,7 +825,7 @@ export default function NetReturnsPage() {
                   Open Account in 10 Minutes <ArrowRight className="h-5 w-5" />
                 </a>
               </div>
-              <div className="px-8 py-3 flex flex-wrap gap-4" style={{ background: "rgba(5,160,73,0.06)", borderTop: "1px solid rgba(5,160,73,0.15)" }}>
+              <div className="px-4 sm:px-8 py-3 flex flex-wrap gap-4" style={{ background: "rgba(5,160,73,0.06)", borderTop: "1px solid rgba(5,160,73,0.15)" }}>
                 <span className="text-[10px]" style={{ color: "#6B7280" }}>IFSCA regulated · India-domiciled fund units · Section 10(23FBC) exempt for NRIs</span>
                 <button onClick={handlePrint} className="ml-auto flex items-center gap-1.5 text-[10px] font-semibold print:hidden"
                   style={{ color: "#05A049" }}>

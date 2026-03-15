@@ -126,7 +126,7 @@ function LRSContent() {
         Every rupee you remit overseas above ₹10 lakh per PAN per financial year triggers a <strong>20% Tax Collected at Source (TCS)</strong> on investments. The bank deducts it upfront — you get it back via ITR, but your money is locked for 7–18 months. This calculator shows you the real cost and how to minimize it.
       </p>
 
-      <div className="mt-4 grid grid-cols-3 gap-3">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
           { label: "TCS threshold per PAN/FY", value: "₹10 Lakh", color: "#05A049" },
           { label: "TCS rate on investments", value: "20%", color: "#DC2626" },
@@ -153,7 +153,7 @@ function LRSContent() {
       {/* ── Example 1 ── */}
       <SectionHeader>Example 1 — Solo investor, large remittance</SectionHeader>
       <ExampleBox title="Scenario: Rajesh wants to invest ₹75L in GIFT City in January">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Inputs</p>
             <CalcLine label="Investment amount" value="₹75L" />
@@ -274,7 +274,7 @@ function CGContent() {
         India taxes overseas fund gains differently depending on how long you hold them. The magic number is <strong>730 days (24 months)</strong>. Hold longer: flat 12.5% LTCG with surcharge capped at 15%. Sell earlier: your income slab rate applies — up to 42.74% for the highest earners. This calculator finds the break-even day and models both scenarios exactly.
       </p>
 
-      <div className="mt-4 grid grid-cols-2 gap-4">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="rounded-xl p-4" style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
           <p className="text-[10px] font-bold uppercase tracking-wide mb-2" style={{ color: "#DC2626" }}>Short Term (≤ 730 days)</p>
           <p className="text-xs text-gray-600 space-y-1">
@@ -310,7 +310,7 @@ function CGContent() {
       {/* Example 1: STCG */}
       <SectionHeader>Example 1 — Short-term gain, high-income investor</SectionHeader>
       <ExampleBox title="Priya buys a GIFT City fund at $100, sells at $145 after 18 months. Income: ₹5 Cr.">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Inputs</p>
             <CalcLine label="Buy price" value="$100 (₹8,450)" />
@@ -426,7 +426,7 @@ function DTAAContent() {
         NRIs and Resident Indians with foreign income face double taxation — both India and their country of residence (or the source country) try to tax the same rupee. DTAA treaties cap the rate. This calculator has two completely separate flows: <strong>NRI flow</strong> (country of residence outside India) and <strong>Resident Indian flow</strong> (you live in India, income sourced abroad).
       </p>
 
-      <div className="mt-4 grid grid-cols-2 gap-4">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="rounded-xl p-4" style={{ background: "#F9FAFB", border: "1px solid #E5E7EB" }}>
           <p className="text-xs font-bold mb-2" style={{ color: "#00111B" }}>NRI Flow (country ≠ India)</p>
           <p className="text-xs text-gray-500 leading-relaxed">India taxes your Indian-source income at DTAA-capped rates. Your residence country taxes globally but credits Indian tax paid. You pay the higher of the two — not both.</p>
@@ -449,7 +449,7 @@ function DTAAContent() {
       ]} />
 
       <ExampleBox title="NRI Example: Rajan lives in UAE, receives ₹10L dividend from an Indian company">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Without DTAA</p>
             <CalcLine label="Indian domestic WHT (30%)" value="₹3L" variant="red" />
@@ -533,7 +533,7 @@ function DTAAContent() {
 
       <ExampleBox title="Resident Indian Example: Aditya gets $10,000 dividend from a US stock. Income: ₹20L (30% slab).">
         <p className="text-xs text-gray-500 mb-3">Dividend ≈ ₹8.45L at ₹84.50/$. USA deducts 25% NRA withholding (₹2.11L) before paying Aditya.</p>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Without FTC</p>
             <CalcLine label="US WHT deducted (25%)" value="₹2.11L" variant="red" />
@@ -592,7 +592,7 @@ function DTAAContent() {
       {/* Form 67 */}
       <SectionHeader><FileText className="h-4 w-4" style={{ color: "#B8913A" }} /> Form 67 — the most important deadline</SectionHeader>
       <div className="rounded-xl p-4" style={{ background: "#FFFBF0", border: "1px solid #E8C97A" }}>
-        <div className="grid grid-cols-2 gap-4 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
             <p className="font-bold mb-2" style={{ color: "#B8913A" }}>Must-do checklist</p>
             {["File Form 67 online on the e-filing portal", "Deadline: March 31 of the Assessment Year (not July 31)", "Must match Schedule FSI in your ITR-2 or ITR-3", "Attach TDS certificate from foreign payer / Indian payer", "Cannot be filed late or via revised return"].map((item) => (
@@ -676,7 +676,7 @@ function NetReturnsContent() {
       {/* Example 1 */}
       <SectionHeader>Example 1 — Long-term investor, ₹1 Cr at 12% return over 20 years</SectionHeader>
       <ExampleBox title="Meera invests ₹1 Cr in US equity. Income: ₹50L (21.45% STCG). Strategy: LTCG.">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Inputs</p>
             <CalcLine label="Initial investment"   value="₹1 Cr" />
@@ -757,7 +757,7 @@ function EstateTaxContent() {
       </p>
 
       {/* Key numbers */}
-      <div className="mt-4 grid grid-cols-3 gap-3">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
           { label: "NRA estate tax exemption",    value: "$60,000",       color: "#DC2626" },
           { label: "Maximum estate tax rate",      value: "40%",           color: "#DC2626" },
@@ -848,7 +848,7 @@ function NRIStatusContent() {
       </p>
 
       {/* 3 statuses */}
-      <div className="mt-4 grid grid-cols-3 gap-3">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
           { label: "NRI",  color: "#05A049", bg: "#EDFAF3", border: "#B4E3C8", desc: "Only India-sourced income taxable. Foreign income exempt. No LRS limit." },
           { label: "RNOR", color: "#B8913A", bg: "#FFFBF0", border: "#E8C97A", desc: "Golden window. Foreign income NOT taxable in India. Limited duration." },
@@ -1001,7 +1001,7 @@ export default function CalcDocsPage() {
     <div className="min-h-screen" style={{ background: "#FFFFFC" }}>
 
       {/* ── Header ── */}
-      <div className="border-b px-8 py-6" style={{ background: "#fff", borderColor: "#E5E7EB" }}>
+      <div className="border-b px-4 sm:px-6 md:px-8 py-6" style={{ background: "#fff", borderColor: "#E5E7EB" }}>
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">

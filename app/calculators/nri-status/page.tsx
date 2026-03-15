@@ -297,7 +297,7 @@ export default function NRIStatusPage() {
     <div className="min-h-screen" style={{ background: "#FFFFFC" }}>
 
       {/* ── Header ── */}
-      <div className="border-b px-8 py-6" style={{ background: "#fff", borderColor: "#E5E7EB" }}>
+      <div className="border-b px-4 sm:px-6 md:px-8 py-6" style={{ background: "#fff", borderColor: "#E5E7EB" }}>
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -307,7 +307,7 @@ export default function NRIStatusPage() {
               </span>
               <span className="text-[10px] text-gray-400">Section 6, Income Tax Act · FY 2025-26</span>
             </div>
-            <h1 className="text-3xl font-extrabold leading-tight tracking-tight"
+            <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight"
               style={{ fontFamily: "var(--font-bricolage)", color: "#00111B" }}>
               NRI Status & Tax Residency Checker
             </h1>

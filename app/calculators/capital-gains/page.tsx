@@ -161,7 +161,7 @@ export default function CapitalGainsCalculator() {
     <div className="min-h-screen" style={{ background: "#FFFFFC" }}>
 
       {/* ── Page Header ── */}
-      <div className="border-b px-8 py-6" style={{ background: "#fff", borderColor: "#E5E7EB" }}>
+      <div className="border-b px-4 sm:px-6 md:px-8 py-6" style={{ background: "#fff", borderColor: "#E5E7EB" }}>
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -170,7 +170,7 @@ export default function CapitalGainsCalculator() {
               </span>
               <span className="text-[10px] text-gray-400">Finance Act 2025 · FY 2025-26</span>
             </div>
-            <h1 className="text-3xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: "var(--font-bricolage)", color: "#00111B" }}>
+            <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: "var(--font-bricolage)", color: "#00111B" }}>
               Capital Gains Calculator
             </h1>
             <p className="mt-1 text-sm text-gray-500 max-w-xl">
@@ -323,7 +323,7 @@ export default function CapitalGainsCalculator() {
                 ))}
               </div>
               {hasLosses && (
-                <div className="grid grid-cols-2 gap-3 mt-2 p-3 rounded-xl" style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2 p-3 rounded-xl" style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
                   <div>
                     <label className="text-[10px] font-semibold text-gray-500 block mb-1">STCL carry-forward (₹)</label>
                     <input type="number" value={stclCarry} onChange={(e) => setStclCarry(Number(e.target.value))}
@@ -426,7 +426,7 @@ export default function CapitalGainsCalculator() {
                 ))}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="rounded-xl px-4 py-3" style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
                   <p className="text-xs font-medium text-gray-500 mb-0.5">Tax Payable</p>
                   <p className="text-2xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: "#DC2626" }}>
@@ -496,8 +496,8 @@ export default function CapitalGainsCalculator() {
                 </div>
               </div>
               <div className="p-6">
-                <div className="grid grid-cols-3 gap-4 mb-5">
-                  <div className="rounded-xl px-4 py-3 text-center" style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-5">
+                  <div className="rounded-xl px-3 sm:px-4 py-3 text-center" style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
                     <p className="text-[10px] text-gray-500 mb-1">Tax if sell now</p>
                     <p className="text-xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: "#DC2626" }}>{INR_L(taxAmount)}</p>
                     <p className="text-[10px] mt-1" style={{ color: "#DC2626" }}>STCG @ {PCT(breakdown.effectiveRate)}</p>

@@ -40,7 +40,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-body bg-brand-bg text-brand-dark antialiased">
         <div className="flex min-h-screen">
           <Sidebar />
-          <main className="ml-60 flex-1 min-h-screen overflow-auto bg-[#FFFFFC]">
+          {/* ml-0 on mobile (sidebar is a drawer), ml-60 on desktop */}
+          <main className="flex-1 min-h-screen overflow-auto bg-[#FFFFFC] md:ml-[240px] pt-14 md:pt-0">
             {children}
           </main>
         </div>

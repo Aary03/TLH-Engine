@@ -135,7 +135,7 @@ export default function EstateTaxCalculator() {
 
       {/* ══════════ HERO HEADER ══════════ */}
       <div style={{ background: "#00111B" }}>
-        <div className="max-w-5xl mx-auto px-8 pt-10 pb-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 pt-10 pb-8">
           <div className="flex flex-wrap items-center gap-2 mb-4">
             <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest"
               style={{ background: "rgba(220,38,38,0.2)", color: "#F87171" }}>
@@ -146,7 +146,7 @@ export default function EstateTaxCalculator() {
               IRS Non-Resident Alien · 2025
             </span>
           </div>
-          <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white mb-2"
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold leading-tight tracking-tight text-white mb-2"
             style={{ fontFamily: "var(--font-bricolage)" }}>
             US Estate Tax Calculator
           </h1>
@@ -686,7 +686,7 @@ export default function EstateTaxCalculator() {
 
         {/* ══════════ CTA — largest on any calculator ══════════ */}
         <div className="rounded-2xl overflow-hidden" style={{ border: "2px solid #05A049", boxShadow: "0 8px 32px rgba(5,160,73,0.2)" }}>
-          <div className="px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-6" style={{ background: "#00111B" }}>
+          <div className="px-4 sm:px-6 md:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-6" style={{ background: "#00111B" }}>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: "rgba(180,227,200,0.55)" }}>
                 Protect your family&apos;s inheritance
@@ -702,14 +702,14 @@ export default function EstateTaxCalculator() {
             </div>
             <a
               href="/signup"
-              className="flex-shrink-0 flex items-center gap-3 rounded-2xl px-8 py-4 text-base font-extrabold transition-all hover:opacity-90 whitespace-nowrap"
+              className="flex-shrink-0 flex items-center gap-3 rounded-2xl px-5 sm:px-8 py-4 text-base font-extrabold transition-all hover:opacity-90"
               style={{ background: "#05A049", color: "#fff", boxShadow: "0 4px 16px rgba(5,160,73,0.35)" }}
             >
               Open a Valura GIFT City Account <ArrowRight className="h-5 w-5" />
             </a>
           </div>
           {/* Bottom strip */}
-          <div className="px-8 py-3 flex flex-wrap gap-4" style={{ background: "rgba(5,160,73,0.08)", borderTop: "1px solid rgba(5,160,73,0.2)" }}>
+          <div className="px-4 sm:px-6 md:px-8 py-3 flex flex-wrap gap-4" style={{ background: "rgba(5,160,73,0.08)", borderTop: "1px solid rgba(5,160,73,0.2)" }}>
             {["No US estate tax", "Ireland UCITS ETF access", "Auto Schedule FA compliance", "Form 67 reminders"].map((f) => (
               <div key={f} className="flex items-center gap-1.5 text-xs" style={{ color: "#B4E3C8" }}>
                 <CheckCircle2 className="h-3.5 w-3.5" style={{ color: "#05A049" }} />
