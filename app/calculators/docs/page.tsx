@@ -6,7 +6,7 @@ import {
   BadgePercent, Calculator, Map, ChevronRight, ChevronDown,
   CheckCircle2, AlertCircle, ArrowRight, BookOpen,
   Lightbulb, Clock, Users, TrendingDown, FileText,
-  TriangleAlert, Zap,
+  TriangleAlert, Zap, TrendingUp, Shield, UserCheck,
 } from "lucide-react";
 
 /* ── Helpers ── */
@@ -14,12 +14,15 @@ const INR_L = (n: number) =>
   n >= 1e7 ? `₹${(n / 1e7).toFixed(2)} Cr` : `₹${(n / 1e5).toFixed(0)} L`;
 
 /* ── Section types ── */
-type CalcKey = "lrs" | "cg" | "dtaa";
+type CalcKey = "lrs" | "cg" | "dtaa" | "nr" | "estate" | "nri";
 
 const CALCULATORS: { key: CalcKey; icon: React.ElementType; label: string; href: string; color: string; tagline: string }[] = [
-  { key: "lrs",  icon: BadgePercent, label: "LRS & TCS",      href: "/calculators/lrs-tcs",      color: "#05A049", tagline: "Minimize the upfront cash cost of overseas remittances" },
-  { key: "cg",   icon: Calculator,   label: "Capital Gains",  href: "/calculators/capital-gains", color: "#00111B", tagline: "Model STCG vs LTCG and find the exact break-even day" },
-  { key: "dtaa", icon: Map,          label: "DTAA",           href: "/calculators/dtaa",          color: "#B8913A", tagline: "Eliminate double taxation for NRIs and Resident Indians" },
+  { key: "lrs",   icon: BadgePercent, label: "LRS & TCS",     href: "/calculators/lrs-tcs",      color: "#05A049", tagline: "Minimize the upfront cash cost of overseas remittances" },
+  { key: "cg",    icon: Calculator,   label: "Capital Gains", href: "/calculators/capital-gains", color: "#00111B", tagline: "Model STCG vs LTCG and find the exact break-even day" },
+  { key: "dtaa",  icon: Map,          label: "DTAA / FTC",    href: "/calculators/dtaa",          color: "#B8913A", tagline: "Eliminate double taxation for NRIs and Resident Indians" },
+  { key: "nr",    icon: TrendingUp,   label: "Net Returns",   href: "/calculators/net-returns",   color: "#2B4A8A", tagline: "Direct vs Valura — full after-tax wealth comparison" },
+  { key: "estate",icon: Shield,       label: "Estate Tax",    href: "/calculators/estate-tax",    color: "#7A2020", tagline: "US estate tax exposure for Indian investors holding US stocks" },
+  { key: "nri",   icon: UserCheck,    label: "NRI Status",    href: "/calculators/nri-status",    color: "#6B7280", tagline: "Determine your tax residency — NRI, RNOR, or ROR" },
 ];
 
 /* ── Reusable components ── */
@@ -609,6 +612,363 @@ function DTAAContent() {
   );
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   NET RETURNS CONTENT
+══════════════════════════════════════════════════════════════════ */
+
+function NetReturnsContent() {
+  return (
+    <div>
+      <p className="text-sm leading-relaxed text-gray-600">
+        This is the <strong>closing argument</strong>. Every drag — TCS lock-up, higher dividend withholding, estate tax risk — compounds silently over decades. The Net Returns calculator runs a full year-by-year projection for both routes and shows exactly how much more wealth your family keeps by investing via Valura GIFT City instead of directly through IBKR, Vested, or INDmoney.
+      </p>
+
+      {/* Key differentiators */}
+      <div className="mt-4 rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
+        <table className="w-full text-xs">
+          <thead>
+            <tr style={{ background: "#F9FAFB" }}>
+              {["What", "Route A — Direct", "Route B — Valura"].map((h) => (
+                <th key={h} className="px-3 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ["TCS on remittance",       "20% above ₹10L per PAN",         "₹0 — family optimized across N PANs"],
+              ["Dividend WHT",            "25% (NRA rate on US stocks)",     "15% via Ireland UCITS ETF route"],
+              ["Capital gains tax",       "LTCG 14.95% / STCG up to 42.74%","Identical — same rules apply"],
+              ["US estate tax",           "Up to 40% above USD 60K",        "₹0 — IFSC units are not US-situs"],
+              ["Currency friction",       "~0.5% per remittance",            "Included in platform fee"],
+              ["Platform fee",            "₹0",                              "0.5% per year (editable)"],
+            ].map(([item, a, b]) => (
+              <tr key={item} className="border-t" style={{ borderColor: "#F3F4F6" }}>
+                <td className="px-3 py-2.5 font-medium text-gray-700">{item}</td>
+                <td className="px-3 py-2.5 font-mono" style={{ color: item === "Capital gains tax" ? "#6B7280" : "#DC2626" }}>{a}</td>
+                <td className="px-3 py-2.5 font-mono" style={{ color: item === "Capital gains tax" ? "#6B7280" : item === "Platform fee" ? "#DC2626" : "#05A049" }}>{b}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="mt-3 rounded-xl px-4 py-3 flex items-start gap-2.5"
+        style={{ background: "#FFFBF0", border: "1px solid #E8C97A" }}>
+        <Lightbulb className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#B8913A" }} />
+        <p className="text-xs leading-relaxed" style={{ color: "#374151" }}>
+          <strong>The key insight:</strong> Capital gains tax is <em>identical</em> in both routes. The entire Route B advantage comes from TCS savings, lower dividend WHT (25% → 15%), and eliminating US estate tax. This calculator makes the compounding effect visible.
+        </p>
+      </div>
+
+      <SectionHeader><BookOpen className="h-4 w-4" style={{ color: "#2B4A8A" }} /> How to use the calculator</SectionHeader>
+      <StepList steps={[
+        "Choose currency (INR or USD) and set your initial investment amount using the slider or input.",
+        "Set annual additional investment if you plan to invest a recurring amount each year.",
+        "Set investment horizon (1–30 years), expected annual return (6–20%), and dividend yield (0–5%).",
+        "Choose holding strategy: Long Term LTCG (hold 730+ days and pay 14.95% on exit), Active STCG (slab rate applied annually), or Mixed (50% each).",
+        "Set your income bracket — this determines your STCG slab rate (matters if Active or Mixed is selected).",
+        "Set family members for LRS optimization (1–5). Route B uses N × ₹10L TCS threshold. Route A always uses just 1.",
+        "Open Advanced Settings to edit platform fee (default 0.5%), exchange rate, and estate tax probability weighting.",
+        "Read the persistent summary bar at the top — Route A and Route B final values update live as you adjust any input.",
+        "Scroll through: IRR chart, tax waterfall chart, year-by-year table, and break-even card.",
+      ]} />
+
+      {/* Example 1 */}
+      <SectionHeader>Example 1 — Long-term investor, ₹1 Cr at 12% return over 20 years</SectionHeader>
+      <ExampleBox title="Meera invests ₹1 Cr in US equity. Income: ₹50L (21.45% STCG). Strategy: LTCG.">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Inputs</p>
+            <CalcLine label="Initial investment"   value="₹1 Cr" />
+            <CalcLine label="Annual return (pre-tax)" value="12%" />
+            <CalcLine label="Dividend yield"       value="2%" />
+            <CalcLine label="Horizon"              value="20 years" />
+            <CalcLine label="Strategy"             value="LTCG" />
+            <CalcLine label="Family PANs"          value="2 (₹20L threshold)" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Route A vs B after 20 years</p>
+            <CalcLine label="TCS drag (A)"         value="₹18L (20% on ₹90L above ₹10L threshold)" variant="red" />
+            <CalcLine label="TCS drag (B)"         value="₹0 (2 PANs × ₹10L = ₹20L free)" variant="green" />
+            <CalcLine label="Dividend WHT (A, 20yr)" value="~₹46L cumulative (25%)" variant="red" />
+            <CalcLine label="Dividend WHT (B, 20yr)" value="~₹28L cumulative (15%)" variant="green" />
+            <CalcLine label="Dividend WHT saved"   value="~₹18L over 20 years" variant="green" />
+            <CalcLine label="Total Route B advantage" value="~₹55–65L + estate tax" variant="green" />
+          </div>
+        </div>
+        <TipBox>At 12% CAGR, ₹18L of TCS that stays invested for 20 years grows to ~₹1.1 Cr. The initial TCS drag is deceptively large in compounding terms.</TipBox>
+      </ExampleBox>
+
+      {/* Example 2 */}
+      <SectionHeader>Example 2 — The estate tax scenario (₹5 Cr holdings)</SectionHeader>
+      <ExampleBox title="Vikram holds $600,000 in US stocks directly. What happens on his death?">
+        <CalcLine label="Total holdings (USD)"          value="$600,000" />
+        <CalcLine label="NRA exemption"                 value="−$60,000" />
+        <CalcLine label="Taxable estate"                value="$540,000" variant="red" />
+        <CalcLine label="US estate tax (progressive)"   value="~$201,800 (~33%)" variant="red" />
+        <CalcLine label="INR equivalent at ₹84.50/$"    value="~₹1.7 Cr" variant="red" />
+        <CalcLine label="Via Valura GIFT City (Route B)" value="$0 estate tax" variant="green" />
+        <div className="mt-3 p-3 rounded-lg" style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
+          <p className="text-xs"><strong>₹1.7 Cr is lost to the IRS before Vikram&apos;s family inherits a rupee.</strong> IFSC fund units are Indian assets under IRS classification — Route B eliminates this entirely. The Net Returns calculator probability-weights this based on your chosen estate tax probability slider.</p>
+        </div>
+      </ExampleBox>
+
+      {/* Break-even */}
+      <SectionHeader><TrendingUp className="h-4 w-4" style={{ color: "#2B4A8A" }} /> Understanding the break-even card</SectionHeader>
+      <p className="text-xs text-gray-500 mb-3">The break-even year shows when Route B&apos;s cumulative tax savings exceed its cumulative platform fees. In most scenarios with investment above ₹30L, this happens within 1–3 years.</p>
+      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
+        <table className="w-full text-xs">
+          <thead><tr style={{ background: "#F9FAFB" }}>
+            {["Initial Amount", "Family PANs", "TCS Saved (Yr 1)", "Break-even Year"].map((h) => (
+              <th key={h} className="px-3 py-2 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+            ))}
+          </tr></thead>
+          <tbody>
+            {[
+              ["₹10L", "1", "₹0 (below threshold)", "~3 years (dividends)"],
+              ["₹50L", "1", "₹8L (20% on ₹40L)", "Year 1"],
+              ["₹1 Cr", "1", "₹18L", "Year 1"],
+              ["₹1 Cr", "2", "₹0 (₹20L threshold)", "~2 years (dividends)"],
+              ["₹5 Cr", "5", "₹0 (₹50L threshold)", "Year 1–2 (dividends + estate)"],
+            ].map(([amt, pans, tcs, be]) => (
+              <tr key={amt + pans} className="border-t" style={{ borderColor: "#F3F4F6" }}>
+                <td className="px-3 py-2.5 font-medium">{amt}</td>
+                <td className="px-3 py-2.5 text-center">{pans}</td>
+                <td className="px-3 py-2.5" style={{ color: tcs.includes("₹0") ? "#6B7280" : "#05A049" }}>{tcs}</td>
+                <td className="px-3 py-2.5 font-bold" style={{ color: "#2B4A8A" }}>{be}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ESTATE TAX CONTENT
+══════════════════════════════════════════════════════════════════ */
+
+function EstateTaxContent() {
+  return (
+    <div>
+      <p className="text-sm leading-relaxed text-gray-600">
+        Every Indian investor who buys US stocks directly is classified as a <strong>Non-Resident Alien (NRA)</strong> by the IRS. On death, their US-situs assets are subject to US estate tax — with only a <strong>USD 60,000 exemption</strong> (vs USD 13.6M for US citizens). Rates go up to 40%. Investing via Valura GIFT City IFSC means you hold IFSC fund units — an Indian asset — and <strong>$0 US estate tax applies</strong>.
+      </p>
+
+      {/* Key numbers */}
+      <div className="mt-4 grid grid-cols-3 gap-3">
+        {[
+          { label: "NRA estate tax exemption",    value: "$60,000",       color: "#DC2626" },
+          { label: "Maximum estate tax rate",      value: "40%",           color: "#DC2626" },
+          { label: "Via Valura GIFT City",         value: "$0 estate tax", color: "#05A049" },
+        ].map((k) => (
+          <div key={k.label} className="rounded-xl px-4 py-3 text-center" style={{ background: "#F9FAFB", border: "1px solid #E5E7EB" }}>
+            <p className="text-[10px] text-gray-400 mb-1">{k.label}</p>
+            <p className="text-lg font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: k.color }}>{k.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <SectionHeader><BookOpen className="h-4 w-4" style={{ color: "#7A2020" }} /> How to use the calculator</SectionHeader>
+      <StepList steps={[
+        "Enter your total US stock and ETF holdings using the slider ($0–$5M) or type directly.",
+        "Use the quick preset buttons ($100K / $250K / $500K / $1M / $2M) for common portfolio sizes.",
+        "Edit the exchange rate (default ₹84.50) to see the estate tax impact in INR.",
+        "Read the two cards side by side: Direct Investment (red — shows IRS bill) vs Via Valura GIFT City (green — $0).",
+        "The large savings callout shows the exact amount your family saves.",
+        "Scroll to the 20-year growth projection chart — it shows how estate tax risk grows as your portfolio compounds at 10% CAGR.",
+        "Review the bracket breakdown in the Direct Investment card to see exactly which brackets your estate falls into.",
+      ]} />
+
+      {/* US estate tax brackets */}
+      <SectionHeader>US estate tax brackets for NRAs (hard-coded in the calculator)</SectionHeader>
+      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
+        <table className="w-full text-xs">
+          <thead><tr style={{ background: "#F9FAFB" }}>
+            {["Taxable Estate (above $60K exemption)", "Rate"].map((h) => (
+              <th key={h} className="px-3 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+            ))}
+          </tr></thead>
+          <tbody>
+            {[
+              ["$0 – $10,000",         "18%"], ["$10,001 – $20,000",      "20%"],
+              ["$20,001 – $40,000",    "22%"], ["$40,001 – $60,000",      "24%"],
+              ["$60,001 – $80,000",    "26%"], ["$80,001 – $100,000",     "28%"],
+              ["$100,001 – $150,000",  "30%"], ["$150,001 – $250,000",    "32%"],
+              ["$250,001 – $500,000",  "34%"], ["$500,001 – $750,000",    "37%"],
+              ["$750,001 – $1,000,000","39%"], ["Above $1,000,000",       "40%"],
+            ].map(([bracket, rate]) => (
+              <tr key={bracket} className="border-t" style={{ borderColor: "#F3F4F6" }}>
+                <td className="px-3 py-2.5 text-gray-600">{bracket}</td>
+                <td className="px-3 py-2.5 font-bold font-mono"
+                  style={{ color: parseFloat(rate) >= 37 ? "#DC2626" : parseFloat(rate) >= 30 ? "#F97316" : "#B8913A" }}>
+                  {rate}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Example */}
+      <SectionHeader>Worked example — $500,000 in US stocks</SectionHeader>
+      <ExampleBox title="Anita holds $500,000 in US stocks (Apple, S&P 500 ETF) via a direct IBKR account.">
+        <CalcLine label="Total holdings"        value="$500,000" />
+        <CalcLine label="NRA exemption"         value="−$60,000" variant="green" />
+        <CalcLine label="Taxable estate"        value="$440,000" variant="red" />
+        <CalcLine label="Tax on first $100K"    value="$23,800 (progressive)" variant="red" />
+        <CalcLine label="Tax on next $150K"     value="$48,000 (32%)" variant="red" />
+        <CalcLine label="Tax on remaining $190K" value="$64,600 (34%)" variant="red" />
+        <CalcLine label="Total IRS bill"        value="~$136,400 (27.3% effective)" variant="red" />
+        <CalcLine label="INR equivalent"        value="~₹1.15 Cr at ₹84.50/$" variant="red" />
+        <CalcLine label="Via Valura GIFT City"  value="$0" variant="green" />
+        <div className="mt-3 p-3 rounded-lg" style={{ background: "#EDFAF3", border: "1px solid #B4E3C8" }}>
+          <p className="text-xs"><strong style={{ color: "#05A049" }}>Anita&apos;s family saves ₹1.15 Cr</strong> by holding via Valura. At 10% CAGR, this $500K becomes ~$3.36M in 20 years — and the estate tax would then be ~$1.22M.</p>
+        </div>
+        <TipBox>The key legal point: When Anita holds Apple shares directly, they are classified as US-situs assets under IRS Rev. Rul. 55-143. When she holds via a Valura IFSC fund, she owns Indian fund units — not US stocks directly. Indian assets are outside IRS jurisdiction.</TipBox>
+      </ExampleBox>
+
+      <WarnBox>
+        India has <strong>no estate or inheritance tax</strong>. The entire risk comes from the US side only. Every Indian with more than $60,000 in direct US stock holdings is exposed. Consult a cross-border estate planning attorney for your specific situation.
+      </WarnBox>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   NRI STATUS CONTENT
+══════════════════════════════════════════════════════════════════ */
+
+function NRIStatusContent() {
+  return (
+    <div>
+      <p className="text-sm leading-relaxed text-gray-600">
+        Your tax residency status under <strong>Section 6 of the Income Tax Act</strong> determines which income is taxable in India — and drives everything from Schedule FA requirements to LRS applicability. This calculator runs the full Section 6 logic to determine whether you are NRI, RNOR, or ROR based on your days in India.
+      </p>
+
+      {/* 3 statuses */}
+      <div className="mt-4 grid grid-cols-3 gap-3">
+        {[
+          { label: "NRI",  color: "#05A049", bg: "#EDFAF3", border: "#B4E3C8", desc: "Only India-sourced income taxable. Foreign income exempt. No LRS limit." },
+          { label: "RNOR", color: "#B8913A", bg: "#FFFBF0", border: "#E8C97A", desc: "Golden window. Foreign income NOT taxable in India. Limited duration." },
+          { label: "ROR",  color: "#2B4A8A", bg: "#EFF4FF", border: "#C7D7F8", desc: "Worldwide income taxable. Schedule FA mandatory. FTC via Form 67." },
+        ].map((s) => (
+          <div key={s.label} className="rounded-xl p-3" style={{ background: s.bg, border: `1px solid ${s.border}` }}>
+            <p className="text-base font-extrabold mb-1" style={{ fontFamily: "var(--font-bricolage)", color: s.color }}>{s.label}</p>
+            <p className="text-[10px] leading-relaxed text-gray-500">{s.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <SectionHeader><BookOpen className="h-4 w-4" style={{ color: "#6B7280" }} /> How to use the calculator</SectionHeader>
+      <StepList steps={[
+        "Step 1 — Enter days spent in India in the current financial year (April 1 to today). The tool auto-shows how many days the FY has progressed.",
+        "Step 1 — Enter days in India for each of the last 4 financial years (FY21-22 through FY24-25) in the 4 compact inputs.",
+        "Step 2 — Use the stepper to set how many of the last 10 financial years you were an NRI (0 to 10).",
+        "Step 2 — Enter total days across all 7 preceding financial years combined. This is the RNOR second test.",
+        "Step 3 — Toggle whether you are an Indian citizen and select your reason for being outside India. Indian citizens leaving for employment use the 182-day threshold, not the 60-day threshold.",
+        "Read the large status badge on the right — it updates live with every input. Read the tax implications, progress bars, and suggested ITR form.",
+      ]} />
+
+      {/* Section 6 rules */}
+      <SectionHeader>Section 6 residency tests — exactly as hard-coded</SectionHeader>
+      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
+        <table className="w-full text-xs">
+          <thead><tr style={{ background: "#F9FAFB" }}>
+            {["Test", "Condition", "Result if met"].map((h) => (
+              <th key={h} className="px-3 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+            ))}
+          </tr></thead>
+          <tbody>
+            {[
+              ["Basic Test 1",  "≥ 182 days in current FY",                                    "Resident"],
+              ["Basic Test 2",  "≥ 60 days current FY AND ≥ 365 days in previous 4 FYs",       "Resident"],
+              ["Exception",     "Indian citizen leaving for employment abroad",                  "60-day threshold becomes 182 days"],
+              ["NRI",           "Neither Basic Test 1 nor Basic Test 2 met",                    "NRI — only Indian income taxable"],
+              ["RNOR Test A",   "Resident, but NRI in 9 of 10 preceding FYs",                  "RNOR status"],
+              ["RNOR Test B",   "Resident, but ≤ 729 days in India across 7 preceding FYs",    "RNOR status"],
+              ["ROR",           "Resident and neither RNOR test applies",                        "ROR — worldwide income taxable"],
+            ].map(([test, cond, result]) => (
+              <tr key={test} className="border-t" style={{ borderColor: "#F3F4F6" }}>
+                <td className="px-3 py-2.5 font-bold" style={{ color: "#00111B" }}>{test}</td>
+                <td className="px-3 py-2.5 text-gray-600">{cond}</td>
+                <td className="px-3 py-2.5 font-semibold"
+                  style={{ color: result.startsWith("NRI") ? "#05A049" : result.startsWith("RNOR") ? "#B8913A" : result.startsWith("ROR") ? "#2B4A8A" : "#374151" }}>
+                  {result}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Examples */}
+      <SectionHeader>Example 1 — Returning NRI: the RNOR window</SectionHeader>
+      <ExampleBox title="Kavitha moved back to India in April 2024 after 10 years in Singapore.">
+        <CalcLine label="Days in India FY 2025-26"       value="350 days" />
+        <CalcLine label="Basic test 1 result"             value="RESIDENT (350 ≥ 182)" variant="neutral" />
+        <CalcLine label="NRI years in last 10 FYs"        value="9 years" variant="green" />
+        <CalcLine label="RNOR Test A result"              value="RNOR — 9/10 years as NRI" variant="gold" />
+        <CalcLine label="Foreign income taxable in India" value="NO — RNOR golden window" variant="green" />
+        <CalcLine label="Indian income taxable"           value="Yes — at slab rates" variant="neutral" />
+        <div className="mt-3 p-3 rounded-lg" style={{ background: "#FFFBF0", border: "1px solid #E8C97A" }}>
+          <p className="text-xs"><strong>Kavitha&apos;s Singapore savings, foreign dividends, and global investments are NOT taxable in India during her RNOR period</strong> — typically 2–3 years after returning. The calculator shows exactly when her RNOR window expires and how many days remain.</p>
+        </div>
+        <TipBox>Front-load global investments during the RNOR window. Gains realised while RNOR are not taxed in India. Once ROR, all future gains on global holdings are taxable.</TipBox>
+      </ExampleBox>
+
+      <SectionHeader>Example 2 — NRI managing 182-day rule</SectionHeader>
+      <ExampleBox title="Suresh lives in Dubai but visits India regularly. Is he at risk of becoming Resident?">
+        <CalcLine label="Days in India FY 2025-26 (to date)" value="155 days" />
+        <CalcLine label="Progress bar"                    value="85% of 182-day threshold" variant="red" />
+        <CalcLine label="Days remaining"                  value="27 more days = resident" variant="red" />
+        <CalcLine label="Days in India across last 4 FYs" value="280 days" />
+        <CalcLine label="Basic test 2 check"              value="155 ≥ 60 AND 280 < 365 → Test 2 fails" variant="green" />
+        <CalcLine label="Current status"                  value="NRI (Test 1 not met, Test 2 not met)" variant="green" />
+        <div className="mt-3 p-3 rounded-lg" style={{ background: "#EDFAF3", border: "1px solid #B4E3C8" }}>
+          <p className="text-xs">Suresh needs to leave India before crossing 182 days to stay NRI. The calculator&apos;s progress bar turns red above 150 days to give early warning — giving him enough time to plan his travel.</p>
+        </div>
+      </ExampleBox>
+
+      {/* Tax implications by status */}
+      <SectionHeader>Tax implications — what each status means for GIFT City investments</SectionHeader>
+      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
+        <table className="w-full text-xs">
+          <thead><tr style={{ background: "#F9FAFB" }}>
+            {["Item", "NRI", "RNOR", "ROR"].map((h) => (
+              <th key={h} className="px-3 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+            ))}
+          </tr></thead>
+          <tbody>
+            {[
+              ["Foreign income",     "Not taxable",        "Not taxable ✓",     "Fully taxable"],
+              ["Indian income",      "Fully taxable",      "Fully taxable",      "Fully taxable"],
+              ["Schedule FA",        "Not required",       "Not required",       "Mandatory (GIFT City = foreign asset)"],
+              ["LRS applicability",  "Does not apply",     "Applies",            "Applies (₹10L TCS threshold)"],
+              ["Form 67 (FTC)",      "Required if FTC claimed", "Required",     "Required"],
+              ["GIFT City interest", "0% — Sec 10(15)(ix)","Taxable at slab",   "Taxable at slab"],
+              ["LTCG on GIFT City",  "12.5% (14.95% max)", "12.5% (14.95% max)","12.5% (14.95% max)"],
+              ["US estate tax",      "Applies if direct",  "Applies if direct",  "Applies if direct (use GIFT City route)"],
+            ].map(([item, nri, rnor, ror]) => (
+              <tr key={item} className="border-t" style={{ borderColor: "#F3F4F6" }}>
+                <td className="px-3 py-2.5 font-medium text-gray-700">{item}</td>
+                <td className="px-3 py-2.5" style={{ color: nri.includes("Not") || nri.includes("Does not") ? "#05A049" : "#374151" }}>{nri}</td>
+                <td className="px-3 py-2.5" style={{ color: rnor.includes("Not") || rnor.includes("✓") ? "#05A049" : "#374151" }}>{rnor}</td>
+                <td className="px-3 py-2.5" style={{ color: ror.includes("Mandatory") ? "#DC2626" : "#374151" }}>{ror}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <WarnBox>
+        Schedule FA disclosure is required for Resident Indians (ROR) who hold GIFT City IFSC investments. GIFT City is classified as a foreign asset under FEMA. Failure to disclose carries a penalty of ₹10 lakh per year under the Black Money Act. The NRI Status calculator tells you exactly which ITR form to use and whether Schedule FA applies to you.
+      </WarnBox>
+    </div>
+  );
+}
+
 /* ── tiny missing import fix ── */
 function Globe(props: React.SVGProps<SVGSVGElement> & { className?: string }) {
   return (
@@ -629,9 +989,12 @@ export default function CalcDocsPage() {
   const [active, setActive] = useState<CalcKey>("lrs");
 
   const CONTENT: Record<CalcKey, React.ReactNode> = {
-    lrs:  <LRSContent />,
-    cg:   <CGContent />,
-    dtaa: <DTAAContent />,
+    lrs:   <LRSContent />,
+    cg:    <CGContent />,
+    dtaa:  <DTAAContent />,
+    nr:    <NetReturnsContent />,
+    estate:<EstateTaxContent />,
+    nri:   <NRIStatusContent />,
   };
 
   return (
@@ -651,7 +1014,7 @@ export default function CalcDocsPage() {
               Calculator Guide
             </h1>
             <p className="mt-1 text-sm text-gray-500 max-w-xl">
-              Step-by-step instructions, worked examples, rate tables, and pro tips for all three Valura tax calculators.
+              Step-by-step instructions, worked examples, rate tables, and pro tips for all six Valura calculators.
             </p>
           </div>
           <div className="hidden md:flex flex-col gap-2">
@@ -670,7 +1033,7 @@ export default function CalcDocsPage() {
       <div className="max-w-4xl mx-auto px-6 py-8">
 
         {/* ── Calculator tabs ── */}
-        <div className="flex gap-2 mb-8 flex-wrap">
+        <div className="flex gap-2 mb-8 flex-wrap" role="tablist">
           {CALCULATORS.map((c) => {
             const isActive = active === c.key;
             return (
