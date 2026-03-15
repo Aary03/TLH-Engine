@@ -18,6 +18,7 @@ import {
   BookOpen,
   Shield,
   UserCheck,
+  TrendingUp,
 } from "lucide-react";
 
 const NAV_SECTIONS = [
@@ -36,6 +37,7 @@ const NAV_SECTIONS = [
       { href: "/calculators/dtaa",           label: "DTAA",           icon: Map,          desc: "NRI double-tax relief", badge: "New" },
       { href: "/calculators/estate-tax",      label: "Estate Tax",     icon: Shield,       desc: "US NRA exposure", badge: "New" },
       { href: "/calculators/nri-status",      label: "NRI Status",     icon: UserCheck,    desc: "NRI / RNOR / ROR check", badge: "New" },
+      { href: "/calculators/net-returns",     label: "Net Returns",    icon: TrendingUp,   desc: "Direct vs Valura · flagship", badge: "New" },
       { href: "/calculators/docs",           label: "Calc Guide",     icon: BookOpen,     desc: "Examples & formulas" },
       { href: "/lrs",                        label: "LRS Tracker",    icon: Globe,        desc: "Family remittance tracker" },
     ],
