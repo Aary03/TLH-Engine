@@ -16,6 +16,7 @@ import {
   Sparkles,
   Map,
   BookOpen,
+  Shield,
 } from "lucide-react";
 
 const NAV_SECTIONS = [
@@ -32,6 +33,7 @@ const NAV_SECTIONS = [
       { href: "/calculators/lrs-tcs",       label: "LRS & TCS",      icon: BadgePercent, desc: "Minimize remittance TCS", badge: "New" },
       { href: "/calculators/capital-gains",  label: "Capital Gains",  icon: Calculator,   desc: "STCG / LTCG + 730-day rule" },
       { href: "/calculators/dtaa",           label: "DTAA",           icon: Map,          desc: "NRI double-tax relief", badge: "New" },
+      { href: "/calculators/estate-tax",      label: "Estate Tax",     icon: Shield,       desc: "US NRA exposure", badge: "New" },
       { href: "/calculators/docs",           label: "Calc Guide",     icon: BookOpen,     desc: "Examples & formulas" },
       { href: "/lrs",                        label: "LRS Tracker",    icon: Globe,        desc: "Family remittance tracker" },
     ],
