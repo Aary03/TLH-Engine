@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Send, Sparkles, Bot, User, Loader2,
@@ -190,7 +190,7 @@ function StatusBar({ status }: { status: string }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────
 
-export default function ChatPage() {
+function ChatPageInner() {
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -555,6 +555,23 @@ export default function ChatPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex-1 flex items-center justify-center min-h-screen" style={{ background: "#00111B" }}>
+        <div className="flex flex-col items-center gap-3">
+          <Sparkles className="h-8 w-8 animate-pulse" style={{ color: "#05A049" }} />
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)", fontFamily: "'Inter', sans-serif" }}>
+            Loading Valura AI…
+          </p>
+        </div>
+      </div>
+    }>
+      <ChatPageInner />
+    </Suspense>
   );
 }
 
