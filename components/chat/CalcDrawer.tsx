@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Sparkles, ArrowUpRight, Send, Loader2 } from "lucide-react";
+import { X, Sparkles, ArrowUpRight, Send, Loader2, Calendar, Clock, AlertCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import type { Components } from "react-markdown";
 import { buildCalcContext } from "@/lib/calc-context";
 import { getProfile, BRACKET_LABELS } from "@/lib/user-profile";
 import Link from "next/link";
@@ -34,6 +35,156 @@ function sseParseChunk(chunk: string): Array<{ type: string; content?: string; m
     } catch { /* skip malformed */ }
   }
   return events;
+}
+
+// ─── Rich markdown renderer for drawer responses ─────────────────────────
+
+function DrawerMarkdown({ content }: { content: string }) {
+  const ACTION_PREFIXES: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
+    "today:": { label: "TODAY", color: "#DC2626", bg: "#FFF5F5", icon: <AlertCircle size={11} /> },
+    "this week:": { label: "THIS WEEK", color: "#B8913A", bg: "#FFFBF0", icon: <Clock size={11} /> },
+    "before march 31:": { label: "BEFORE MARCH 31", color: "#2B4A8A", bg: "#F0F6FF", icon: <Calendar size={11} /> },
+  };
+
+  const components: Components = {
+    // Paragraphs — detect action lines
+    p({ children }) {
+      const text = String(children).toLowerCase().trim();
+      for (const [prefix, style] of Object.entries(ACTION_PREFIXES)) {
+        if (text.startsWith(prefix)) {
+          const rest = String(children).slice(prefix.length).trim();
+          return (
+            <div
+              className="flex items-start gap-2 rounded-lg px-3 py-2 my-1.5"
+              style={{ background: style.bg, border: `1px solid ${style.color}22` }}
+            >
+              <span className="flex-shrink-0 mt-0.5 flex items-center gap-1 font-bold text-[10px] tracking-widest" style={{ color: style.color }}>
+                {style.icon}{style.label}
+              </span>
+              <span className="text-[13px] leading-snug" style={{ color: "#00111B", fontFamily: "'Inter', sans-serif" }}>
+                {rest}
+              </span>
+            </div>
+          );
+        }
+      }
+      return (
+        <p className="text-[13px] leading-relaxed my-1.5" style={{ color: "#1a1a1a", fontFamily: "'Inter', sans-serif" }}>
+          {children}
+        </p>
+      );
+    },
+    // Bold — green accent
+    strong({ children }) {
+      return (
+        <strong className="font-semibold" style={{ color: "#00111B" }}>
+          {children}
+        </strong>
+      );
+    },
+    // Tables
+    table({ children }) {
+      return (
+        <div className="my-2 overflow-x-auto rounded-xl border" style={{ borderColor: "#E8E4DE" }}>
+          <table className="w-full text-[12px]" style={{ borderCollapse: "collapse" }}>
+            {children}
+          </table>
+        </div>
+      );
+    },
+    thead({ children }) {
+      return (
+        <thead style={{ background: "#00111B" }}>
+          {children}
+        </thead>
+      );
+    },
+    th({ children }) {
+      return (
+        <th
+          className="px-3 py-2 text-left font-semibold text-[11px] uppercase tracking-wider"
+          style={{ color: "#B4E3C8", borderBottom: "1px solid rgba(255,255,255,0.1)" }}
+        >
+          {children}
+        </th>
+      );
+    },
+    tbody({ children }) {
+      return <tbody>{children}</tbody>;
+    },
+    tr({ children }) {
+      return (
+        <tr className="border-b last:border-0" style={{ borderColor: "#F0EDE8" }}>
+          {children}
+        </tr>
+      );
+    },
+    td({ children }) {
+      return (
+        <td className="px-3 py-2" style={{ color: "#00111B", fontFamily: "'Inter', sans-serif" }}>
+          {children}
+        </td>
+      );
+    },
+    // Lists
+    ul({ children }) {
+      return <ul className="my-1.5 space-y-1 pl-4">{children}</ul>;
+    },
+    ol({ children }) {
+      return <ol className="my-1.5 space-y-1 pl-4 list-decimal">{children}</ol>;
+    },
+    li({ children }) {
+      return (
+        <li className="text-[13px] leading-snug flex items-start gap-1.5" style={{ color: "#1a1a1a", fontFamily: "'Inter', sans-serif" }}>
+          <span className="mt-1.5 h-1.5 w-1.5 rounded-full flex-shrink-0" style={{ background: "#05A049" }} />
+          <span>{children}</span>
+        </li>
+      );
+    },
+    // Headings
+    h1({ children }) {
+      return <h1 className="text-base font-bold mt-3 mb-1" style={{ color: "#00111B", fontFamily: "'Bricolage Grotesque', sans-serif" }}>{children}</h1>;
+    },
+    h2({ children }) {
+      return <h2 className="text-sm font-bold mt-2.5 mb-1" style={{ color: "#00111B", fontFamily: "'Bricolage Grotesque', sans-serif" }}>{children}</h2>;
+    },
+    h3({ children }) {
+      return <h3 className="text-[13px] font-semibold mt-2 mb-0.5" style={{ color: "#05A049" }}>{children}</h3>;
+    },
+    // Code
+    code({ children }) {
+      return (
+        <code className="px-1.5 py-0.5 rounded text-[12px] font-mono" style={{ background: "#F0EDE8", color: "#00111B" }}>
+          {children}
+        </code>
+      );
+    },
+    // Horizontal rule — used as section separator
+    hr() {
+      return <hr className="my-2" style={{ borderColor: "#E8E4DE" }} />;
+    },
+    // Blockquote — recommendation callout
+    blockquote({ children }) {
+      return (
+        <div
+          className="my-2 rounded-xl px-3 py-2.5 border-l-4"
+          style={{ background: "#F0FAF4", borderLeftColor: "#05A049" }}
+        >
+          <div className="text-[13px] leading-relaxed" style={{ color: "#064E24", fontFamily: "'Inter', sans-serif" }}>
+            {children}
+          </div>
+        </div>
+      );
+    },
+  };
+
+  return (
+    <div style={{ fontFamily: "'Inter', sans-serif" }}>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
 }
 
 export default function CalcDrawer({ page, inputs, outputs, chips, open, onClose }: CalcDrawerProps) {
@@ -267,20 +418,20 @@ export default function CalcDrawer({ page, inputs, outputs, chips, open, onClose
                       {msg.content}
                     </div>
                   ) : (
-                    <div
-                      className="max-w-[90%] text-sm leading-relaxed"
-                      style={{ color: "#00111B", fontFamily: "'Inter', sans-serif" }}
-                    >
+                    <div className="w-full space-y-1">
                       {msg.content ? (
-                        <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {msg.content}
-                          </ReactMarkdown>
-                        </div>
+                        <DrawerMarkdown content={msg.content} />
                       ) : null}
-                      {msg.isStreaming && (
+                      {msg.isStreaming && !msg.content && (
+                        <div className="flex items-center gap-1.5 px-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#05A049] animate-bounce" style={{ animationDelay: "0ms" }} />
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#05A049] animate-bounce" style={{ animationDelay: "150ms" }} />
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#05A049] animate-bounce" style={{ animationDelay: "300ms" }} />
+                        </div>
+                      )}
+                      {msg.isStreaming && msg.content && (
                         <span
-                          className="inline-block h-3.5 w-1 ml-0.5 rounded-sm animate-pulse"
+                          className="inline-block h-3.5 w-0.5 ml-0.5 rounded-sm animate-pulse"
                           style={{ background: "#05A049", verticalAlign: "middle" }}
                         />
                       )}
