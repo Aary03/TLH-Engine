@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { getProfile } from "@/lib/user-profile";
+import CalcDrawer from "@/components/chat/CalcDrawer";
+import ProactiveBanner from "@/components/layout/ProactiveBanner";
 import {
   BarChart,
   Bar,
@@ -188,6 +191,20 @@ export default function LRSTCSCalculator() {
   const [familyOpen, setFamilyOpen] = useState(false);
   const [members, setMembers] = useState<FamilyMember[]>([]);
 
+  // Pre-fill from saved profile (runs once on mount)
+  useEffect(() => {
+    const p = getProfile();
+    if (p.familyMembers.length > 1) {
+      const extras: FamilyMember[] = p.familyMembers.slice(1).map((m, i) => ({
+        id: `member-${i + 2}`,
+        name: m.name,
+        remittedL: m.fyRemittedINR / 1e5,
+      }));
+      setMembers(extras);
+      setFamilyOpen(true);
+    }
+  }, []);
+
   /* derived */
   const tcsRate = TCS_RATES[purpose];
   const monthsLockedITR = MONTHS_LOCKED[currentMonth] ?? 9;       // ITR path (always computed)
@@ -245,6 +262,26 @@ export default function LRSTCSCalculator() {
 
   const familyCapacity = allMembers.reduce((s, m) => s + Math.max(0, THRESHOLD - m.remittedINR), 0);
 
+  const [aiOpen, setAiOpen] = useState(false);
+  const calcInputs = {
+    remittanceINR: investmentINR,
+    alreadyRemittedINR,
+    purpose: PURPOSE_LABELS[purpose],
+    currentMonth,
+    payAdvanceTax,
+    familyMembersCount: allMembers.length,
+  };
+  const calcOutputs = {
+    tcsAmountINR: Math.round(tcsAmount),
+    taxFreeAmountINR: Math.round(taxFreeAmt),
+    effectiveTCSRatePct: +effectiveTCSRate.toFixed(2),
+    netToGiftCityINR: Math.round(netToGiftCity),
+    monthsLocked,
+    opportunityCostINR: Math.round(irrDrag),
+    familySavingINR: Math.round(familyOptimization.saving),
+    totalFamilyTCSFreeCapacityINR: Math.round(familyCapacity),
+  };
+
   const chartData = familyOptimization.allocs.map((a) => {
     const taxFree = Math.min(a.routed, Math.max(0, THRESHOLD - a.remittedINR));
     const taxable = Math.max(0, a.routed - taxFree);
@@ -277,6 +314,7 @@ export default function LRSTCSCalculator() {
   };
 
   return (
+    <>
     <div className="min-h-screen" style={{ background: "#FFFFFC" }}>
       {/* ── Page Header ── */}
       <div
@@ -336,6 +374,8 @@ export default function LRSTCSCalculator() {
           </div>
         </div>
       </div>
+
+      <ProactiveBanner />
 
       <div className="flex flex-col lg:flex-row gap-0">
         {/* ═══════════════════════════════════════
@@ -1065,8 +1105,34 @@ export default function LRSTCSCalculator() {
           <p className="text-[10px] text-center pb-4" style={{ color: "#9CA3AF" }}>
             Advance tax offset assumes TCS amount is fully absorbable against advance tax liability. Consult your CA to confirm your specific advance tax position before relying on offset.
           </p>
+
+          {/* ── Ask AI button ── */}
+          <div className="flex justify-center pb-6">
+            <button
+              onClick={() => setAiOpen(true)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-semibold transition-all hover:opacity-90 active:scale-95 shadow-lg"
+              style={{ background: "#05A049", fontFamily: "'Manrope', sans-serif" }}
+            >
+              <Sparkles className="h-4 w-4" />
+              Ask AI about this result →
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
+    <CalcDrawer
+      page="LRS & TCS"
+      inputs={calcInputs}
+      outputs={calcOutputs}
+      chips={[
+        "Is there a way to reduce this TCS further?",
+        "When will I get this TCS back as a refund?",
+        "Should I split this across family members?",
+      ]}
+      open={aiOpen}
+      onClose={() => setAiOpen(false)}
+    />
+    </>
   );
 }

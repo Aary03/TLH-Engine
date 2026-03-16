@@ -22,7 +22,10 @@ import {
   X,
   Home,
   Newspaper,
+  SlidersHorizontal,
 } from "lucide-react";
+import { useProfile } from "@/components/profile/ProfileContext";
+import { BRACKET_LABELS } from "@/lib/user-profile";
 
 const NAV_SECTIONS = [
   {
@@ -57,6 +60,7 @@ const NAV_SECTIONS = [
 export function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { profile, setShowPanel } = useProfile();
 
   // Close drawer on route change
   useEffect(() => { setMobileOpen(false); }, [pathname]);
@@ -143,7 +147,32 @@ export function Sidebar() {
       </nav>
 
       {/* ── Footer ── */}
-      <div className="p-4 border-t border-white/10 flex-shrink-0">
+      <div className="p-4 border-t border-white/10 flex-shrink-0 space-y-3">
+        {/* Profile chip */}
+        <button
+          onClick={() => setShowPanel(true)}
+          className="w-full rounded-lg p-3 text-left transition-all hover:opacity-90 active:scale-[0.98]"
+          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+        >
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-1.5">
+              <div className="h-5 w-5 rounded-full flex items-center justify-center"
+                style={{ background: "rgba(5,160,73,0.25)" }}>
+                <span className="text-[9px]">
+                  {profile.investorType === "resident" ? "🇮🇳" : profile.investorType === "nri" ? "✈️" : "🌍"}
+                </span>
+              </div>
+              <p className="text-[11px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
+                {profile.investorType === "resident" ? "Resident Indian" : profile.investorType === "nri" ? "NRI" : "Foreign"}
+              </p>
+            </div>
+            <SlidersHorizontal className="h-3 w-3" style={{ color: "rgba(5,160,73,0.7)" }} />
+          </div>
+          <p className="text-[10px] truncate" style={{ color: "rgba(255,255,255,0.35)" }}>
+            {BRACKET_LABELS[profile.incomeBracket]} · {profile.taxRegime === "new" ? "New regime" : "Old regime"} · {profile.familyMembers.length} member{profile.familyMembers.length > 1 ? "s" : ""}
+          </p>
+        </button>
+
         <div className="rounded-lg p-3" style={{ background: "rgba(5,160,73,0.1)", border: "1px solid rgba(5,160,73,0.2)" }}>
           <div className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-[#05A049] animate-pulse" />
@@ -153,7 +182,7 @@ export function Sidebar() {
             Finance Act 2025 rates active
           </p>
         </div>
-        <div className="mt-3 flex items-center gap-1.5 px-1">
+        <div className="flex items-center gap-1.5 px-1">
           <Sparkles className="h-3 w-3" style={{ color: "rgba(184,145,58,0.7)" }} />
           <p className="text-[9px]" style={{ color: "rgba(255,255,255,0.25)" }}>
             Illustrative only. Consult your CA.

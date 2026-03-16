@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { getProfile } from "@/lib/user-profile";
+import CalcDrawer from "@/components/chat/CalcDrawer";
 import {
   ComposedChart, AreaChart, Area, BarChart, Bar,
   Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -278,6 +280,23 @@ export default function NetReturnsPage() {
   const [estatePct, setEstatePct]       = useState(100);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showAllRows, setShowAllRows]   = useState(false);
+  const [aiOpen, setAiOpen]             = useState(false);
+
+  // Pre-fill from saved profile (runs once on mount)
+  useEffect(() => {
+    const p = getProfile();
+    setInvestorType(p.investorType);
+    setFamilyMembers(p.familyMembers.length);
+    setAbove5Cr(p.incomeAbove5Cr);
+    const bracketMap: Record<string, string> = {
+      up_to_50L:    "10-50l",
+      "50L_to_1Cr": "50l-1cr",
+      "1Cr_to_2Cr": "1-2cr",
+      "2Cr_to_5Cr": "2-5cr",
+      above_5Cr:    "5cr+",
+    };
+    setIncomeBracket(bracketMap[p.incomeBracket] ?? "10-50l");
+  }, []);
 
   const initialINR = currency === "USD" ? initialAmt * exchangeRate : initialAmt;
   const stcgRate = above5Cr ? 0.4274 : STCG_RATES[incomeBracket] ?? 0.1755;
@@ -329,6 +348,7 @@ export default function NetReturnsPage() {
      RENDER
   ══════════════════════════════════════ */
   return (
+    <>
     <div className="min-h-screen" style={{ background: "#FFFFFC" }} id="net-returns-page">
 
       {/* HEADER */}
@@ -838,9 +858,52 @@ export default function NetReturnsPage() {
             <p className="text-[10px] text-center pb-4 leading-relaxed" style={{ color: "#9CA3AF" }}>
               Projections are illustrative only. Tax treatment per Finance Act 2025. Returns, tax rates, and regulations may change. Capital gains tax is identical in both routes — the Route B advantage comes from TCS, dividend WHT, and estate tax differences only. Consult your CA and financial advisor before investing.
             </p>
+
+            {/* ── Ask AI button ── */}
+            <div className="flex justify-center pb-6">
+              <button
+                onClick={() => setAiOpen(true)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-semibold transition-all hover:opacity-90 active:scale-95 shadow-lg"
+                style={{ background: "#05A049", fontFamily: "'Manrope', sans-serif" }}
+              >
+                <Sparkles className="h-4 w-4" />
+                Ask AI about this result →
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      <CalcDrawer
+        page="Net Returns"
+        inputs={{
+          initialInvestmentINR: initialAmt,
+          annualAdditionINR: annualAdd,
+          horizonYears: years,
+          returnRatePct: +(returnRate * 100).toFixed(1),
+          dividendYieldPct: +(divYield * 100).toFixed(1),
+          strategy,
+          investorType,
+          incomeBracket,
+          familyMembers,
+          platformFeePct: +(platformFee * 100).toFixed(2),
+        }}
+        outputs={{
+          routeAFinalINR: Math.round(proj.finalA),
+          routeBFinalINR: Math.round(proj.finalB),
+          routeBAdvantageINR: Math.round(totalAdvantage),
+          advantagePct: proj.finalA > 0 ? +((totalAdvantage / proj.finalA) * 100).toFixed(1) : 0,
+          routeAIRR: proj.rows.length > 0 ? +(proj.rows[proj.rows.length - 1].irrA * 100).toFixed(2) : 0,
+          routeBIRR: proj.rows.length > 0 ? +(proj.rows[proj.rows.length - 1].irrB * 100).toFixed(2) : 0,
+        }}
+        chips={[
+          "Why is Route B so much better in later years?",
+          "What's the single biggest drag on Route A?",
+          "Is 0.5% platform fee worth paying?",
+        ]}
+        open={aiOpen}
+        onClose={() => setAiOpen(false)}
+      />
 
       {/* PRINT STYLES */}
       <style>{`
@@ -851,5 +914,6 @@ export default function NetReturnsPage() {
         }
       `}</style>
     </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckCircle2, AlertTriangle, TrendingDown, TrendingUp, Scissors, BarChart2, Users, Zap } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, AlertTriangle, TrendingDown, TrendingUp, Scissors, BarChart2, Users, Zap, Calendar, FileText, ShieldAlert, Trophy } from "lucide-react";
 import { formatINR, formatUSD } from "@/lib/utils";
 
 // ─── Type guards ──────────────────────────────────────────────────────────
@@ -10,13 +11,67 @@ export type WidgetData =
   | CGWidgetData
   | FamilySplitData
   | TLHWidgetData
-  | RatesWidgetData;
+  | RatesWidgetData
+  | FYAuditData
+  | ScenarioComparisonData
+  | ScheduleFAData
+  | FYCountdownData;
 
 interface TCSWidgetData { type: "tcs_result"; remittanceINR: number; purpose: string; fyCumulativeINR: number; thresholdINR: number; totalAfterINR: number; taxableAmountINR: number; tcsAmount: number; effectiveRate: number; breakdown: string; isAboveThreshold: boolean; remainingFree: number; }
 interface CGWidgetData { type: "cg_result"; gainType: string; holdingDays: number; holdingMonths: number; gainINR: number; gainUSD: number; isLoss: boolean; isLTCG: boolean; effectiveRate: number; taxAmount: number; netProceeds: number; baseRate: number; appliedSurcharge: number; formula: string; daysToLTCG: number; savingByWaiting: number; incomeBracket: string; regime: string; }
 interface FamilySplitData { type: "family_split"; totalRemittanceINR: number; purpose: string; memberCount: number; singlePANTCS: number; optimizedTCS: number; tcsSavings: number; allocations: { memberId: string; memberName: string; fyRemittedSoFar: number; allocation: number; tcs: number; remainingThreshold: number }[]; recommendation: string; zeroTCSCapacity: number; }
 interface TLHWidgetData { type: "tlh_opportunities"; incomeBracket: string; summary: { opportunityCount: number; totalLossAvailable: number; totalPotentialSavings: number; totalNetBenefit: number; stclCount: number }; topOpportunities: { name: string; symbol: string; isSTCL: boolean; unrealizedLossINR: number; unrealizedLossPercent: number; bestCaseSavings: number; holdingDays: number; priorityScore: number; urgency: string; recommendation: string }[]; }
 interface RatesWidgetData { type: "tax_rates"; incomeBracket: string; regime: string; stcgRate: number; ltcgRate: number; spread: number; baseSTCG: number; baseLTCG: number; surcharge: number; ltcgSurcharge: number; stcgFormula: string; ltcgFormula: string; savingPerLakh: number; capBenefit: string | null; }
+
+interface FYAuditData {
+  type: "fy_audit_result";
+  fyDaysLeft: number;
+  portfolioValueINR: number;
+  totalUnrealizedLossINR: number;
+  totalUnrealizedGainINR: number;
+  tlhOpportunities: { symbol: string; name: string; lossINR: number; taxSavingINR: number; urgency: string; isSTCL: boolean }[];
+  totalTLHSavingINR: number;
+  pendingGains: { name: string; symbol: string; gainType: string; gainINR: number; taxAmount: number; holdingDays: number }[];
+  lrsStatus: { familyTotalRemittedINR: number; familyTotalTCSPaidINR: number; optimizedSavingINR: number };
+  urgentActions: string[];
+}
+
+interface ScenarioComparisonData {
+  type: "scenario_comparison";
+  holdingName: string;
+  buyPriceUSD: number;
+  currentPriceUSD: number;
+  quantity: number;
+  scenarioA: { label: string; holdingMonths: number; holdingDays: number; isLTCG: boolean; gainINR: number; taxAmount: number; effectiveRate: number; netProceedsINR: number; gainType: string };
+  scenarioB: { label: string; holdingMonths: number; holdingDays: number; isLTCG: boolean; gainINR: number; taxAmount: number; effectiveRate: number; netProceedsINR: number; gainType: string };
+  betterScenario: "A" | "B";
+  savingByChoosingBetterINR: number;
+  recommendation: string;
+}
+
+interface ScheduleFAData {
+  type: "schedule_fa_draft";
+  reportingCalendarYear: number;
+  itrFormNeeded: string;
+  filingDeadline: string;
+  accounts: { slNo: string; country: string; institution: string; accountType: string; accountNumber: string; openingBalanceINR: number; peakBalanceINR: number; closingBalanceINR: number; incomeEarnedINR: number; taxableInIndia: string }[];
+  holdingSummary: { name: string; isin: string; quantityUnits: number; costINR: number; marketValueINR: number }[];
+  blackMoneyActNote: string;
+  complianceChecklist: string[];
+  valuraNote: string;
+}
+
+interface FYCountdownData {
+  type: "fy_countdown";
+  today: string;
+  fyEndDate: string;
+  daysLeft: number;
+  lastTLHDate: string;
+  nextAdvanceTaxDate: string;
+  nextAdvanceTaxPct: number;
+  urgencyLevel: "critical" | "high" | "medium";
+  keyDeadlines: { event: string; date: string; daysAway: number }[];
+}
 
 // ─── Widget Router ────────────────────────────────────────────────────────
 
@@ -27,6 +82,10 @@ export function WidgetRenderer({ widget }: { widget: Record<string, unknown> }) 
     case "family_split":   return <FamilySplitWidget data={widget as unknown as FamilySplitData} />;
     case "tlh_opportunities": return <TLHWidget data={widget as unknown as TLHWidgetData} />;
     case "tax_rates":      return <RatesWidget data={widget as unknown as RatesWidgetData} />;
+    case "fy_audit_result": return <FYAuditWidget data={widget as unknown as FYAuditData} />;
+    case "scenario_comparison": return <ScenarioComparisonWidget data={widget as unknown as ScenarioComparisonData} />;
+    case "schedule_fa_draft": return <ScheduleFAWidget data={widget as unknown as ScheduleFAData} />;
+    case "fy_countdown":  return <FYCountdownWidget data={widget as unknown as FYCountdownData} />;
     default:               return null;
   }
 }
@@ -355,6 +414,301 @@ function RatesWidget({ data }: { data: RatesWidgetData }) {
   );
 }
 
+// ─── FY Audit Widget ──────────────────────────────────────────────────────
+
+function FYAuditWidget({ data }: { data: FYAuditData }) {
+  const isCritical = data.fyDaysLeft <= 10;
+  const isHigh = data.fyDaysLeft <= 30;
+  const urgencyColor = isCritical ? "text-rose-400" : isHigh ? "text-amber-400" : "text-emerald-400";
+  const urgencyBg = isCritical ? "bg-rose-500/10 border-rose-500/30" : isHigh ? "bg-amber-500/10 border-amber-500/30" : "bg-emerald-500/10 border-emerald-500/30";
+
+  return (
+    <div className="rounded-xl border border-violet-500/30 bg-gradient-to-br from-violet-950/30 to-background overflow-hidden animate-fade-in">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-violet-500/20 bg-violet-500/10">
+        <div className="flex items-center gap-2">
+          <Trophy className="h-3.5 w-3.5 text-violet-400" />
+          <span className="text-xs font-semibold text-violet-400">FY 2025-26 Full Audit</span>
+        </div>
+        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${urgencyBg} ${urgencyColor}`}>
+          {data.fyDaysLeft}d left in FY
+        </span>
+      </div>
+
+      <div className="p-4 space-y-4">
+        {/* Top stat row */}
+        <div className="grid grid-cols-3 gap-3 text-center">
+          <div className={`rounded-lg border p-3 ${urgencyBg}`}>
+            <p className="text-[9px] text-muted-foreground">FY Days Left</p>
+            <p className={`text-2xl font-bold ${urgencyColor}`}>{data.fyDaysLeft}</p>
+            <p className="text-[8px] text-muted-foreground">ends Mar 31</p>
+          </div>
+          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
+            <p className="text-[9px] text-muted-foreground">TLH Savings Available</p>
+            <p className="text-xl font-bold text-emerald-400">{formatINR(data.totalTLHSavingINR)}</p>
+            <p className="text-[8px] text-muted-foreground">{data.tlhOpportunities.length} positions</p>
+          </div>
+          <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-3">
+            <p className="text-[9px] text-muted-foreground">LRS TCS Optimizable</p>
+            <p className="text-xl font-bold text-amber-400">{formatINR(data.lrsStatus.optimizedSavingINR)}</p>
+            <p className="text-[8px] text-muted-foreground">via family split</p>
+          </div>
+        </div>
+
+        {/* Ranked action table */}
+        {data.urgentActions.length > 0 && (
+          <div className="rounded-lg border border-border overflow-hidden">
+            <div className="px-3 py-2 bg-secondary/40 border-b border-border">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Ranked Action Plan</p>
+            </div>
+            <div className="divide-y divide-border/50">
+              {data.urgentActions.map((action, i) => (
+                <div key={i} className="flex items-start gap-3 px-3 py-2.5">
+                  <span className={`flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
+                    i === 0 ? "bg-rose-500/20 text-rose-400" : i === 1 ? "bg-amber-500/20 text-amber-400" : "bg-secondary text-muted-foreground"
+                  }`}>
+                    {i + 1}
+                  </span>
+                  <p className="text-[10px] leading-relaxed text-foreground">{action}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TLH positions */}
+        {data.tlhOpportunities.length > 0 && (
+          <div className="space-y-1.5">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">TLH Positions</p>
+            {data.tlhOpportunities.map((o, i) => (
+              <div key={i} className={`flex items-center justify-between rounded-lg border px-3 py-2 ${
+                o.urgency === "critical" ? "border-rose-500/30 bg-rose-500/5" : "border-border bg-secondary/20"
+              }`}>
+                <div>
+                  <p className="text-[10px] font-semibold">{o.symbol}</p>
+                  <p className="text-[9px] text-muted-foreground">{o.isSTCL ? "STCL" : "LTCL"} · {o.urgency}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[9px] text-rose-400">{formatINR(o.lossINR)} loss</p>
+                  <p className="text-[9px] text-emerald-400 font-bold">{formatINR(o.taxSavingINR)} saved</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <p className="text-[9px] text-muted-foreground text-center">
+          Portfolio value: {formatINR(data.portfolioValueINR)} · Unrealized gain: {formatINR(data.totalUnrealizedGainINR)} · Unrealized loss: {formatINR(data.totalUnrealizedLossINR)}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Scenario Comparison Widget ───────────────────────────────────────────
+
+function ScenarioComparisonWidget({ data }: { data: ScenarioComparisonData }) {
+  const aIsBetter = data.betterScenario === "A";
+  const better = aIsBetter ? data.scenarioA : data.scenarioB;
+  const worse = aIsBetter ? data.scenarioB : data.scenarioA;
+
+  function ScenarioCard({ s, isBetter }: { s: ScenarioComparisonData["scenarioA"]; isBetter: boolean }) {
+    return (
+      <div className={`rounded-xl border p-3 space-y-2 ${isBetter ? "border-emerald-500/30 bg-emerald-500/5" : "border-rose-500/20 bg-rose-500/5"}`}>
+        <div className="flex items-center justify-between">
+          <p className={`text-[10px] font-bold ${isBetter ? "text-emerald-400" : "text-rose-400"}`}>{s.label}</p>
+          {isBetter && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">BETTER</span>}
+        </div>
+        <div className="space-y-1">
+          <Row label="Gain type" value={s.gainType} color={s.isLTCG ? "text-emerald-400" : "text-yellow-400"} />
+          <Row label="Tax rate" value={`${(s.effectiveRate * 100).toFixed(2)}%`} color={s.isLTCG ? "text-emerald-400" : "text-rose-400"} />
+          <Row label="Tax payable" value={formatINR(s.taxAmount)} color="text-rose-400" />
+          <Row label="Net proceeds" value={formatINR(s.netProceedsINR)} color={isBetter ? "text-emerald-400" : "text-foreground"} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-blue-500/30 bg-gradient-to-br from-blue-950/30 to-background overflow-hidden animate-fade-in">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-blue-500/20 bg-blue-500/10">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-3.5 w-3.5 text-blue-400" />
+          <span className="text-xs font-semibold text-blue-400">Scenario Comparison — {data.holdingName}</span>
+        </div>
+        <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">
+          {data.betterScenario === "B" ? data.scenarioB.label : data.scenarioA.label} wins by {formatINR(data.savingByChoosingBetterINR)}
+        </span>
+      </div>
+
+      <div className="p-4 space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <ScenarioCard s={data.scenarioA} isBetter={aIsBetter} />
+          <ScenarioCard s={data.scenarioB} isBetter={!aIsBetter} />
+        </div>
+
+        {/* Winner banner */}
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-center">
+          <p className="text-[10px] text-muted-foreground mb-1">Recommendation</p>
+          <p className="text-sm font-bold text-emerald-400">{data.recommendation}</p>
+          <p className="text-[9px] text-muted-foreground mt-1">
+            Difference: {formatINR(data.savingByChoosingBetterINR)} more in your pocket
+          </p>
+        </div>
+
+        <p className="text-[9px] text-muted-foreground text-center">
+          {data.quantity} units @ buy ${data.buyPriceUSD} → current ${data.currentPriceUSD}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Schedule FA Widget ───────────────────────────────────────────────────
+
+function ScheduleFAWidget({ data }: { data: ScheduleFAData }) {
+  const [copied, setCopied] = useState(false);
+
+  function copyToITR() {
+    const text = [
+      `SCHEDULE FA — Foreign Assets Disclosure`,
+      `Reporting Calendar Year: ${data.reportingCalendarYear}`,
+      `ITR Form: ${data.itrFormNeeded}`,
+      `Filing Deadline: ${data.filingDeadline}`,
+      ``,
+      `ACCOUNT DETAILS:`,
+      ...data.accounts.map((a) =>
+        `${a.slNo}. ${a.institution} (${a.country})\n` +
+        `   Account: ${a.accountNumber}\n` +
+        `   Opening: ${formatINR(a.openingBalanceINR)} | Peak: ${formatINR(a.peakBalanceINR)} | Closing: ${formatINR(a.closingBalanceINR)}\n` +
+        `   Income earned: ${formatINR(a.incomeEarnedINR)}`
+      ),
+      ``,
+      `COMPLIANCE: ${data.blackMoneyActNote}`,
+    ].join("\n");
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div className="rounded-xl border border-orange-500/30 bg-gradient-to-br from-orange-950/20 to-background overflow-hidden animate-fade-in">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-orange-500/20 bg-orange-500/10">
+        <div className="flex items-center gap-2">
+          <FileText className="h-3.5 w-3.5 text-orange-400" />
+          <span className="text-xs font-semibold text-orange-400">Schedule FA Draft — {data.reportingCalendarYear}</span>
+        </div>
+        <button
+          onClick={copyToITR}
+          className="text-[9px] font-bold px-2 py-1 rounded-full bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 transition-colors"
+        >
+          {copied ? "Copied ✓" : "Copy to ITR →"}
+        </button>
+      </div>
+
+      <div className="p-4 space-y-3">
+        {/* Warning banner */}
+        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 flex items-start gap-2">
+          <ShieldAlert className="h-3.5 w-3.5 text-rose-400 flex-shrink-0 mt-0.5" />
+          <p className="text-[9px] text-rose-300 leading-relaxed">{data.blackMoneyActNote}</p>
+        </div>
+
+        {/* Account table */}
+        {data.accounts.map((a, i) => (
+          <div key={i} className="rounded-lg border border-border overflow-hidden">
+            <div className="px-3 py-2 bg-secondary/40 border-b border-border">
+              <p className="text-[10px] font-semibold">{a.institution}</p>
+              <p className="text-[9px] text-muted-foreground">{a.country} · {a.accountType}</p>
+            </div>
+            <div className="p-3 grid grid-cols-2 gap-2">
+              <Row label="Opening balance" value={formatINR(a.openingBalanceINR)} />
+              <Row label="Peak balance" value={formatINR(a.peakBalanceINR)} />
+              <Row label="Closing balance" value={formatINR(a.closingBalanceINR)} color="text-foreground" />
+              <Row label="Income earned" value={formatINR(a.incomeEarnedINR)} />
+            </div>
+          </div>
+        ))}
+
+        {/* Compliance checklist */}
+        <div className="space-y-1">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Compliance Checklist</p>
+          {data.complianceChecklist.map((item, i) => (
+            <div key={i} className="flex items-start gap-2">
+              <CheckCircle2 className="h-3 w-3 text-emerald-400 flex-shrink-0 mt-0.5" />
+              <p className="text-[9px] text-muted-foreground">{item}</p>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-[9px] text-emerald-400 text-center font-medium">{data.valuraNote}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── FY Countdown Widget ──────────────────────────────────────────────────
+
+function FYCountdownWidget({ data }: { data: FYCountdownData }) {
+  const isCritical = data.urgencyLevel === "critical";
+  const isHigh = data.urgencyLevel === "high";
+  const urgencyColor = isCritical ? "text-rose-400" : isHigh ? "text-amber-400" : "text-emerald-400";
+  const urgencyBg = isCritical ? "border-rose-500/30 bg-rose-500/10" : isHigh ? "border-amber-500/30 bg-amber-500/10" : "border-emerald-500/30 bg-emerald-500/10";
+
+  return (
+    <div className="rounded-xl border border-cyan-500/30 bg-gradient-to-br from-cyan-950/20 to-background overflow-hidden animate-fade-in">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-cyan-500/20 bg-cyan-500/10">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-3.5 w-3.5 text-cyan-400" />
+          <span className="text-xs font-semibold text-cyan-400">FY 2025-26 Countdown</span>
+        </div>
+        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${urgencyBg} ${urgencyColor}`}>
+          {data.urgencyLevel.toUpperCase()} urgency
+        </span>
+      </div>
+
+      <div className="p-4 space-y-3">
+        {/* Big days left */}
+        <div className={`rounded-xl border ${urgencyBg} p-4 text-center`}>
+          <p className="text-[10px] text-muted-foreground">Days left in FY</p>
+          <p className={`text-5xl font-extrabold ${urgencyColor}`}>{data.daysLeft}</p>
+          <p className="text-[9px] text-muted-foreground mt-1">FY ends {data.fyEndDate}</p>
+        </div>
+
+        {/* Key deadlines */}
+        <div className="rounded-lg border border-border overflow-hidden">
+          <div className="px-3 py-2 bg-secondary/40 border-b border-border">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Key Deadlines</p>
+          </div>
+          <div className="divide-y divide-border/50">
+            {data.keyDeadlines.map((d, i) => (
+              <div key={i} className="flex items-center justify-between px-3 py-2">
+                <div>
+                  <p className="text-[10px] font-medium">{d.event}</p>
+                  <p className="text-[9px] text-muted-foreground">{d.date}</p>
+                </div>
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                  d.daysAway <= 7 ? "bg-rose-500/20 text-rose-400" :
+                  d.daysAway <= 30 ? "bg-amber-500/20 text-amber-400" :
+                  "bg-secondary text-muted-foreground"
+                }`}>
+                  {d.daysAway}d
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
+          <p className="text-[9px] text-amber-400">
+            <span className="font-bold">Next advance tax:</span> {data.nextAdvanceTaxDate} ({data.nextAdvanceTaxPct}% of annual tax due) · TCS credits can offset this directly
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Shared ───────────────────────────────────────────────────────────────
 
 function Row({ label, value, color = "text-foreground", highlight }: { label: string; value: string; color?: string; highlight?: boolean }) {
@@ -369,11 +723,15 @@ function Row({ label, value, color = "text-foreground", highlight }: { label: st
 // ─── Tool Status Pill ─────────────────────────────────────────────────────
 
 const TOOL_LABELS: Record<string, { label: string; icon: string }> = {
-  calculate_tcs:         { label: "Calculating TCS",             icon: "⚡" },
-  calculate_capital_gains: { label: "Computing capital gains",   icon: "📊" },
-  optimize_family_tcs:   { label: "Optimizing family split",     icon: "👨‍👩‍👧" },
-  get_tlh_opportunities: { label: "Scanning TLH opportunities",  icon: "✂️" },
-  get_tax_rates:         { label: "Fetching tax rates",          icon: "📈" },
+  calculate_tcs:          { label: "Calculating TCS",                icon: "⚡" },
+  calculate_capital_gains:{ label: "Computing capital gains",        icon: "📊" },
+  optimize_family_tcs:    { label: "Optimizing family split",        icon: "👨‍👩‍👧" },
+  get_tlh_opportunities:  { label: "Scanning TLH opportunities",     icon: "✂️" },
+  get_tax_rates:          { label: "Fetching tax rates",             icon: "📈" },
+  run_fy_audit:           { label: "Running full FY audit",          icon: "🔍" },
+  compare_scenarios:      { label: "Comparing sell scenarios",       icon: "⚖️" },
+  build_schedule_fa_data: { label: "Building Schedule FA draft",     icon: "📋" },
+  get_fy_countdown:       { label: "Checking FY deadlines",          icon: "⏰" },
 };
 
 export function ToolPill({ tool, done }: { tool: string; done: boolean }) {

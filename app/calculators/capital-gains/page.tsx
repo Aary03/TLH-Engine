@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { getProfile, profileBracketToCalcBracket } from "@/lib/user-profile";
+import CalcDrawer from "@/components/chat/CalcDrawer";
+import ProactiveBanner from "@/components/layout/ProactiveBanner";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine,
 } from "recharts";
@@ -99,6 +102,22 @@ export default function CapitalGainsCalculator() {
   const [stclCarry, setStclCarry] = useState(0);
   const [ltclCarry, setLtclCarry] = useState(0);
   const [showMath, setShowMath] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+
+  // Pre-fill from saved profile (runs once on mount)
+  useEffect(() => {
+    const p = getProfile();
+    setRegime(p.taxRegime as TaxRegime);
+    // Map profile bracket to a representative income figure
+    const incomeMap: Record<string, number> = {
+      up_to_50L:    3_000_000,
+      "50L_to_1Cr": 7_500_000,
+      "1Cr_to_2Cr": 15_000_000,
+      "2Cr_to_5Cr": 35_000_000,
+      above_5Cr:    60_000_000,
+    };
+    setIncome(incomeMap[p.incomeBracket] ?? 5_000_000);
+  }, []);
 
   /* ── Derived calculations ── */
   const holdingDays = useMemo(() => holdYears * 365 + holdMonths * 30, [holdYears, holdMonths]);
@@ -158,6 +177,7 @@ export default function CapitalGainsCalculator() {
   const activeRowIdx = getActiveRowIdx(income);
 
   return (
+    <>
     <div className="min-h-screen" style={{ background: "#FFFFFC" }}>
 
       {/* ── Page Header ── */}
@@ -191,6 +211,8 @@ export default function CapitalGainsCalculator() {
           </div>
         </div>
       </div>
+
+      <ProactiveBanner />
 
       <div className="flex flex-col lg:flex-row">
 
@@ -611,8 +633,56 @@ export default function CapitalGainsCalculator() {
           <p className="text-[10px] text-center pb-4" style={{ color: "#9CA3AF" }}>
             Indicative only. Finance Act 2025. Surcharge for LTCG capped at 15% (Section 112). Old regime max surcharge 37%. Consult your CA.
           </p>
+
+          {/* ── Ask AI button ── */}
+          <div className="flex justify-center pb-6">
+            <button
+              onClick={() => setAiOpen(true)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-semibold transition-all hover:opacity-90 active:scale-95 shadow-lg"
+              style={{ background: "#05A049", fontFamily: "'Manrope', sans-serif" }}
+            >
+              <TrendingUp className="h-4 w-4" />
+              Ask AI about this result →
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
+    <CalcDrawer
+      page="Capital Gains"
+      inputs={{
+        currency,
+        buyPrice,
+        sellPrice,
+        units,
+        holdingDays,
+        isLTCG,
+        incomeINR: income,
+        regime,
+        hasCarryForwardLosses: hasLosses,
+        stclCarryForward: hasLosses ? stclCarry : 0,
+        ltclCarryForward: hasLosses ? ltclCarry : 0,
+      }}
+      outputs={{
+        purchaseValueINR: Math.round(purchaseValue),
+        saleValueINR: Math.round(saleValue),
+        gainINR: Math.round(rawGain),
+        taxableGainINR: Math.round(taxableGain),
+        taxAmountINR: Math.round(taxAmount),
+        effectiveRatePct: +(breakdown.effectiveRate * 100).toFixed(2),
+        netProceedsINR: Math.round(netProceeds),
+        daysToLTCGThreshold: daysToLTCG,
+        taxSavingByWaitingINR: Math.round(taxSaving),
+      }}
+      chips={[
+        "Should I sell now or wait for LTCG?",
+        "Can I offset this gain with any existing losses?",
+        "What's the best tax-saving move here?",
+      ]}
+      open={aiOpen}
+      onClose={() => setAiOpen(false)}
+    />
+    </>
   );
 }

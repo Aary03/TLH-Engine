@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import ProactiveBanner from "@/components/layout/ProactiveBanner";
 import {
   Globe, TrendingDown, CheckCircle2, Users, Plus, Trash2,
   RefreshCw, Sigma, Info, ChevronDown, ChevronUp, Zap,
@@ -211,7 +212,9 @@ export default function LRSPage() {
   const growthFactor = Math.pow(1 + monthlyR, refundMonths[0]);
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
+    <>
+      <ProactiveBanner />
+      <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -625,6 +628,7 @@ export default function LRSPage() {
         )}
       </Card>
     </div>
+    </>
   );
 }
 

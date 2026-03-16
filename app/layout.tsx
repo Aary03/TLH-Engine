@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, Manrope, Inter } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/sidebar";
+import { ProfileProvider } from "@/components/profile/ProfileContext";
+import ProfileModal from "@/components/profile/ProfileModal";
+import ProfilePanel from "@/components/profile/ProfilePanel";
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -38,13 +41,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${bricolage.variable} ${manrope.variable} ${inter.variable}`}
     >
       <body className="font-body bg-brand-bg text-brand-dark antialiased">
-        <div className="flex min-h-screen">
-          <Sidebar />
-          {/* ml-0 on mobile (sidebar is a drawer), ml-60 on desktop */}
-          <main className="flex-1 min-h-screen overflow-auto bg-[#FFFFFC] md:ml-[240px] pt-14 md:pt-0">
-            {children}
-          </main>
-        </div>
+        <ProfileProvider>
+          <ProfileModal />
+          <ProfilePanel />
+          <div className="flex min-h-screen">
+            <Sidebar />
+            {/* ml-0 on mobile (sidebar is a drawer), ml-60 on desktop */}
+            <main className="flex-1 min-h-screen overflow-auto bg-[#FFFFFC] md:ml-[240px] pt-14 md:pt-0">
+              {children}
+            </main>
+          </div>
+        </ProfileProvider>
       </body>
     </html>
   );

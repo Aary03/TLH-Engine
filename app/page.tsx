@@ -5,6 +5,7 @@ import {
   ChevronRight, Newspaper,
 } from "lucide-react";
 import { BLOG_POSTS } from "@/lib/blog-data";
+import ProactiveBanner from "@/components/layout/ProactiveBanner";
 
 /* ── Calculator cards ── */
 const CALCULATORS = [
@@ -173,6 +174,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <ProactiveBanner />
 
       {/* ══════════════════════════════════════════
           CALCULATORS GRID

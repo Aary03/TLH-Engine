@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import CalcDrawer from "@/components/chat/CalcDrawer";
 import {
   AlertCircle, CheckCircle2, ArrowRight, ChevronLeft, ChevronRight,
   Info, FileText, Globe, Sparkles, Building2, TriangleAlert, Home, Plane,
@@ -447,6 +448,7 @@ function PathSelector({
 export default function DTAACalculator() {
   /* ── Path state ── */
   const [investorType, setInvestorType] = useState<InvestorType>(null);
+  const [aiOpen, setAiOpen] = useState(false);
 
   /* ── Wizard state (Resident Indian) ── */
   const [step, setStep] = useState(1);
@@ -504,6 +506,7 @@ export default function DTAACalculator() {
      RENDER
   ════════════════════════════════════════════════════ */
   return (
+    <>
     <div className="min-h-screen" style={{ background: "#FFFFFC" }}>
 
       {/* ── Header ── */}
@@ -1052,7 +1055,48 @@ export default function DTAACalculator() {
             For Resident Indians: FTC under Section 90/91 requires filing Form 67 by March 31 of the Assessment Year. Must match Schedule FSI and TR entries in ITR-2 or ITR-3. Excess WHT over Indian tax liability is not refundable. For NRIs: tax exemptions under Sections 10(23FBC) and 10(15)(ix) are subject to conditions including non-resident status and IFSC fund classification. Consult a qualified CA before filing.
           </p>
         )}
+
+        {/* ── Ask AI button ── */}
+        {investorType === "resident" && (
+          <div className="flex justify-center pb-6">
+            <button
+              onClick={() => setAiOpen(true)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-semibold transition-all hover:opacity-90 active:scale-95 shadow-lg"
+              style={{ background: "#05A049", fontFamily: "'Manrope', sans-serif" }}
+            >
+              <Sparkles className="h-4 w-4" />
+              Ask AI about this result →
+            </button>
+          </div>
+        )}
       </div>
     </div>
+
+    <CalcDrawer
+      page="DTAA / FTC Calculator"
+      inputs={{
+        investorType,
+        sourceCountry: sourceCountryKey,
+        incomeType,
+        incomeINR: incomeAmount,
+      }}
+      outputs={{
+        withoutFTCTotalINR: Math.round(calcIndia.withoutFTCTotal),
+        withoutFTCEffectiveRatePct: +(calcIndia.withoutFTCRate * 100).toFixed(2),
+        withFTCTotalINR: Math.round(calcIndia.withFTCTotal),
+        withFTCEffectiveRatePct: +(calcIndia.withFTCRate * 100).toFixed(2),
+        ftcAmountINR: Math.round(calcIndia.ftcAmount),
+        savingINR: Math.round(calcIndia.saving),
+        savingRatePct: +(calcIndia.savingPct * 100).toFixed(2),
+      }}
+      chips={[
+        "How do I claim this FTC in my ITR?",
+        "What documents do I need for Form 67?",
+        "Is there a way to reduce this further?",
+      ]}
+      open={aiOpen}
+      onClose={() => setAiOpen(false)}
+    />
+    </>
   );
 }

@@ -4,8 +4,9 @@ import { useState, useMemo } from "react";
 import {
   ChevronRight, ChevronLeft, CheckCircle2, AlertCircle,
   ArrowRight, Calendar, Globe, FileText, TriangleAlert,
-  Clock, TrendingUp, Info,
+  Clock, TrendingUp, Info, Sparkles,
 } from "lucide-react";
+import CalcDrawer from "@/components/chat/CalcDrawer";
 
 /* ══════════════════════════════════════════════════════
    CONSTANTS
@@ -262,6 +263,7 @@ const STATUS_CONFIG = {
 export default function NRIStatusPage() {
   /* ── Wizard step ── */
   const [step, setStep] = useState(1);
+  const [aiOpen, setAiOpen] = useState(false);
 
   /* ── Step 1: Days in India ── */
   const [currentFYDays, setCurrentFYDays] = useState(120);
@@ -294,6 +296,7 @@ export default function NRIStatusPage() {
 
   /* ─────────────── RENDER ─────────────── */
   return (
+    <>
     <div className="min-h-screen" style={{ background: "#FFFFFC" }}>
 
       {/* ── Header ── */}
@@ -833,9 +836,48 @@ export default function NRIStatusPage() {
             <p className="text-[10px] text-center pb-2 leading-relaxed" style={{ color: "#9CA3AF" }}>
               Residency status per Income Tax Act Section 6. Indicative only — rules have nuances for specific situations including deemed residency and High Net Worth provisions. Confirm with a qualified CA before filing your ITR.
             </p>
+
+            {/* ── Ask AI button ── */}
+            <div className="flex justify-center pb-6 pt-2">
+              <button
+                onClick={() => setAiOpen(true)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-semibold transition-all hover:opacity-90 active:scale-95 shadow-lg"
+                style={{ background: "#05A049", fontFamily: "'Manrope', sans-serif" }}
+              >
+                <Sparkles className="h-4 w-4" />
+                Ask AI about this result →
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
+    <CalcDrawer
+      page="NRI Status"
+      inputs={{
+        daysInIndiaThisFY: currentFYDays,
+        prevFYDays,
+        nriYearsInLast10: nriYearsLast10,
+        totalDaysInLast7FYs: totalDaysLast7,
+        isIndianCitizen: isCitizen,
+        reasonForAbsence: reason,
+      }}
+      outputs={{
+        status: result.status,
+        isResident: result.isResident,
+        isRNOR: result.isRNOR,
+        daysLeftBefore182Threshold: Math.max(0, 182 - currentFYDays),
+        rnorWindow: result.isRNOR ? "RNOR window active — foreign income not taxable in India" : "Not in RNOR window",
+      }}
+      chips={[
+        "What should I do differently given this status?",
+        "How long is my RNOR window exactly?",
+        "What do I need to disclose in Schedule FA?",
+      ]}
+      open={aiOpen}
+      onClose={() => setAiOpen(false)}
+    />
+    </>
   );
 }

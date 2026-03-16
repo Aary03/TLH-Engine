@@ -7,8 +7,9 @@ import {
 } from "recharts";
 import {
   AlertTriangle, CheckCircle2, ArrowRight, Shield,
-  TrendingUp, Users, TriangleAlert, ArrowDown,
+  TrendingUp, Users, TriangleAlert, ArrowDown, Sparkles,
 } from "lucide-react";
+import CalcDrawer from "@/components/chat/CalcDrawer";
 
 /* ══════════════════════════════════════════════════════
    CONSTANTS
@@ -101,6 +102,7 @@ export default function EstateTaxCalculator() {
   const [holdingsUSD, setHoldingsUSD] = useState(500_000);
   const [inputText, setInputText]     = useState("500000");
   const [exchangeRate, setExchangeRate] = useState(84.5);
+  const [aiOpen, setAiOpen]            = useState(false);
 
   const calc     = useMemo(() => calcEstateTax(holdingsUSD), [holdingsUSD]);
   const afterTax = holdingsUSD - calc.total;
@@ -131,6 +133,7 @@ export default function EstateTaxCalculator() {
      RENDER
   ════════════════════════════════════════════════════ */
   return (
+    <>
     <div className="min-h-screen" style={{ background: "#FFFFFC" }}>
 
       {/* ══════════ HERO HEADER ══════════ */}
@@ -723,7 +726,45 @@ export default function EstateTaxCalculator() {
         <p className="text-[10px] text-center pb-4 leading-relaxed" style={{ color: "#9CA3AF" }}>
           US estate tax law as of 2025. Non-Resident Alien (NRA) exemption is USD 60,000 under IRC Section 2101. Rates per IRS estate tax rate schedule. IFSC fund unit classification is based on general IRS situs rules for intangible property — consult a cross-border estate planning attorney for your specific situation. This calculator is illustrative only and does not constitute legal or tax advice.
         </p>
+
+        {/* ── Ask AI button ── */}
+        <div className="flex justify-center pb-6">
+          <button
+            onClick={() => setAiOpen(true)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-semibold transition-all hover:opacity-90 active:scale-95 shadow-lg"
+            style={{ background: "#05A049", fontFamily: "'Manrope', sans-serif" }}
+          >
+            <Sparkles className="h-4 w-4" />
+            Ask AI about this result →
+          </button>
+        </div>
       </div>
     </div>
+
+    <CalcDrawer
+      page="US Estate Tax"
+      inputs={{
+        holdingsUSD,
+        exchangeRateINRperUSD: exchangeRate,
+        nraExemptionUSD: 60000,
+      }}
+      outputs={{
+        directEstateTaxUSD: Math.round(calc.total),
+        directEstateTaxINR: Math.round(calc.total * exchangeRate),
+        effectiveRatePct: +(calc.effectiveRate * 100).toFixed(2),
+        familyReceivesDirectUSD: Math.round(afterTax),
+        viaValuraEstateTaxUSD: 0,
+        savingUSD: Math.round(calc.total),
+        savingINR: Math.round(calc.total * exchangeRate),
+      }}
+      chips={[
+        "How do I restructure to avoid this?",
+        "Does the Ireland UCITS route actually work?",
+        "What happens if I do nothing?",
+      ]}
+      open={aiOpen}
+      onClose={() => setAiOpen(false)}
+    />
+    </>
   );
 }

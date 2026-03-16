@@ -13,7 +13,14 @@ import {
   type TaxRegime,
 } from "@/lib/tax-calculations";
 import { runTLHScan, getTLHSummary } from "@/lib/tlh-engine";
-import { FAMILY_MEMBERS } from "@/lib/mock-data";
+import {
+  FAMILY_MEMBERS,
+  HOLDINGS,
+  getHoldingDays,
+  getUnrealizedPnL,
+  getPortfolioSummary,
+  USD_TO_INR,
+} from "@/lib/mock-data";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const VECTOR_STORE_ID = process.env.OPENAI_VECTOR_STORE_ID;
@@ -137,6 +144,76 @@ const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
         },
         required: ["income_bracket"],
       },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "run_fy_audit",
+      description: "Run a complete FY tax audit. Call this when the user asks for a full picture, tax review, 'what should I do', 'audit my taxes', or wants a ranked action plan. Automatically runs portfolio summary, TLH scan, family TCS optimization, and capital gains analysis for every holding.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "compare_scenarios",
+      description: "Compare sell-now vs wait-for-LTCG scenarios side by side. Call when the user asks 'should I sell now or wait', 'what if I hold X more months', or wants a comparison of two selling strategies for a specific holding.",
+      parameters: {
+        type: "object",
+        properties: {
+          scenarioA: {
+            type: "object",
+            description: "First scenario (e.g. sell now)",
+            properties: {
+              holdingMonths: { type: "number" },
+              label: { type: "string" },
+            },
+            required: ["holdingMonths", "label"],
+          },
+          scenarioB: {
+            type: "object",
+            description: "Second scenario (e.g. wait for LTCG)",
+            properties: {
+              holdingMonths: { type: "number" },
+              label: { type: "string" },
+            },
+            required: ["holdingMonths", "label"],
+          },
+          holdingDetails: {
+            type: "object",
+            properties: {
+              buyPriceUSD: { type: "number" },
+              currentPriceUSD: { type: "number" },
+              quantity: { type: "number" },
+              incomeBracket: {
+                type: "string",
+                enum: ["up_to_50L", "50L_to_1Cr", "1Cr_to_2Cr", "2Cr_to_5Cr", "above_5Cr"],
+              },
+              regime: { type: "string", enum: ["old", "new"] },
+              holdingName: { type: "string" },
+            },
+            required: ["buyPriceUSD", "currentPriceUSD", "quantity", "incomeBracket"],
+          },
+        },
+        required: ["scenarioA", "scenarioB", "holdingDetails"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "build_schedule_fa_data",
+      description: "Build a structured Schedule FA draft for GIFT City IFSC holdings. Call when user asks about Schedule FA, ITR-2/ITR-3 foreign asset disclosure, or FEMA compliance for GIFT City investments.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_fy_countdown",
+      description: "Get precise FY deadline data — days left in FY, last TLH date, next advance tax installment. Always call this when the user asks about timing, urgency, March 31 deadlines, or advance tax dates.",
+      parameters: { type: "object", properties: {}, required: [] },
     },
   },
 ];
@@ -319,6 +396,259 @@ function execGetTaxRates(args: {
   };
 }
 
+// ─── New tool executors ────────────────────────────────────────────────────
+
+function execRunFYAudit(): Record<string, unknown> {
+  const income = bracketToIncome("above_5Cr");
+  const summary = getPortfolioSummary();
+
+  // TLH scan
+  const opps = runTLHScan(income, "old", 2_200_000, 10_000);
+  const tlhSummary = getTLHSummary(opps);
+
+  // Family TCS optimization
+  const familyMembers = FAMILY_MEMBERS.map((m) => ({
+    id: m.id,
+    name: m.name,
+    fyRemittedINR: m.fyRemittedINR,
+  }));
+  const familyOpt = optimizeFamilyTCS(familyMembers, 10_000_000, "investment");
+
+  // Capital gains per holding
+  const pendingGains: Array<{
+    name: string; symbol: string; gainType: string;
+    gainINR: number; taxAmount: number; holdingDays: number;
+  }> = [];
+
+  for (const h of HOLDINGS) {
+    const pnl = getUnrealizedPnL(h);
+    if (!pnl.isLoss) {
+      const days = getHoldingDays(h.purchaseDate);
+      const isLTCG = days > 730;
+      const rate = isLTCG
+        ? getLTCGEffectiveRate(income, "old")
+        : getSTCGEffectiveRate(income, "old");
+      const tax = pnl.pnlINR * rate;
+      pendingGains.push({
+        name: h.name,
+        symbol: h.symbol,
+        gainType: isLTCG ? "LTCG" : "STCG",
+        gainINR: Math.round(pnl.pnlINR),
+        taxAmount: Math.round(tax),
+        holdingDays: days,
+      });
+    }
+  }
+
+  const today = new Date();
+  const fyEnd = new Date(today.getFullYear(), 2, 31); // March 31
+  if (today > fyEnd) fyEnd.setFullYear(fyEnd.getFullYear() + 1);
+  const fyDaysLeft = Math.ceil((fyEnd.getTime() - today.getTime()) / 86_400_000);
+
+  // Ranked urgent actions by rupee impact
+  const urgentActions: string[] = [];
+  if (tlhSummary.totalNetBenefit > 0) {
+    urgentActions.push(
+      `Harvest TLH losses — save ₹${Math.round(tlhSummary.totalNetBenefit / 1000)}K in tax (${tlhSummary.opportunityCount} positions available)`
+    );
+  }
+  const totalPendingTax = pendingGains.reduce((s, g) => s + g.taxAmount, 0);
+  if (totalPendingTax > 0) {
+    urgentActions.push(
+      `Review ₹${Math.round(totalPendingTax / 100_000)}L in pending capital gains tax before FY end`
+    );
+  }
+  if (familyOpt.tcsSavings > 0) {
+    urgentActions.push(
+      `Optimize family LRS routing — save ₹${Math.round(familyOpt.tcsSavings / 1000)}K in TCS`
+    );
+  }
+  if (fyDaysLeft < 30) {
+    urgentActions.unshift(
+      `URGENT: Only ${fyDaysLeft} days left in FY — execute TLH by March 28 (T+2 settlement)`
+    );
+  }
+
+  return {
+    type: "fy_audit_result" as const,
+    fyDaysLeft,
+    portfolioValueINR: Math.round(summary.totalValueINR),
+    totalUnrealizedLossINR: Math.round(summary.totalLossINR),
+    totalUnrealizedGainINR: Math.round(summary.totalGainINR),
+    tlhOpportunities: opps.slice(0, 4).map((o) => ({
+      symbol: o.holding.symbol,
+      name: o.holding.name,
+      lossINR: Math.round(o.unrealizedLossINR),
+      taxSavingINR: Math.round(o.bestCaseSavings),
+      urgency: o.urgency,
+      isSTCL: o.isSTCL,
+    })),
+    totalTLHSavingINR: Math.round(tlhSummary.totalNetBenefit),
+    pendingGains,
+    lrsStatus: {
+      familyTotalRemittedINR: FAMILY_MEMBERS.reduce((s, m) => s + m.fyRemittedINR, 0),
+      familyTotalTCSPaidINR: FAMILY_MEMBERS.reduce((s, m) => s + m.tcsDeducted, 0),
+      optimizedSavingINR: Math.round(familyOpt.tcsSavings),
+    },
+    urgentActions,
+  };
+}
+
+function execCompareScenarios(args: {
+  scenarioA: { holdingMonths: number; label: string };
+  scenarioB: { holdingMonths: number; label: string };
+  holdingDetails: {
+    buyPriceUSD: number;
+    currentPriceUSD: number;
+    quantity: number;
+    incomeBracket: IncomeBracket;
+    regime?: TaxRegime;
+    holdingName?: string;
+  };
+}): Record<string, unknown> {
+  const regime = args.holdingDetails.regime ?? "old";
+  const income = bracketToIncome(args.holdingDetails.incomeBracket);
+  const { buyPriceUSD, currentPriceUSD, quantity } = args.holdingDetails;
+
+  function calcScenario(holdingMonths: number) {
+    const holdingDays = Math.round(holdingMonths * 30.4);
+    const isLTCG = holdingDays > 730;
+    const gainUSD = (currentPriceUSD - buyPriceUSD) * quantity;
+    const gainINR = gainUSD * USD_TO_INR;
+    const isLoss = gainINR < 0;
+    const rate = isLTCG ? getLTCGEffectiveRate(income, regime) : getSTCGEffectiveRate(income, regime);
+    const taxAmount = isLoss ? 0 : gainINR * rate;
+    const netProceeds = currentPriceUSD * quantity * USD_TO_INR - taxAmount;
+    return {
+      holdingMonths,
+      holdingDays,
+      isLTCG,
+      gainINR: Math.round(gainINR),
+      taxAmount: Math.round(taxAmount),
+      effectiveRate: rate,
+      netProceedsINR: Math.round(netProceeds),
+      gainType: isLTCG ? "LTCG" : (isLoss ? "Loss" : "STCG"),
+    };
+  }
+
+  const a = calcScenario(args.scenarioA.holdingMonths);
+  const b = calcScenario(args.scenarioB.holdingMonths);
+  const betterScenario = b.netProceedsINR >= a.netProceedsINR ? "B" : "A";
+  const savingByChoosingBetter = Math.abs(b.netProceedsINR - a.netProceedsINR);
+
+  return {
+    type: "scenario_comparison" as const,
+    holdingName: args.holdingDetails.holdingName ?? "This position",
+    buyPriceUSD,
+    currentPriceUSD,
+    quantity,
+    scenarioA: { ...a, label: args.scenarioA.label },
+    scenarioB: { ...b, label: args.scenarioB.label },
+    betterScenario,
+    savingByChoosingBetterINR: Math.round(savingByChoosingBetter),
+    recommendation: betterScenario === "B"
+      ? `Wait for Scenario B — saves ₹${Math.round(savingByChoosingBetter / 1000)}K more in your pocket`
+      : `Sell now (Scenario A) — Scenario B gives ₹${Math.round(savingByChoosingBetter / 1000)}K less`,
+  };
+}
+
+function execBuildScheduleFAData(): Record<string, unknown> {
+  const today = new Date();
+  const calendarYear = today.getFullYear() - 1; // Schedule FA reports prior calendar year
+
+  const totalPortfolioValueINR = HOLDINGS.reduce(
+    (s, h) => s + h.currentNAVUSD * h.quantity * USD_TO_INR, 0
+  );
+  const totalCostINR = HOLDINGS.reduce(
+    (s, h) => s + h.avgCostUSD * h.quantity * USD_TO_INR, 0
+  );
+
+  // Peak balance estimate: cost basis + 10% (approximate mid-year peak)
+  const peakBalanceINR = totalCostINR * 1.1;
+
+  // Estimated income earned (dividends/interest — minimal for growth funds)
+  const estimatedIncomeINR = totalPortfolioValueINR * 0.005; // ~0.5% income yield
+
+  return {
+    type: "schedule_fa_draft" as const,
+    reportingCalendarYear: calendarYear,
+    itrFormNeeded: "ITR-2 or ITR-3",
+    filingDeadline: "July 31 of Assessment Year",
+    accounts: [
+      {
+        slNo: "A1",
+        country: "India (IFSC — treated as foreign asset under FEMA)",
+        institution: "Valura GIFT City IFSC",
+        accountType: "IFSC Fund Units / Investment Account",
+        accountNumber: "IFSC-2025-MEHTA-001",
+        openingBalanceINR: Math.round(totalCostINR),
+        peakBalanceINR: Math.round(peakBalanceINR),
+        closingBalanceINR: Math.round(totalPortfolioValueINR),
+        incomeEarnedINR: Math.round(estimatedIncomeINR),
+        taxableInIndia: "Subject to slab rate (Resident Indians) — see Schedule FSI",
+      },
+    ],
+    holdingSummary: HOLDINGS.map((h) => ({
+      name: h.name,
+      isin: h.isin,
+      quantityUnits: h.quantity,
+      costINR: Math.round(h.avgCostUSD * h.quantity * USD_TO_INR),
+      marketValueINR: Math.round(h.currentNAVUSD * h.quantity * USD_TO_INR),
+    })),
+    blackMoneyActNote:
+      "Failure to disclose GIFT City IFSC holdings in Schedule FA = ₹10 lakh penalty per year under Section 42 of the Black Money (Undisclosed Foreign Income and Assets) Act, 2015.",
+    complianceChecklist: [
+      "File in ITR-2 (salaried/capital gains) or ITR-3 (business income) — NOT ITR-1",
+      "Also fill Schedule FSI (Foreign Source Income) and Schedule TR (Tax Relief)",
+      "File Form 67 by March 31 of Assessment Year to claim FTC on any foreign WHT",
+      "Match Schedule FA entries with Form 26AS and AIS data",
+    ],
+    valuraNote: "Valura auto-generates your Schedule FA data — download from the Compliance section before July 31.",
+  };
+}
+
+function execGetFYCountdown(): Record<string, unknown> {
+  const today = new Date();
+  const fyEnd = new Date(today.getFullYear(), 2, 31); // March 31 current year
+  if (today > fyEnd) fyEnd.setFullYear(fyEnd.getFullYear() + 1);
+
+  const daysLeft = Math.ceil((fyEnd.getTime() - today.getTime()) / 86_400_000);
+
+  // Last TLH date: March 28 (T+2 means trade on 28th, settles by 31st)
+  const lastTLHDate = new Date(fyEnd);
+  lastTLHDate.setDate(28);
+
+  // Advance tax installments (FY 2025-26)
+  const advanceTaxDates = [
+    { date: new Date(2025, 5, 15), pct: 15, label: "June 15" },
+    { date: new Date(2025, 8, 15), pct: 45, label: "September 15" },
+    { date: new Date(2025, 11, 15), pct: 75, label: "December 15" },
+    { date: new Date(2026, 2, 15), pct: 100, label: "March 15" },
+  ];
+
+  const nextAT = advanceTaxDates.find((d) => d.date > today) ?? advanceTaxDates[advanceTaxDates.length - 1];
+
+  const urgencyLevel: "critical" | "high" | "medium" =
+    daysLeft <= 10 ? "critical" : daysLeft <= 30 ? "high" : "medium";
+
+  return {
+    type: "fy_countdown" as const,
+    today: today.toISOString().split("T")[0],
+    fyEndDate: fyEnd.toISOString().split("T")[0],
+    daysLeft,
+    lastTLHDate: `${lastTLHDate.toISOString().split("T")[0]} (T+2 settlement — trade by this date to settle before March 31)`,
+    nextAdvanceTaxDate: nextAT.label,
+    nextAdvanceTaxPct: nextAT.pct,
+    urgencyLevel,
+    keyDeadlines: [
+      { event: "Last TLH trade date", date: "March 28, 2026", daysAway: Math.ceil((lastTLHDate.getTime() - today.getTime()) / 86_400_000) },
+      { event: "FY 2025-26 ends", date: "March 31, 2026", daysAway: daysLeft },
+      { event: "Advance tax final installment", date: "March 15, 2026", daysAway: Math.ceil((new Date(2026, 2, 15).getTime() - today.getTime()) / 86_400_000) },
+      { event: "ITR filing deadline", date: "July 31, 2026", daysAway: Math.ceil((new Date(2026, 6, 31).getTime() - today.getTime()) / 86_400_000) },
+    ],
+  };
+}
+
 // ─── Tool dispatch ────────────────────────────────────────────────────────
 
 function executeTool(name: string, args: Record<string, unknown>): Record<string, unknown> {
@@ -333,6 +663,14 @@ function executeTool(name: string, args: Record<string, unknown>): Record<string
       return execGetTLHOpportunities(args as Parameters<typeof execGetTLHOpportunities>[0]);
     case "get_tax_rates":
       return execGetTaxRates(args as Parameters<typeof execGetTaxRates>[0]);
+    case "run_fy_audit":
+      return execRunFYAudit();
+    case "compare_scenarios":
+      return execCompareScenarios(args as Parameters<typeof execCompareScenarios>[0]);
+    case "build_schedule_fa_data":
+      return execBuildScheduleFAData();
+    case "get_fy_countdown":
+      return execGetFYCountdown();
     default:
       return { error: `Unknown tool: ${name}` };
   }
@@ -340,40 +678,53 @@ function executeTool(name: string, args: Record<string, unknown>): Record<string
 
 // ─── System Prompt ────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are an expert Indian tax advisor and agentic financial assistant embedded in a GIFT City IFSC Tax Loss Harvesting platform. You help Indian HNI investors and MFDs understand and optimize their tax situation.
+const TODAY_ISO = new Date().toISOString().split("T")[0];
 
-YOU HAVE ACCESS TO LIVE CALCULATION TOOLS — use them proactively whenever a calculation would be helpful.
+const SYSTEM_PROMPT = `You are Valura's AI Tax Advisor — an autonomous agent, not a chatbot. You have access to the user's actual portfolio, real calculation tools, and India's regulatory knowledge base.
 
-TOOLS AVAILABLE:
-- calculate_tcs: Compute exact TCS on any LRS remittance
-- calculate_capital_gains: Compute STCG/LTCG tax on any IFSC fund trade
-- optimize_family_tcs: Find optimal split across family members to minimize TCS
-- get_tlh_opportunities: Pull live TLH opportunities from the portfolio
-- get_tax_rates: Show effective rates for any income bracket
+CRITICAL RULES:
+1. ALWAYS call tools to get real numbers. Never estimate, guess, or use example figures.
+2. When asked a multi-part question, call ALL relevant tools before responding — do not ask clarifying questions first.
+3. Today's date is ${TODAY_ISO}. FY 2025-26 ends March 31, 2026. Always factor in FY urgency.
+4. Your output must contain: (a) the exact calculation with real numbers from tools, (b) one clear recommendation in bold, (c) a specific next action with a deadline.
+5. Show comparison tables whenever two scenarios exist. Never just explain one option.
+6. Every response ends with: what to do TODAY, what to do THIS WEEK, what to do BEFORE MARCH 31.
 
-WHEN TO CALL TOOLS:
-- Any mention of a specific rupee amount with TCS → call calculate_tcs
-- Any mention of buy/sell price or holding period → call calculate_capital_gains  
-- Any question about family splitting → call optimize_family_tcs
-- Any question about TLH, losses, harvesting → call get_tlh_opportunities
-- Any question about "what rate" or "how much tax" → call get_tax_rates
-- ALWAYS call at least one tool if calculations are relevant
+TAX RULES (FY 2025-26, Finance Act 2025):
+- LTCG: 12.5% flat after 730 days, surcharge capped 15%, effective max 14.95%
+- STCG: slab rate up to 30%, surcharge uncapped, effective max 42.74% (old regime >5Cr)
+- TCS: 0% up to ₹10L per PAN per FY, 20% above for investment remittances
+- No wash-sale rule in India — sell and immediately rebuy is legal and optimal for TLH
+- STCL offsets STCG AND LTCG. LTCL offsets LTCG only. 8-year carry-forward.
+- TCS credits offset advance tax installments (Jun 15, Sep 15, Dec 15, Mar 15)
+- Schedule FA: GIFT City holdings = foreign assets under FEMA. ₹10L/year penalty if missed.
 
-KEY FACTS:
-- LTCG: 12.5% × (1 + min(surcharge,15%)) × 1.04 = MAX 14.95% (Section 112)
-- STCG: slab × (1 + surcharge, no cap) × 1.04 = MAX 42.74% old regime
-- Holding period: 730 days for LTCG
-- TCS: 0% ≤₹10L per PAN per FY, 20% above for investment
-- India: NO wash sale rules — rebuy same fund same day after harvesting loss
-- STCL offsets STCG (42.74%) AND LTCG (14.95%); LTCL offsets LTCG ONLY
-- Carry-forward: 8 years, but file ITR by July 31 or lose it forever
+AGENTIC BEHAVIOR — call tools automatically, without asking first:
+- "audit my taxes" / "full picture" / "what should I do" → call run_fy_audit, then generate ranked action plan
+- "should I sell [holding]" / "sell now or wait" → call compare_scenarios (sell-now vs wait-for-LTCG)
+- "optimize my LRS" / "family TCS" → call get_fy_countdown then optimize_family_tcs
+- "what should I do before March 31" → call get_fy_countdown + run_tlh_scan + run_fy_audit
+- any holding + "harvest?" → call run_tlh_scan + calculate_capital_gains, give yes/no with exact numbers
+- "Schedule FA" / "ITR disclosure" / "foreign assets" → call build_schedule_fa_data
+- any timing question → call get_fy_countdown first
 
-RESPONSE STYLE:
-- After calling a tool, explain the result conversationally but precisely
-- Point out the key number (TCS amount, tax saving, effective rate)
-- Mention what action the user should take
-- Keep responses concise — the widget shows the full calculation
-- Always end with: *For specific advice, consult a qualified CA.*`;
+TOOLS:
+- calculate_tcs: TCS on any LRS remittance
+- calculate_capital_gains: STCG/LTCG tax on a specific trade
+- optimize_family_tcs: Optimal LRS split across family
+- get_tlh_opportunities: Live TLH scan from portfolio
+- get_tax_rates: Effective rates for income bracket
+- run_fy_audit: Full FY audit — runs ALL tools, returns ranked action plan
+- compare_scenarios: Side-by-side sell-now vs wait comparison
+- build_schedule_fa_data: Schedule FA draft for ITR-2/ITR-3
+- get_fy_countdown: FY deadlines, advance tax dates, urgency level
+
+RESPONSE FORMAT:
+- Lead with the key number in bold
+- Show comparison table if two scenarios exist
+- One clear recommendation in bold
+- End every response with three bullets: **Today:** / **This week:** / **Before March 31:**
+- Final line: *For specific advice, consult a qualified CA.*`;
 
 // ─── SSE helpers ─────────────────────────────────────────────────────────
 
@@ -383,10 +734,21 @@ function sseEvent(data: unknown): string {
 
 // ─── Route Handler ────────────────────────────────────────────────────────
 
+interface ProfileContext {
+  incomeBracket: string;
+  incomeBracketLabel: string;
+  investorType: string;
+  taxRegime: string;
+  familyMembersCount: number;
+  incomeAbove5Cr: boolean;
+}
+
 export async function POST(req: NextRequest) {
-  const { messages, query } = await req.json() as {
+  const { messages, query, profile, calcContext } = await req.json() as {
     messages: { role: "user" | "assistant"; content: string }[];
     query: string;
+    profile?: ProfileContext;
+    calcContext?: string;
   };
 
   const encoder = new TextEncoder();
@@ -423,7 +785,21 @@ export async function POST(req: NextRequest) {
         // ── Step 2: First call — detect tool needs ──────────────────────
         send({ type: "status", message: "Thinking…" });
 
-        const systemWithRAG = SYSTEM_PROMPT + (ragContext
+        const profileSection = profile
+          ? `\n\nUSER PROFILE (pre-loaded — do not ask for these details again):\n` +
+            `- Income bracket: ${profile.incomeBracketLabel} (${profile.incomeBracket})\n` +
+            `- Investor type: ${profile.investorType}\n` +
+            `- Tax regime: ${profile.taxRegime} regime\n` +
+            `- Family members investing: ${profile.familyMembersCount}\n` +
+            `- Income above ₹5 Cr: ${profile.incomeAbove5Cr ? "Yes" : "No"}\n` +
+            `Use these values directly in any calculations or explanations. Acknowledge the profile silently — no need to repeat it back to the user.`
+          : "";
+
+        const calcContextSection = calcContext
+          ? `\n\nCALCULATOR CONTEXT (user's current calculation — answer relative to these exact numbers):\n${calcContext}`
+          : "";
+
+        const systemWithRAG = SYSTEM_PROMPT + profileSection + calcContextSection + (ragContext
           ? `\n\nRELEVANT REGULATORY CONTEXT (from knowledge base):\n${ragContext}`
           : "");
 

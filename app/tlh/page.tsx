@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import ProactiveBanner from "@/components/layout/ProactiveBanner";
 import {
   Scissors, Zap, CheckCircle2, AlertTriangle, Clock,
   ArrowRight, RefreshCw, TrendingDown, Info, ChevronDown,
@@ -229,7 +230,9 @@ export default function TLHPage() {
   }));
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
+    <>
+      <ProactiveBanner />
+      <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -410,6 +413,7 @@ export default function TLHPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

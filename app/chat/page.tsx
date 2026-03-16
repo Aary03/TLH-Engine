@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Send, Sparkles, Bot, User, Loader2,
   RefreshCw, BookOpen, ChevronRight, Mic,
@@ -12,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { WidgetRenderer, ToolPill } from "@/components/chat/widgets";
+import { getProfile, BRACKET_LABELS } from "@/lib/user-profile";
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -40,62 +42,64 @@ type SSEEvent =
 
 const SUGGESTED_PROMPTS = [
   {
-    category: "TCS",
-    icon: "⚡",
-    prompt: "What TCS will I pay on a ₹50 lakh GIFT City remittance? I've already sent ₹8L this FY.",
-    short: "TCS on ₹50L",
+    category: "Audit",
+    icon: "🔍",
+    prompt: "Audit my full tax position for FY 2025-26 — show me everything I should do.",
+    short: "Full FY audit",
+  },
+  {
+    category: "Urgent",
+    icon: "⏰",
+    prompt: "I have 20 days left in the FY — what should I do urgently before March 31?",
+    short: "March 31 urgency",
+  },
+  {
+    category: "Compare",
+    icon: "⚖️",
+    prompt: "Compare: sell my TATA-SP500 position now (18 months held) vs wait 6 more months for LTCG. Buy $218, current $196, 850 units.",
+    short: "Sell now vs wait",
+  },
+  {
+    category: "Schedule FA",
+    icon: "📋",
+    prompt: "Build my Schedule FA data for GIFT City holdings — I need to file ITR-2.",
+    short: "Schedule FA draft",
+  },
+  {
+    category: "LRS",
+    icon: "👨‍👩‍👧",
+    prompt: "Optimize my LRS remittance of ₹1.2 crore across family members before March 31.",
+    short: "Optimize LRS",
   },
   {
     category: "TLH",
     icon: "✂️",
-    prompt: "Show me all TLH opportunities in the portfolio and how much I can save.",
-    short: "TLH opportunities",
+    prompt: "I'm thinking of selling a position held for 22 months — run the full TLH numbers first.",
+    short: "22-month TLH",
   },
   {
-    category: "Rates",
-    icon: "📊",
-    prompt: "What are the STCG and LTCG effective rates for income above ₹5 crore?",
-    short: "Tax rates ₹5Cr+",
-  },
-  {
-    category: "CG",
-    icon: "📈",
-    prompt: "I bought 500 units at $210 and want to sell at $245. I've held for 18 months. What's my capital gains tax?",
-    short: "CG calculation",
-  },
-  {
-    category: "Family",
-    icon: "👨‍👩‍👧",
-    prompt: "How should I split a ₹1.2 crore investment remittance across 3 family members to minimize TCS?",
-    short: "Family TCS split",
+    category: "Advance Tax",
+    icon: "⚡",
+    prompt: "What's my advance tax position and can my LRS TCS credits offset the March 15 installment?",
+    short: "Advance tax offset",
   },
   {
     category: "Harvest",
-    icon: "🔄",
-    prompt: "Can I sell Mirae IFSC fund at a loss today and rebuy it tomorrow? Is there any wash sale restriction?",
-    short: "Wash sale rules",
-  },
-  {
-    category: "LRS",
-    icon: "🌐",
-    prompt: "Is PAN mandatory for LRS remittances? What documents does the bank require?",
-    short: "LRS requirements",
-  },
-  {
-    category: "Strategy",
     icon: "🎯",
-    prompt: "I have a position with 22-month holding and it's at a loss. Should I harvest STCL now or wait for LTCL?",
-    short: "STCL vs LTCL",
+    prompt: "Should I harvest my Mirae Global loss position now? Give me the exact tax saving with numbers.",
+    short: "Harvest MIRAE",
   },
 ];
 
-const WELCOME_CONTENT = `Hi! I'm your **Agentic Tax Advisor** — I don't just answer questions, I calculate live results and show them as interactive cards.
+const WELCOME_CONTENT = `I'm Valura's **Autonomous Tax Agent** — I call multiple tools simultaneously, never guess numbers, and give you ranked actions with deadlines.
 
-**Try asking me:**
-- *"What TCS on ₹50L remittance?"* → I'll run the exact calculation
-- *"Show me TLH opportunities"* → I'll pull live portfolio data
-- *"What are the rates for ₹5Cr+ income?"* → I'll generate a rate comparison card
-- *"Split ₹1Cr across 3 family members"* → I'll optimize and show allocations
+**New agentic capabilities:**
+- 🔍 *"Audit my full tax position"* → runs portfolio scan + TLH + LRS optimization automatically
+- ⚖️ *"Should I sell now or wait?"* → side-by-side scenario comparison with exact rupee impact
+- 📋 *"Build my Schedule FA"* → generates ITR-ready foreign asset disclosure draft
+- ⏰ *"What should I do before March 31?"* → FY countdown + ranked action plan by rupee impact
+
+**Every response includes:** what to do TODAY · THIS WEEK · BEFORE MARCH 31
 
 I have access to **5 regulatory documents** including the RBI LRS FAQ, IT Act sections, and GIFT City compliance rules — with live semantic search on every question.`;
 
@@ -187,6 +191,7 @@ function StatusBar({ status }: { status: string }) {
 // ─── Main Page ────────────────────────────────────────────────────────────
 
 export default function ChatPage() {
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -198,9 +203,35 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState("");
+  const [calcContext, setCalcContext] = useState<string | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const contextLoaded = useRef(false);
+
+  // Read ?context= param on mount — pre-fill from CalcDrawer "Open in full chat" link
+  useEffect(() => {
+    if (contextLoaded.current) return;
+    const rawContext = searchParams.get("context");
+    if (rawContext) {
+      try {
+        const decoded = decodeURIComponent(escape(atob(rawContext)));
+        setCalcContext(decoded);
+        // Add a visible context-loaded notice so the user knows the AI has context
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: "ctx-loaded",
+            role: "assistant",
+            content:
+              "I've loaded your calculator results as context. Ask me anything about your specific numbers — I can see all your inputs and outputs.",
+            timestamp: new Date(),
+          },
+        ]);
+      } catch { /* ignore malformed param */ }
+      contextLoaded.current = true;
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -243,10 +274,20 @@ export default function ChatPage() {
         content: m.content,
       }));
 
+      const profile = getProfile();
+      const profileContext = {
+        incomeBracket: profile.incomeBracket,
+        incomeBracketLabel: BRACKET_LABELS[profile.incomeBracket],
+        investorType: profile.investorType,
+        taxRegime: profile.taxRegime,
+        familyMembersCount: profile.familyMembers.length,
+        incomeAbove5Cr: profile.incomeAbove5Cr,
+      };
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: allMessages, query: content.trim() }),
+        body: JSON.stringify({ messages: allMessages, query: content.trim(), profile: profileContext, calcContext }),
         signal: abortRef.current.signal,
       });
 
