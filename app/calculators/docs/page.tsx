@@ -3,30 +3,21 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  BadgePercent, Calculator, Map, ChevronRight, ChevronDown,
-  CheckCircle2, AlertCircle, ArrowRight, BookOpen,
-  Lightbulb, Clock, Users, TrendingDown, FileText,
-  TriangleAlert, Zap, TrendingUp, Shield, UserCheck,
+  BadgePercent, Calculator, Map, TrendingUp, Shield, UserCheck,
+  ChevronRight, Sparkles, ArrowRight, Lightbulb, AlertCircle,
+  CheckCircle2, Clock, Users, BookOpen, Zap, TriangleAlert,
+  Calendar, MessageSquare, ChevronDown,
 } from "lucide-react";
 
-/* ── Helpers ── */
-const INR_L = (n: number) =>
-  n >= 1e7 ? `₹${(n / 1e7).toFixed(2)} Cr` : `₹${(n / 1e5).toFixed(0)} L`;
+/* ─── Colour palette ──────────────────────────────────────────────────── */
+const C = {
+  green: "#05A049", mint: "#B4E3C8", dark: "#00111B",
+  amber: "#B8913A", red: "#DC2626", blue: "#2B4A8A",
+  bg: "#FFFFFC",
+};
 
-/* ── Section types ── */
-type CalcKey = "lrs" | "cg" | "dtaa" | "nr" | "estate" | "nri";
-
-const CALCULATORS: { key: CalcKey; icon: React.ElementType; label: string; href: string; color: string; tagline: string }[] = [
-  { key: "lrs",   icon: BadgePercent, label: "LRS & TCS",     href: "/calculators/lrs-tcs",      color: "#05A049", tagline: "Minimize the upfront cash cost of overseas remittances" },
-  { key: "cg",    icon: Calculator,   label: "Capital Gains", href: "/calculators/capital-gains", color: "#00111B", tagline: "Model STCG vs LTCG and find the exact break-even day" },
-  { key: "dtaa",  icon: Map,          label: "DTAA / FTC",    href: "/calculators/dtaa",          color: "#B8913A", tagline: "Eliminate double taxation for NRIs and Resident Indians" },
-  { key: "nr",    icon: TrendingUp,   label: "Net Returns",   href: "/calculators/net-returns",   color: "#2B4A8A", tagline: "Direct vs Valura — full after-tax wealth comparison" },
-  { key: "estate",icon: Shield,       label: "Estate Tax",    href: "/calculators/estate-tax",    color: "#7A2020", tagline: "US estate tax exposure for Indian investors holding US stocks" },
-  { key: "nri",   icon: UserCheck,    label: "NRI Status",    href: "/calculators/nri-status",    color: "#6B7280", tagline: "Determine your tax residency — NRI, RNOR, or ROR" },
-];
-
-/* ── Reusable components ── */
-function Tag({ children, color = "#05A049" }: { children: React.ReactNode; color?: string }) {
+/* ─── Mini helpers ────────────────────────────────────────────────────── */
+function Tag({ children, color = C.green }: { children: React.ReactNode; color?: string }) {
   return (
     <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest"
       style={{ background: `${color}18`, color }}>
@@ -35,1067 +26,941 @@ function Tag({ children, color = "#05A049" }: { children: React.ReactNode; color
   );
 }
 
-function ExampleBox({ title, children }: { title: string; children: React.ReactNode }) {
+function Row({ label, value, color = "#374151" }: { label: string; value: string; color?: string }) {
   return (
-    <div className="rounded-2xl overflow-hidden my-4" style={{ border: "1px solid #B4E3C8" }}>
-      <div className="px-5 py-3 flex items-center gap-2" style={{ background: "#F0FAF5" }}>
-        <Zap className="h-4 w-4 flex-shrink-0" style={{ color: "#05A049" }} />
-        <p className="text-sm font-bold" style={{ fontFamily: "var(--font-manrope)", color: "#00111B" }}>{title}</p>
-      </div>
-      <div className="px-5 py-4 text-sm space-y-2" style={{ color: "#374151" }}>{children}</div>
+    <div className="flex items-center justify-between py-1.5 border-b last:border-0" style={{ borderColor: "#F3F4F6" }}>
+      <span className="text-xs text-gray-500 pr-2">{label}</span>
+      <span className="text-xs font-bold flex-shrink-0" style={{ color }}>{value}</span>
     </div>
   );
 }
 
-function CalcLine({ label, value, variant = "neutral" }: { label: string; value: string; variant?: "green" | "red" | "gold" | "neutral" }) {
-  const c = { green: "#05A049", red: "#DC2626", gold: "#B8913A", neutral: "#374151" }[variant];
-  return (
-    <div className="flex justify-between items-center py-1.5 border-b" style={{ borderColor: "#F3F4F6" }}>
-      <span className="text-xs text-gray-500">{label}</span>
-      <span className="text-xs font-bold" style={{ color: c }}>{value}</span>
-    </div>
-  );
+function GreenRow({ label, value }: { label: string; value: string }) {
+  return <Row label={label} value={value} color={C.green} />;
+}
+function RedRow({ label, value }: { label: string; value: string }) {
+  return <Row label={label} value={value} color={C.red} />;
+}
+function GoldRow({ label, value }: { label: string; value: string }) {
+  return <Row label={label} value={value} color={C.amber} />;
 }
 
-function TipBox({ children }: { children: React.ReactNode }) {
+function Tip({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-xl px-4 py-3 my-3 flex items-start gap-2.5"
-      style={{ background: "#FFFBF0", border: "1px solid #E8C97A" }}>
-      <Lightbulb className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#B8913A" }} />
+    <div className="rounded-xl px-4 py-3 mt-3 flex items-start gap-2.5"
+      style={{ background: "#FFFBF0", border: `1px solid ${C.amber}44` }}>
+      <Lightbulb className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: C.amber }} />
       <p className="text-xs leading-relaxed" style={{ color: "#374151" }}>{children}</p>
     </div>
   );
 }
 
-function WarnBox({ children }: { children: React.ReactNode }) {
+function Warn({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-xl px-4 py-3 my-3 flex items-start gap-2.5"
-      style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
-      <TriangleAlert className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#DC2626" }} />
+    <div className="rounded-xl px-4 py-3 mt-3 flex items-start gap-2.5"
+      style={{ background: "#FEF2F2", border: `1px solid ${C.red}44` }}>
+      <TriangleAlert className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: C.red }} />
       <p className="text-xs leading-relaxed" style={{ color: "#374151" }}>{children}</p>
     </div>
   );
 }
 
-function SectionHeader({ children }: { children: React.ReactNode }) {
+function Win({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-base font-bold mt-8 mb-3 flex items-center gap-2"
-      style={{ fontFamily: "var(--font-manrope)", color: "#00111B" }}>
+    <div className="rounded-xl px-4 py-3 mt-3 flex items-start gap-2.5"
+      style={{ background: "#EDFAF3", border: `1px solid ${C.mint}` }}>
+      <CheckCircle2 className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: C.green }} />
+      <p className="text-xs leading-relaxed" style={{ color: "#064E24" }}>{children}</p>
+    </div>
+  );
+}
+
+function ActionPill({ color, label, children }: { color: string; label: string; children: React.ReactNode }) {
+  const bg: Record<string, string> = {
+    [C.red]: "#FFF5F5", [C.amber]: "#FFFBF0", [C.blue]: "#F0F6FF", [C.green]: "#EDFAF3",
+  };
+  return (
+    <div className="rounded-xl px-4 py-2.5 mt-2 flex items-start gap-2"
+      style={{ background: bg[color] ?? "#F9FAFB", border: `1px solid ${color}22` }}>
+      <span className="text-[9px] font-black uppercase tracking-widest mt-0.5 flex-shrink-0" style={{ color }}>{label}</span>
+      <span className="text-xs leading-relaxed" style={{ color: C.dark }}>{children}</span>
+    </div>
+  );
+}
+
+function SectionH2({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-xl sm:text-2xl font-extrabold mt-14 mb-2"
+      style={{ fontFamily: "var(--font-bricolage)", color: C.dark }}>
       {children}
+    </h2>
+  );
+}
+
+function SectionH3({ icon, children }: { icon?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <h3 className="text-sm font-bold mt-6 mb-2 flex items-center gap-2"
+      style={{ fontFamily: "var(--font-manrope)", color: C.dark }}>
+      {icon}{children}
     </h3>
   );
 }
 
-function StepList({ steps }: { steps: string[] }) {
-  return (
-    <ol className="space-y-2 my-3">
-      {steps.map((s, i) => (
-        <li key={i} className="flex items-start gap-3 text-xs" style={{ color: "#374151" }}>
-          <span className="flex-shrink-0 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold mt-0.5"
-            style={{ background: "#00111B", color: "#fff" }}>{i + 1}</span>
-          <span className="leading-relaxed">{s}</span>
-        </li>
-      ))}
-    </ol>
-  );
+function Divider() {
+  return <hr className="my-10" style={{ borderColor: "#E5E7EB" }} />;
 }
 
-function Collapse({ title, children }: { title: string; children: React.ReactNode }) {
+function Collapse({ title, badge, children }: { title: string; badge?: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-xl overflow-hidden my-3" style={{ border: "1px solid #E5E7EB" }}>
+    <div className="rounded-2xl overflow-hidden my-3" style={{ border: "1px solid #E5E7EB" }}>
       <button onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-left transition-colors"
-        style={{ background: open ? "#F0FAF5" : "#F9FAFB", color: "#00111B" }}>
-        {title}
-        {open ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
+        className="w-full flex items-center justify-between px-4 py-3.5 text-sm font-semibold text-left transition-colors"
+        style={{ background: open ? "#EDFAF3" : "#F9FAFB", color: C.dark }}>
+        <span className="flex items-center gap-2">
+          {title}
+          {badge && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${C.green}18`, color: C.green }}>{badge}</span>}
+        </span>
+        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && <div className="px-4 py-4 text-sm" style={{ color: "#374151" }}>{children}</div>}
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
-   CALCULATOR CONTENT
-═══════════════════════════════════════════════════════════ */
-
-function LRSContent() {
+/* Scenario card — the main building block */
+function ScenarioCard({
+  number, title, subtitle, color, icon: Icon, href, calcLabel, children,
+}: {
+  number: number; title: string; subtitle: string; color: string;
+  icon: React.ElementType; href: string; calcLabel: string; children: React.ReactNode;
+}) {
   return (
-    <div>
-      <p className="text-sm leading-relaxed text-gray-600">
-        Every rupee you remit overseas above ₹10 lakh per PAN per financial year triggers a <strong>20% Tax Collected at Source (TCS)</strong> on investments. The bank deducts it upfront — you get it back via ITR, but your money is locked for 7–18 months. This calculator shows you the real cost and how to minimize it.
-      </p>
-
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {[
-          { label: "TCS threshold per PAN/FY", value: "₹10 Lakh", color: "#05A049" },
-          { label: "TCS rate on investments", value: "20%", color: "#DC2626" },
-          { label: "Max USD remittance / adult / FY", value: "$250,000", color: "#00111B" },
-        ].map((k) => (
-          <div key={k.label} className="rounded-xl px-4 py-3 text-center" style={{ background: "#F9FAFB", border: "1px solid #E5E7EB" }}>
-            <p className="text-[10px] text-gray-400 mb-1">{k.label}</p>
-            <p className="text-lg font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: k.color }}>{k.value}</p>
+    <div id={`scenario-${number}`} className="rounded-2xl overflow-hidden scroll-mt-6"
+      style={{ border: `1.5px solid ${color}30`, background: C.bg }}>
+      {/* Card header */}
+      <div className="px-5 py-4 flex items-start gap-3" style={{ background: `${color}08`, borderBottom: `1px solid ${color}20` }}>
+        <div className="h-8 w-8 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: `${color}15` }}>
+          <Icon className="h-4 w-4" style={{ color }} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] font-black uppercase tracking-widest" style={{ color }}>
+              Scenario {number}
+            </span>
+            <Tag color={color}>{calcLabel}</Tag>
           </div>
-        ))}
+          <p className="text-base font-bold mt-0.5" style={{ fontFamily: "var(--font-manrope)", color: C.dark }}>{title}</p>
+          <p className="text-xs mt-0.5" style={{ color: "#6B7280" }}>{subtitle}</p>
+        </div>
       </div>
-
-      {/* ── How to use ── */}
-      <SectionHeader><BookOpen className="h-4 w-4" style={{ color: "#05A049" }} /> How to use the calculator</SectionHeader>
-      <StepList steps={[
-        "Enter how much you want to remit this financial year — use the slider (₹1L to ₹5 Cr) or type directly in the text box in Lakhs.",
-        "Enter how much you have already remitted this FY from this PAN. If this is your first remittance, leave it at ₹0.",
-        "Select the purpose — Investment, Education (self-funded), Medical, or Education via 80E loan. The TCS rate changes accordingly.",
-        "Select the current month. This determines how long TCS will be locked before you get it back via ITR.",
-        "Toggle 'Do you pay advance tax?' — if Yes, the lock-up collapses dramatically from months to weeks.",
-        "Optionally expand 'Add family members' to route remittances through your spouse or adult children, each with their own ₹10L threshold.",
-      ]} />
-
-      {/* ── Example 1 ── */}
-      <SectionHeader>Example 1 — Solo investor, large remittance</SectionHeader>
-      <ExampleBox title="Scenario: Rajesh wants to invest ₹75L in GIFT City in January">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Inputs</p>
-            <CalcLine label="Investment amount" value="₹75L" />
-            <CalcLine label="Already remitted" value="₹0" />
-            <CalcLine label="Purpose" value="Investment" />
-            <CalcLine label="Month" value="January" />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Output</p>
-            <CalcLine label="TCS-free portion" value="₹10L (threshold)" variant="green" />
-            <CalcLine label="TCS-liable portion" value="₹65L" variant="red" />
-            <CalcLine label="TCS deducted (20%)" value="₹13L" variant="red" />
-            <CalcLine label="Effective TCS rate" value="17.33%" variant="red" />
-            <CalcLine label="Net reaches GIFT City" value="₹62L" variant="neutral" />
-          </div>
-        </div>
-        <div className="mt-3 p-3 rounded-lg" style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
-          <p className="text-xs"><strong>IRR drag (via ITR, 9 months, 12% return):</strong> ₹13L × 12% × (9/12) = <strong style={{ color: "#DC2626" }}>₹1.17L in lost returns</strong>. Rajesh effectively pays ₹14.17L in real cost for his TCS.</p>
-        </div>
-        <TipBox>
-          If Rajesh switches on &ldquo;Do you pay advance tax?&rdquo;, the lock-up drops to ~1.5 months (next installment March 15). His opportunity cost collapses from ₹1.17L to <strong>₹0.19L</strong> — saving ₹98,000 by simply offsetting TCS against advance tax.
-        </TipBox>
-      </ExampleBox>
-
-      {/* ── Example 2 ── */}
-      <SectionHeader>Example 2 — Family optimization</SectionHeader>
-      <ExampleBox title="Scenario: Sharma family wants to remit ₹3 Cr collectively">
-        <p className="text-xs text-gray-500 mb-3">Three adult PANs: Arvind (already remitted ₹0), Priya (₹0), their adult son Rohan (₹0)</p>
-        <div className="rounded-lg overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
-          <table className="w-full text-xs">
-            <thead>
-              <tr style={{ background: "#F9FAFB" }}>
-                <th className="px-3 py-2 text-left text-gray-500">Member</th>
-                <th className="px-3 py-2 text-right text-gray-500">Routed</th>
-                <th className="px-3 py-2 text-right text-gray-500">TCS-Free</th>
-                <th className="px-3 py-2 text-right text-gray-500">TCS Paid</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { name: "Arvind", routed: "₹1Cr", free: "₹10L", tcs: "₹18L (20%)" },
-                { name: "Priya", routed: "₹1Cr", free: "₹10L", tcs: "₹18L (20%)" },
-                { name: "Rohan", routed: "₹1Cr", free: "₹10L", tcs: "₹18L (20%)" },
-              ].map((r) => (
-                <tr key={r.name} className="border-t" style={{ borderColor: "#F3F4F6" }}>
-                  <td className="px-3 py-2 font-medium" style={{ color: "#00111B" }}>{r.name}</td>
-                  <td className="px-3 py-2 text-right">{r.routed}</td>
-                  <td className="px-3 py-2 text-right font-semibold" style={{ color: "#05A049" }}>{r.free}</td>
-                  <td className="px-3 py-2 text-right font-semibold" style={{ color: "#DC2626" }}>{r.tcs}</td>
-                </tr>
-              ))}
-              <tr style={{ background: "#F0FAF5", borderTop: "2px solid #B4E3C8" }}>
-                <td className="px-3 py-2 font-bold" style={{ color: "#00111B" }}>Total</td>
-                <td className="px-3 py-2 text-right font-bold">₹3 Cr</td>
-                <td className="px-3 py-2 text-right font-bold" style={{ color: "#05A049" }}>₹30L free</td>
-                <td className="px-3 py-2 text-right font-bold" style={{ color: "#DC2626" }}>₹54L TCS</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-3 p-3 rounded-lg" style={{ background: "#EDFAF3", border: "1px solid #B4E3C8" }}>
-          <p className="text-xs"><strong>If Arvind remitted all ₹3 Cr alone:</strong> TCS = ₹2.9Cr × 20% = ₹58L.<br />
-          <strong>By splitting across 3 PANs:</strong> TCS = ₹54L. <strong style={{ color: "#05A049" }}>Family saves ₹4L.</strong></p>
-        </div>
-        <TipBox>Each adult member of the family — spouse, parents, adult children — gets their own ₹10L TCS-free threshold and their own $250,000 LRS annual limit. A family of 5 can remit ₹50L completely TCS-free every year.</TipBox>
-      </ExampleBox>
-
-      {/* ── Advance tax deep dive ── */}
-      <SectionHeader><Clock className="h-4 w-4" style={{ color: "#05A049" }} /> The advance tax opportunity</SectionHeader>
-      <p className="text-xs text-gray-500 mb-3">The biggest unlock most HNIs miss. TCS appears in Form 26AS Part F and can be directly credited against your advance tax installments — no separate claim, no waiting until July.</p>
-
-      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
-        <div className="grid grid-cols-3 text-center" style={{ borderBottom: "1px solid #E5E7EB" }}>
-          {["Installment", "Date", "% of Annual Tax"].map((h) => (
-            <div key={h} className="px-3 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wide" style={{ background: "#F9FAFB" }}>{h}</div>
-          ))}
-        </div>
-        {[["1st", "June 15", "15%"], ["2nd", "September 15", "45%"], ["3rd", "December 15", "75%"], ["4th", "March 15", "100%"]].map(([inst, date, pct]) => (
-          <div key={date} className="grid grid-cols-3 text-center border-t text-xs" style={{ borderColor: "#F3F4F6" }}>
-            <div className="px-3 py-2.5 font-medium" style={{ color: "#374151" }}>{inst}</div>
-            <div className="px-3 py-2.5 font-bold" style={{ color: "#00111B" }}>{date}</div>
-            <div className="px-3 py-2.5 font-semibold" style={{ color: "#05A049" }}>{pct}</div>
-          </div>
-        ))}
-      </div>
-
-      <ExampleBox title="Advance tax example: Remitting ₹50L in June">
-        <CalcLine label="TCS deducted (20% on ₹40L above threshold)" value="₹8L" variant="red" />
-        <CalcLine label="ITR path lock-up (June → Sep next year)" value="16 months" variant="red" />
-        <CalcLine label="Opportunity cost via ITR @ 12% return" value="₹1.28L" variant="red" />
-        <CalcLine label="Advance tax path lock-up (June → Sep 15)" value="3 months" variant="green" />
-        <CalcLine label="Opportunity cost via AT @ 12% return" value="₹0.24L" variant="green" />
-        <CalcLine label="Saving by using advance tax offset" value="₹1.04L" variant="green" />
-        <p className="text-[10px] text-gray-400 mt-3">When filing your September 15 advance tax, you reduce payment by ₹8L. The ₹8L TCS in Form 26AS Part F offsets directly. No application required.</p>
-      </ExampleBox>
-
-      {/* ── Common mistakes ── */}
-      <SectionHeader>Common mistakes to avoid</SectionHeader>
-      <div className="space-y-2">
-        {[
-          ["Remitting in one PAN only", "Even if only one person is investing, GIFT City funds can be owned jointly. Split remittances across family PANs to avoid TCS and optimize the ₹10L threshold per PAN."],
-          ["Not tracking FY remittances", "TCS kicks in on the total across the FY from one PAN — not per remittance. If you remit ₹8L in April and ₹5L in October from the same PAN, the second remittance hits the threshold mid-way. Track cumulative FY total."],
-          ["Missing advance tax offset", "Most investors wait 9–18 months for ITR refund. If you pay advance tax, the same TCS is absorbed in weeks at your next installment. Toggle this on if you pay advance tax above ₹10,000/year."],
-        ].map(([title, body]) => (
-          <Collapse key={title} title={`⚠ ${title}`}>
-            <p className="text-xs leading-relaxed text-gray-600">{body}</p>
-          </Collapse>
-        ))}
+      <div className="px-5 py-4 space-y-3">{children}</div>
+      <div className="px-5 pb-4">
+        <Link href={href}
+          className="inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-xl transition-all hover:opacity-90 active:scale-[0.98]"
+          style={{ background: color, color: "#fff" }}>
+          Open {calcLabel} calculator <ArrowRight size={13} />
+        </Link>
       </div>
     </div>
   );
 }
 
-function CGContent() {
+/* Quick-link pill */
+function NavPill({ href, color, children }: { href: string; color: string; children: React.ReactNode }) {
   return (
-    <div>
-      <p className="text-sm leading-relaxed text-gray-600">
-        India taxes overseas fund gains differently depending on how long you hold them. The magic number is <strong>730 days (24 months)</strong>. Hold longer: flat 12.5% LTCG with surcharge capped at 15%. Sell earlier: your income slab rate applies — up to 42.74% for the highest earners. This calculator finds the break-even day and models both scenarios exactly.
-      </p>
-
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-xl p-4" style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
-          <p className="text-[10px] font-bold uppercase tracking-wide mb-2" style={{ color: "#DC2626" }}>Short Term (≤ 730 days)</p>
-          <p className="text-xs text-gray-600 space-y-1">
-            <span className="block">Base rate: your income slab (0–30%)</span>
-            <span className="block">Surcharge: up to 37% — <strong>no cap</strong></span>
-            <span className="block">Cess: 4%</span>
-            <span className="block font-bold" style={{ color: "#DC2626" }}>Max effective: 42.74%</span>
-          </p>
-        </div>
-        <div className="rounded-xl p-4" style={{ background: "#EDFAF3", border: "1px solid #B4E3C8" }}>
-          <p className="text-[10px] font-bold uppercase tracking-wide mb-2" style={{ color: "#05A049" }}>Long Term (&gt; 730 days)</p>
-          <p className="text-xs text-gray-600 space-y-1">
-            <span className="block">Base rate: 12.5% flat (Section 112)</span>
-            <span className="block">Surcharge: <strong>capped at 15%</strong> — key HNI benefit</span>
-            <span className="block">Cess: 4%</span>
-            <span className="block font-bold" style={{ color: "#05A049" }}>Max effective: 14.95%</span>
-          </p>
-        </div>
-      </div>
-
-      <SectionHeader><BookOpen className="h-4 w-4" style={{ color: "#00111B" }} /> How to use the calculator</SectionHeader>
-      <StepList steps={[
-        "Choose currency (INR or USD). If USD, edit the exchange rate (default ₹84.50).",
-        "Enter your purchase price and sale price per unit.",
-        "Enter the number of units/shares.",
-        "Set holding period using either the Years + Months inputs or the slider (0–10 years). The badge instantly shows LONG TERM or SHORT TERM.",
-        "Set your annual income excluding this gain — this determines your STCG slab rate and surcharge bracket.",
-        "Choose tax regime — New (default FY 2025-26) or Old.",
-        "If you have carry-forward losses, toggle Yes and enter STCL/LTCL amounts.",
-        "Click 'Show Math' on Card 2 to see the full 8-step derivation of your tax.",
-      ]} />
-
-      {/* Example 1: STCG */}
-      <SectionHeader>Example 1 — Short-term gain, high-income investor</SectionHeader>
-      <ExampleBox title="Priya buys a GIFT City fund at $100, sells at $145 after 18 months. Income: ₹5 Cr.">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Inputs</p>
-            <CalcLine label="Buy price" value="$100 (₹8,450)" />
-            <CalcLine label="Sell price" value="$145 (₹12,252)" />
-            <CalcLine label="Units" value="1,000" />
-            <CalcLine label="Holding" value="18 months (540 days)" variant="red" />
-            <CalcLine label="Income" value="₹5 Cr (above ₹2Cr slab)" />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Calculation</p>
-            <CalcLine label="Gain" value="₹38,02,000 (₹3,802/unit × 1,000)" variant="gold" />
-            <CalcLine label="Type" value="STCG (540 days ≤ 730)" variant="red" />
-            <CalcLine label="Base slab rate" value="30%" variant="red" />
-            <CalcLine label="Surcharge (uncapped)" value="25% → net 37.5% rate" variant="red" />
-            <CalcLine label="Cess 4%" value="+4%" />
-            <CalcLine label="Effective rate" value="40.56%" variant="red" />
-            <CalcLine label="Tax payable" value="~₹15.42L" variant="red" />
-            <CalcLine label="Net after tax" value="~₹22.60L" variant="neutral" />
-          </div>
-        </div>
-        <div className="mt-3 p-3 rounded-lg" style={{ background: "#FFF7ED", border: "1px solid #FDE68A" }}>
-          <p className="text-xs"><strong>The Waiting Game:</strong> Priya is 190 days from LTCG threshold. If she waits, effective rate drops to 14.95%. Tax drops from ₹15.42L to <strong style={{ color: "#05A049" }}>~₹5.69L</strong>. She saves <strong style={{ color: "#05A049" }}>₹9.73L by waiting 190 days.</strong></p>
-        </div>
-      </ExampleBox>
-
-      {/* Example 2: LTCG */}
-      <SectionHeader>Example 2 — Long-term gain with surcharge cap advantage</SectionHeader>
-      <ExampleBox title="Vikram holds for 25 months. Income above ₹5 Cr. The surcharge cap is the key.">
-        <p className="text-xs text-gray-500 mb-3">Without LTCG, Vikram would be at 37% surcharge. With LTCG, surcharge is capped at 15% regardless of income.</p>
-        <div className="rounded-lg overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
-          <table className="w-full text-xs">
-            <thead>
-              <tr style={{ background: "#F9FAFB" }}>
-                <th className="px-3 py-2 text-left text-gray-500">Item</th>
-                <th className="px-3 py-2 text-right text-gray-500">STCG (if held less)</th>
-                <th className="px-3 py-2 text-right text-gray-500">LTCG (25 months)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ["Base rate", "30% (slab)", "12.5% (flat)"],
-                ["Surcharge", "37% (uncapped)", "15% (capped)"],
-                ["Effective rate", "42.74%", "14.95%"],
-                ["Tax on ₹1 Cr gain", "₹42.74L", "₹14.95L"],
-                ["Saving vs STCG", "—", "₹27.79L per ₹1 Cr"],
-              ].map(([item, stcg, ltcg]) => (
-                <tr key={item} className="border-t" style={{ borderColor: "#F3F4F6" }}>
-                  <td className="px-3 py-2.5 font-medium text-gray-600">{item}</td>
-                  <td className="px-3 py-2.5 text-right font-mono" style={{ color: "#DC2626" }}>{stcg}</td>
-                  <td className="px-3 py-2.5 text-right font-mono font-bold" style={{ color: "#05A049" }}>{ltcg}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <TipBox>The 15% surcharge cap on LTCG is the most underutilised provision for HNIs with income above ₹2 Cr. At ₹5 Cr+ income, the STCG-to-LTCG spread is 27.79 percentage points per rupee of gain. Waiting 730 days is mathematically the single highest-value action.</TipBox>
-      </ExampleBox>
-
-      {/* Example 3: Losses */}
-      <SectionHeader>Example 3 — Using carry-forward losses</SectionHeader>
-      <ExampleBox title="Deepa has ₹5L in STCL from last year. Now she has a ₹12L STCG.">
-        <CalcLine label="Gross STCG" value="₹12L" variant="gold" />
-        <CalcLine label="STCL carry-forward offset" value="−₹5L" variant="green" />
-        <CalcLine label="Taxable STCG after offset" value="₹7L" variant="gold" />
-        <CalcLine label="Effective rate (₹50L income, new regime)" value="~17.55%" />
-        <CalcLine label="Tax on ₹7L vs ₹12L" value="₹1.23L vs ₹2.11L" variant="green" />
-        <CalcLine label="Saving from STCL offset" value="₹0.88L" variant="green" />
-        <p className="text-[10px] text-gray-400 mt-3">STCL offsets both STCG and LTCG. LTCL offsets LTCG only. Carry-forward is valid for 8 Assessment Years — but you must file ITR by July 31 to preserve it.</p>
-        <WarnBox>If you miss the July 31 ITR deadline, you lose the right to carry forward the loss permanently. Always file on time even if you have no tax to pay.</WarnBox>
-      </ExampleBox>
-
-      {/* Rate table reference */}
-      <SectionHeader>Rate quick-reference</SectionHeader>
-      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
-        <table className="w-full text-xs">
-          <thead>
-            <tr style={{ background: "#F9FAFB" }}>
-              {["Income Bracket", "STCG Effective", "LTCG Effective", "TLH Value / ₹1L gain"].map((h) => (
-                <th key={h} className="px-3 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              ["Up to ₹3L",    "0%",     "13.00%", "—"],
-              ["₹3L–₹7L",     "5.46%",  "13.00%", "₹ 763"],
-              ["₹7L–₹10L",    "10.92%", "13.00%", "₹ 208"],
-              ["₹10L–₹50L",   "17.55%", "13.00%", "₹ 455"],
-              ["₹50L–₹1 Cr",  "21.45%", "13.00%", "₹ 845"],
-              ["₹1 Cr–₹2 Cr", "24.96%", "13.00%", "₹1,196"],
-              ["₹2 Cr–₹5 Cr", "34.32%", "14.95%", "₹1,937"],
-              ["Above ₹5 Cr", "42.74%", "14.95%", "₹2,779"],
-            ].map(([bracket, stcg, ltcg, tlh]) => (
-              <tr key={bracket} className="border-t" style={{ borderColor: "#F3F4F6" }}>
-                <td className="px-3 py-2.5 font-medium text-gray-700">{bracket}</td>
-                <td className="px-3 py-2.5 font-mono font-bold" style={{ color: "#DC2626" }}>{stcg}</td>
-                <td className="px-3 py-2.5 font-mono font-bold" style={{ color: "#05A049" }}>{ltcg}</td>
-                <td className="px-3 py-2.5 font-mono font-semibold" style={{ color: "#B8913A" }}>{tlh}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p className="text-[10px] text-gray-400 mt-2">TLH Value = tax saved per ₹1L of loss harvested. For income above ₹5 Cr, harvesting a ₹1L loss and reinvesting is worth ₹2,779 in permanent tax saving.</p>
-    </div>
+    <a href={href}
+      className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all hover:opacity-80 active:scale-[0.97]"
+      style={{ background: `${color}12`, color, border: `1px solid ${color}25` }}>
+      {children} <ChevronRight size={11} />
+    </a>
   );
 }
 
-function DTAAContent() {
+/* ─── Main export ─────────────────────────────────────────────────────── */
+export default function DocsPage() {
   return (
-    <div>
-      <p className="text-sm leading-relaxed text-gray-600">
-        NRIs and Resident Indians with foreign income face double taxation — both India and their country of residence (or the source country) try to tax the same rupee. DTAA treaties cap the rate. This calculator has two completely separate flows: <strong>NRI flow</strong> (country of residence outside India) and <strong>Resident Indian flow</strong> (you live in India, income sourced abroad).
-      </p>
+    <div className="min-h-screen" style={{ background: C.bg }}>
 
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-xl p-4" style={{ background: "#F9FAFB", border: "1px solid #E5E7EB" }}>
-          <p className="text-xs font-bold mb-2" style={{ color: "#00111B" }}>NRI Flow (country ≠ India)</p>
-          <p className="text-xs text-gray-500 leading-relaxed">India taxes your Indian-source income at DTAA-capped rates. Your residence country taxes globally but credits Indian tax paid. You pay the higher of the two — not both.</p>
-        </div>
-        <div className="rounded-xl p-4" style={{ background: "#FFF7ED", border: "1px solid #FDE68A" }}>
-          <p className="text-xs font-bold mb-2" style={{ color: "#00111B" }}>Resident Indian Flow (🇮🇳 India)</p>
-          <p className="text-xs text-gray-500 leading-relaxed">You live in India. A foreign source country deducts WHT before paying you. India then taxes the gross at your slab rate. File Form 67 to claim FTC — and pay only the higher of the two rates.</p>
-        </div>
-      </div>
-
-      {/* NRI Section */}
-      <SectionHeader><Globe className="h-4 w-4" style={{ color: "#B8913A" }} /> NRI Flow — How to use</SectionHeader>
-      <StepList steps={[
-        "Step 1: Select your country of residence (UAE, UK, USA, Singapore, Canada, Australia, Germany, Netherlands, Mauritius, Japan, or Other).",
-        "Step 1: Select income type — Dividends, Capital Gains, Interest, or Other.",
-        "Step 1: Enter the income amount (INR or USD toggle).",
-        "Step 2: Set your marginal income tax rate in your residence country using the slider. A hint shows the typical rate for your selected country.",
-        "Step 2: Enter the Indian TDS/WHT already deducted by the payer (pre-filled with the DTAA rate).",
-        "Read the two cards: 'Without DTAA' (red, double taxation) vs 'With DTAA' (green, treaty protection). The savings banner shows the exact INR benefit.",
-      ]} />
-
-      <ExampleBox title="NRI Example: Rajan lives in UAE, receives ₹10L dividend from an Indian company">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Without DTAA</p>
-            <CalcLine label="Indian domestic WHT (30%)" value="₹3L" variant="red" />
-            <CalcLine label="UAE tax (0% — no income tax)" value="₹0" variant="neutral" />
-            <CalcLine label="Total" value="₹3L (30%)" variant="red" />
+      {/* ════════════════════════════════════════════
+          HERO
+      ════════════════════════════════════════════ */}
+      <div style={{ background: C.dark }}>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 pt-10 pb-12">
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
+            <Tag color={C.mint}>Platform Guide</Tag>
+            <Tag color={C.amber}>FY 2025-26</Tag>
           </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">With DTAA (India-UAE)</p>
-            <CalcLine label="Indian DTAA-capped WHT (10%)" value="₹1L" variant="green" />
-            <CalcLine label="UAE tax (0%)" value="₹0" variant="neutral" />
-            <CalcLine label="FTC via Form 67" value="₹0 (UAE taxes nothing to credit)" variant="neutral" />
-            <CalcLine label="Total" value="₹1L (10%)" variant="green" />
-          </div>
-        </div>
-        <div className="mt-3 p-3 rounded-lg" style={{ background: "#EDFAF3", border: "1px solid #B4E3C8" }}>
-          <p className="text-xs"><strong style={{ color: "#05A049" }}>DTAA saves Rajan ₹2L (20 percentage points)</strong> on this single dividend payment. UAE is one of the lowest DTAA rates (10%). Mauritius is the lowest at 5%.</p>
-        </div>
-      </ExampleBox>
+          <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight"
+            style={{ fontFamily: "var(--font-bricolage)", color: "#FFFFFC" }}>
+            How to get the most out of Valura
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+            Six calculators. One AI advisor. Real tax rules. No guesswork.
+            This guide walks through exactly when to use each tool, with real rupee examples
+            so you leave every session knowing exactly what to do next.
+          </p>
 
-      <ExampleBox title="NRI Example: Sunita lives in UK, receives ₹20L dividend from Indian stocks">
-        <CalcLine label="Without DTAA — Indian tax (30%)" value="₹6L" variant="red" />
-        <CalcLine label="Without DTAA — UK tax (45% marginal)" value="₹9L" variant="red" />
-        <CalcLine label="Without DTAA — Total double tax" value="₹15L (75%!)" variant="red" />
-        <div className="my-2 border-t" style={{ borderColor: "#E5E7EB" }} />
-        <CalcLine label="With DTAA — Indian WHT (15% per UK treaty)" value="₹3L" variant="green" />
-        <CalcLine label="With DTAA — UK tax (45%)" value="₹9L gross" variant="neutral" />
-        <CalcLine label="With DTAA — FTC credit (Indian tax paid)" value="−₹3L" variant="green" />
-        <CalcLine label="With DTAA — Net UK tax" value="₹6L" variant="neutral" />
-        <CalcLine label="With DTAA — Total" value="₹9L (45%)" variant="green" />
-        <p className="text-[10px] text-gray-400 mt-2">Sunita pays only the UK rate (the higher of the two). She does not pay both — that is the core principle of DTAA + FTC.</p>
-      </ExampleBox>
-
-      {/* DTAA rates table */}
-      <SectionHeader>India DTAA Dividend WHT rates at a glance</SectionHeader>
-      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
-        <table className="w-full text-xs">
-          <thead>
-            <tr style={{ background: "#F9FAFB" }}>
-              {["Country", "Dividend WHT", "Why it matters"].map((h) => (
-                <th key={h} className="px-3 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
+          {/* Quick nav */}
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-2">
             {[
-              ["🇲🇺 Mauritius", "5%", "Lowest treaty rate — ideal for dividend-heavy portfolios"],
-              ["🇩🇪 Germany", "10%", "Low rate with strong treaty provisions"],
-              ["🇳🇱 Netherlands", "10%", "Low rate; popular UCITS fund domicile"],
-              ["🇦🇪 UAE", "10%", "No UAE income tax — only Indian WHT applies"],
-              ["🇯🇵 Japan", "10%", "Low rate despite high domestic Japanese tax"],
-              ["🇬🇧 UK", "15%", "Standard rate; FTC available against UK tax"],
-              ["🇸🇬 Singapore", "15%", "One-tier dividend system — no Singapore WHT beyond this"],
-              ["🇦🇺 Australia", "15%", "FTC available against Australian CGT"],
-              ["🇮🇳 Without DTAA", "30%", "Full domestic rate — no treaty protection"],
-              ["🇺🇸 USA", "25%", "Highest among major destinations — UCITS route preferred"],
-              ["🇨🇦 Canada", "25%", "Highest alongside USA"],
-            ].map(([c, rate, note]) => (
-              <tr key={c} className="border-t" style={{ borderColor: "#F3F4F6" }}>
-                <td className="px-3 py-2.5 font-medium">{c}</td>
-                <td className="px-3 py-2.5 font-mono font-bold"
-                  style={{ color: parseFloat(rate) <= 10 ? "#05A049" : parseFloat(rate) >= 25 ? "#DC2626" : "#B8913A" }}>
-                  {rate}
-                </td>
-                <td className="px-3 py-2.5 text-gray-500">{note}</td>
-              </tr>
+              { href: "#scenario-1", label: "TCS & LRS",    color: C.green  },
+              { href: "#scenario-2", label: "Capital Gains", color: C.dark  },
+              { href: "#scenario-3", label: "DTAA / FTC",   color: C.amber  },
+              { href: "#scenario-4", label: "Net Returns",   color: C.blue   },
+              { href: "#scenario-5", label: "Estate Tax",    color: C.red    },
+              { href: "#scenario-6", label: "NRI Status",    color: "#6B7280"},
+            ].map((n) => (
+              <a key={n.href} href={n.href}
+                className="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all hover:opacity-80"
+                style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.65)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                {n.label} <ChevronRight size={11} />
+              </a>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
 
-      {/* Resident Indian section */}
-      <SectionHeader><span className="text-base">🇮🇳</span> Resident Indian Flow — How to use</SectionHeader>
-      <StepList steps={[
-        "Step 1: Select '🇮🇳 India (Resident Indian)' — the UI switches to the FTC flow.",
-        "Step 1: Select income type. Note: GIFT City interest is NOT exempt for residents (unlike NRIs). Interest is taxed at your slab rate.",
-        "Step 1: Enter the income amount.",
-        "Step 2: Select your Indian income tax slab from the dropdown (New Regime FY 2025-26).",
-        "Step 2: Select the source country — the country where the income originated (USA, UK, Singapore, etc.).",
-        "Read the two cards: 'Without FTC' (both taxes stacked) vs 'With FTC via Form 67' (you pay only the higher rate).",
-      ]} />
-
-      <ExampleBox title="Resident Indian Example: Aditya gets $10,000 dividend from a US stock. Income: ₹20L (30% slab).">
-        <p className="text-xs text-gray-500 mb-3">Dividend ≈ ₹8.45L at ₹84.50/$. USA deducts 25% NRA withholding (₹2.11L) before paying Aditya.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Without FTC</p>
-            <CalcLine label="US WHT deducted (25%)" value="₹2.11L" variant="red" />
-            <CalcLine label="Indian slab tax (30%)" value="₹2.54L" variant="red" />
-            <CalcLine label="Total" value="₹4.65L (55%!)" variant="red" />
+      {/* ════════════════════════════════════════════
+          MENTAL MODEL — one paragraph
+      ════════════════════════════════════════════ */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 mt-10">
+        <div className="rounded-2xl p-5 sm:p-6" style={{ background: "#F0FAF4", border: `1px solid ${C.mint}` }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-4 w-4" style={{ color: C.green }} />
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: C.green }}>Start here</p>
           </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">With FTC (Form 67)</p>
-            <CalcLine label="US WHT deducted" value="₹2.11L" variant="neutral" />
-            <CalcLine label="Indian slab tax" value="₹2.54L" variant="neutral" />
-            <CalcLine label="FTC = min(US WHT, Indian tax)" value="−₹2.11L" variant="green" />
-            <CalcLine label="Net Indian tax" value="₹0.43L" variant="neutral" />
-            <CalcLine label="Total (US WHT + net Indian)" value="₹2.54L (30%)" variant="green" />
-          </div>
-        </div>
-        <div className="mt-3 p-3 rounded-lg" style={{ background: "#EDFAF3", border: "1px solid #B4E3C8" }}>
-          <p className="text-xs"><strong style={{ color: "#05A049" }}>FTC saves ₹2.11L.</strong> Aditya pays only 30% (his Indian slab rate — the higher of the two), not 55%.</p>
-        </div>
-        <TipBox>
-          US WHT (25%) &lt; Indian slab (30%), so FTC covers the full WHT and Aditya still pays the Indian differential. If Aditya were in the 20% slab, US WHT would exceed his Indian tax — he would pay 25% and get no further credit. The FTC rule: you always pay the <strong>higher</strong> of the two rates.
-        </TipBox>
-      </ExampleBox>
-
-      {/* GIFT City for residents */}
-      <SectionHeader>GIFT City: Key differences for Resident Indians</SectionHeader>
-      <WarnBox>
-        Unlike NRIs, Resident Indians do NOT get the Section 10(15)(ix) interest exemption on GIFT City IFSC bonds. Interest income from GIFT City funds is taxable at your full slab rate. Structure your portfolio towards growth/capital-appreciation funds rather than income-distributing products.
-      </WarnBox>
-      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
-        <table className="w-full text-xs">
-          <thead>
-            <tr style={{ background: "#F9FAFB" }}>
-              {["Income Type", "NRI", "Resident Indian"].map((h) => (
-                <th key={h} className="px-3 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
+          <p className="text-sm font-bold mb-1" style={{ fontFamily: "var(--font-manrope)", color: C.dark }}>
+            Three types of tax drag eat your returns as an Indian HNI investing globally.
+          </p>
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
-              ["GIFT City interest", "0% — Sec 10(15)(ix) exempt", "Slab rate (up to 30%)"],
-              ["LTCG on GIFT City funds", "12.5% (14.95% max)", "12.5% (14.95% max)"],
-              ["STCG on GIFT City funds", "Slab rate", "Slab rate"],
-              ["Schedule FA disclosure", "Not required", "Mandatory — ₹10L penalty if missed"],
-              ["Form 67 for FTC", "Required for foreign tax credit", "Required for foreign WHT credit"],
-            ].map(([type, nri, res]) => (
-              <tr key={type} className="border-t" style={{ borderColor: "#F3F4F6" }}>
-                <td className="px-3 py-2.5 font-medium text-gray-700">{type}</td>
-                <td className="px-3 py-2.5" style={{ color: "#05A049" }}>{nri}</td>
-                <td className="px-3 py-2.5" style={{ color: type.includes("interest") ? "#DC2626" : "#374151" }}>{res}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Form 67 */}
-      <SectionHeader><FileText className="h-4 w-4" style={{ color: "#B8913A" }} /> Form 67 — the most important deadline</SectionHeader>
-      <div className="rounded-xl p-4" style={{ background: "#FFFBF0", border: "1px solid #E8C97A" }}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div>
-            <p className="font-bold mb-2" style={{ color: "#B8913A" }}>Must-do checklist</p>
-            {["File Form 67 online on the e-filing portal", "Deadline: March 31 of the Assessment Year (not July 31)", "Must match Schedule FSI in your ITR-2 or ITR-3", "Attach TDS certificate from foreign payer / Indian payer", "Cannot be filed late or via revised return"].map((item) => (
-              <div key={item} className="flex items-start gap-1.5 mb-1">
-                <CheckCircle2 className="h-3 w-3 flex-shrink-0 mt-0.5" style={{ color: "#B8913A" }} />
-                <span className="text-gray-600">{item}</span>
+              { num: "①", label: "Upfront cash lock", desc: "20% TCS deducted the moment you remit. Calculator 1.", color: C.red },
+              { num: "②", label: "Return tax leak", desc: "STCG vs LTCG spreads up to 28 percentage points. Calculators 2 & 4.", color: C.amber },
+              { num: "③", label: "Structural risk", desc: "US estate tax up to 40% on death if you hold directly. Calculator 5.", color: C.blue },
+            ].map((i) => (
+              <div key={i.num} className="rounded-xl px-3.5 py-3" style={{ background: "#fff", border: `1px solid ${C.mint}` }}>
+                <span className="text-lg font-black" style={{ color: i.color }}>{i.num}</span>
+                <p className="text-xs font-bold mt-0.5" style={{ color: C.dark }}>{i.label}</p>
+                <p className="text-[11px] mt-0.5" style={{ color: "#6B7280" }}>{i.desc}</p>
               </div>
             ))}
           </div>
-          <div>
-            <p className="font-bold mb-2" style={{ color: "#DC2626" }}>What happens if you miss it</p>
-            <p className="text-gray-600 leading-relaxed">The Foreign Tax Credit is <strong>permanently lost</strong>. You cannot claim it in a revised return or in subsequent years. For large dividend portfolios, this can mean losing lakhs every year with no recourse. Set a calendar reminder for March 31.</p>
-          </div>
+          <p className="text-xs mt-3 leading-relaxed" style={{ color: "#374151" }}>
+            Valura eliminates or reduces all three simultaneously. Use these calculators to
+            <strong> quantify each drag in rupees</strong>, then open an account to apply the fix.
+          </p>
         </div>
       </div>
-    </div>
-  );
-}
 
-/* ══════════════════════════════════════════════════════════════════
-   NET RETURNS CONTENT
-══════════════════════════════════════════════════════════════════ */
+      {/* ════════════════════════════════════════════
+          SCENARIOS
+      ════════════════════════════════════════════ */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 mt-10 space-y-6 pb-16">
 
-function NetReturnsContent() {
-  return (
-    <div>
-      <p className="text-sm leading-relaxed text-gray-600">
-        This is the <strong>closing argument</strong>. Every drag — TCS lock-up, higher dividend withholding, estate tax risk — compounds silently over decades. The Net Returns calculator runs a full year-by-year projection for both routes and shows exactly how much more wealth your family keeps by investing via Valura GIFT City instead of directly through IBKR, Vested, or INDmoney.
-      </p>
+        {/* ── Scenario 1: LRS & TCS ── */}
+        <ScenarioCard
+          number={1}
+          title="I want to invest ₹50L abroad. How much TCS will I pay — and how do I cut it?"
+          subtitle="Use this whenever you're about to remit money overseas for investment."
+          color={C.green}
+          icon={BadgePercent}
+          href="/calculators/lrs-tcs"
+          calcLabel="LRS & TCS"
+        >
+          <p className="text-xs leading-relaxed" style={{ color: "#374151" }}>
+            India's bank deducts <strong>20% TCS on every rupee above ₹10L per PAN per financial year</strong>.
+            You get it back via ITR — but the money is locked for 7–18 months.
+            The real cost isn't just the TCS; it's the <em>return you could have earned</em> on that locked cash.
+          </p>
 
-      {/* Key differentiators */}
-      <div className="mt-4 rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
-        <table className="w-full text-xs">
-          <thead>
-            <tr style={{ background: "#F9FAFB" }}>
-              {["What", "Route A — Direct", "Route B — Valura"].map((h) => (
-                <th key={h} className="px-3 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
+          {/* Step-by-step */}
+          <SectionH3 icon={<BookOpen size={13} style={{ color: C.green }} />}>
+            What to enter — step by step
+          </SectionH3>
+          <ol className="space-y-2">
             {[
-              ["TCS on remittance",       "20% above ₹10L per PAN",         "₹0 — family optimized across N PANs"],
-              ["Dividend WHT",            "25% (NRA rate on US stocks)",     "15% via Ireland UCITS ETF route"],
-              ["Capital gains tax",       "LTCG 14.95% / STCG up to 42.74%","Identical — same rules apply"],
-              ["US estate tax",           "Up to 40% above USD 60K",        "₹0 — IFSC units are not US-situs"],
-              ["Currency friction",       "~0.5% per remittance",            "Included in platform fee"],
-              ["Platform fee",            "₹0",                              "0.5% per year (editable)"],
-            ].map(([item, a, b]) => (
-              <tr key={item} className="border-t" style={{ borderColor: "#F3F4F6" }}>
-                <td className="px-3 py-2.5 font-medium text-gray-700">{item}</td>
-                <td className="px-3 py-2.5 font-mono" style={{ color: item === "Capital gains tax" ? "#6B7280" : "#DC2626" }}>{a}</td>
-                <td className="px-3 py-2.5 font-mono" style={{ color: item === "Capital gains tax" ? "#6B7280" : item === "Platform fee" ? "#DC2626" : "#05A049" }}>{b}</td>
-              </tr>
+              ["How much to invest this FY?", "₹50L — type it or use the slider"],
+              ["Already remitted?", "₹0 if this is your first remittance of the year"],
+              ["Purpose?", "Investment (20% TCS). Education via 80E loan = 0% TCS."],
+              ["Current month?", "Determines how long TCS is locked before you get it back"],
+              ["Do you pay advance tax?", "Switch YES — this is the most important toggle on the page"],
+              ["Family members?", "Add your spouse and adult children — each gets their own ₹10L threshold"],
+            ].map(([q, a], i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span className="flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-black mt-0.5"
+                  style={{ background: C.dark, color: "#fff" }}>{i + 1}</span>
+                <div>
+                  <p className="text-xs font-semibold" style={{ color: C.dark }}>{q}</p>
+                  <p className="text-[11px]" style={{ color: "#6B7280" }}>{a}</p>
+                </div>
+              </li>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </ol>
 
-      <div className="mt-3 rounded-xl px-4 py-3 flex items-start gap-2.5"
-        style={{ background: "#FFFBF0", border: "1px solid #E8C97A" }}>
-        <Lightbulb className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#B8913A" }} />
-        <p className="text-xs leading-relaxed" style={{ color: "#374151" }}>
-          <strong>The key insight:</strong> Capital gains tax is <em>identical</em> in both routes. The entire Route B advantage comes from TCS savings, lower dividend WHT (25% → 15%), and eliminating US estate tax. This calculator makes the compounding effect visible.
-        </p>
-      </div>
-
-      <SectionHeader><BookOpen className="h-4 w-4" style={{ color: "#2B4A8A" }} /> How to use the calculator</SectionHeader>
-      <StepList steps={[
-        "Choose currency (INR or USD) and set your initial investment amount using the slider or input.",
-        "Set annual additional investment if you plan to invest a recurring amount each year.",
-        "Set investment horizon (1–30 years), expected annual return (6–20%), and dividend yield (0–5%).",
-        "Choose holding strategy: Long Term LTCG (hold 730+ days and pay 14.95% on exit), Active STCG (slab rate applied annually), or Mixed (50% each).",
-        "Set your income bracket — this determines your STCG slab rate (matters if Active or Mixed is selected).",
-        "Set family members for LRS optimization (1–5). Route B uses N × ₹10L TCS threshold. Route A always uses just 1.",
-        "Open Advanced Settings to edit platform fee (default 0.5%), exchange rate, and estate tax probability weighting.",
-        "Read the persistent summary bar at the top — Route A and Route B final values update live as you adjust any input.",
-        "Scroll through: IRR chart, tax waterfall chart, year-by-year table, and break-even card.",
-      ]} />
-
-      {/* Example 1 */}
-      <SectionHeader>Example 1 — Long-term investor, ₹1 Cr at 12% return over 20 years</SectionHeader>
-      <ExampleBox title="Meera invests ₹1 Cr in US equity. Income: ₹50L (21.45% STCG). Strategy: LTCG.">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Inputs</p>
-            <CalcLine label="Initial investment"   value="₹1 Cr" />
-            <CalcLine label="Annual return (pre-tax)" value="12%" />
-            <CalcLine label="Dividend yield"       value="2%" />
-            <CalcLine label="Horizon"              value="20 years" />
-            <CalcLine label="Strategy"             value="LTCG" />
-            <CalcLine label="Family PANs"          value="2 (₹20L threshold)" />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">Route A vs B after 20 years</p>
-            <CalcLine label="TCS drag (A)"         value="₹18L (20% on ₹90L above ₹10L threshold)" variant="red" />
-            <CalcLine label="TCS drag (B)"         value="₹0 (2 PANs × ₹10L = ₹20L free)" variant="green" />
-            <CalcLine label="Dividend WHT (A, 20yr)" value="~₹46L cumulative (25%)" variant="red" />
-            <CalcLine label="Dividend WHT (B, 20yr)" value="~₹28L cumulative (15%)" variant="green" />
-            <CalcLine label="Dividend WHT saved"   value="~₹18L over 20 years" variant="green" />
-            <CalcLine label="Total Route B advantage" value="~₹55–65L + estate tax" variant="green" />
-          </div>
-        </div>
-        <TipBox>At 12% CAGR, ₹18L of TCS that stays invested for 20 years grows to ~₹1.1 Cr. The initial TCS drag is deceptively large in compounding terms.</TipBox>
-      </ExampleBox>
-
-      {/* Example 2 */}
-      <SectionHeader>Example 2 — The estate tax scenario (₹5 Cr holdings)</SectionHeader>
-      <ExampleBox title="Vikram holds $600,000 in US stocks directly. What happens on his death?">
-        <CalcLine label="Total holdings (USD)"          value="$600,000" />
-        <CalcLine label="NRA exemption"                 value="−$60,000" />
-        <CalcLine label="Taxable estate"                value="$540,000" variant="red" />
-        <CalcLine label="US estate tax (progressive)"   value="~$201,800 (~33%)" variant="red" />
-        <CalcLine label="INR equivalent at ₹84.50/$"    value="~₹1.7 Cr" variant="red" />
-        <CalcLine label="Via Valura GIFT City (Route B)" value="$0 estate tax" variant="green" />
-        <div className="mt-3 p-3 rounded-lg" style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}>
-          <p className="text-xs"><strong>₹1.7 Cr is lost to the IRS before Vikram&apos;s family inherits a rupee.</strong> IFSC fund units are Indian assets under IRS classification — Route B eliminates this entirely. The Net Returns calculator probability-weights this based on your chosen estate tax probability slider.</p>
-        </div>
-      </ExampleBox>
-
-      {/* Break-even */}
-      <SectionHeader><TrendingUp className="h-4 w-4" style={{ color: "#2B4A8A" }} /> Understanding the break-even card</SectionHeader>
-      <p className="text-xs text-gray-500 mb-3">The break-even year shows when Route B&apos;s cumulative tax savings exceed its cumulative platform fees. In most scenarios with investment above ₹30L, this happens within 1–3 years.</p>
-      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
-        <table className="w-full text-xs">
-          <thead><tr style={{ background: "#F9FAFB" }}>
-            {["Initial Amount", "Family PANs", "TCS Saved (Yr 1)", "Break-even Year"].map((h) => (
-              <th key={h} className="px-3 py-2 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
-            ))}
-          </tr></thead>
-          <tbody>
-            {[
-              ["₹10L", "1", "₹0 (below threshold)", "~3 years (dividends)"],
-              ["₹50L", "1", "₹8L (20% on ₹40L)", "Year 1"],
-              ["₹1 Cr", "1", "₹18L", "Year 1"],
-              ["₹1 Cr", "2", "₹0 (₹20L threshold)", "~2 years (dividends)"],
-              ["₹5 Cr", "5", "₹0 (₹50L threshold)", "Year 1–2 (dividends + estate)"],
-            ].map(([amt, pans, tcs, be]) => (
-              <tr key={amt + pans} className="border-t" style={{ borderColor: "#F3F4F6" }}>
-                <td className="px-3 py-2.5 font-medium">{amt}</td>
-                <td className="px-3 py-2.5 text-center">{pans}</td>
-                <td className="px-3 py-2.5" style={{ color: tcs.includes("₹0") ? "#6B7280" : "#05A049" }}>{tcs}</td>
-                <td className="px-3 py-2.5 font-bold" style={{ color: "#2B4A8A" }}>{be}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   ESTATE TAX CONTENT
-══════════════════════════════════════════════════════════════════ */
-
-function EstateTaxContent() {
-  return (
-    <div>
-      <p className="text-sm leading-relaxed text-gray-600">
-        Every Indian investor who buys US stocks directly is classified as a <strong>Non-Resident Alien (NRA)</strong> by the IRS. On death, their US-situs assets are subject to US estate tax — with only a <strong>USD 60,000 exemption</strong> (vs USD 13.6M for US citizens). Rates go up to 40%. Investing via Valura GIFT City IFSC means you hold IFSC fund units — an Indian asset — and <strong>$0 US estate tax applies</strong>.
-      </p>
-
-      {/* Key numbers */}
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {[
-          { label: "NRA estate tax exemption",    value: "$60,000",       color: "#DC2626" },
-          { label: "Maximum estate tax rate",      value: "40%",           color: "#DC2626" },
-          { label: "Via Valura GIFT City",         value: "$0 estate tax", color: "#05A049" },
-        ].map((k) => (
-          <div key={k.label} className="rounded-xl px-4 py-3 text-center" style={{ background: "#F9FAFB", border: "1px solid #E5E7EB" }}>
-            <p className="text-[10px] text-gray-400 mb-1">{k.label}</p>
-            <p className="text-lg font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: k.color }}>{k.value}</p>
-          </div>
-        ))}
-      </div>
-
-      <SectionHeader><BookOpen className="h-4 w-4" style={{ color: "#7A2020" }} /> How to use the calculator</SectionHeader>
-      <StepList steps={[
-        "Enter your total US stock and ETF holdings using the slider ($0–$5M) or type directly.",
-        "Use the quick preset buttons ($100K / $250K / $500K / $1M / $2M) for common portfolio sizes.",
-        "Edit the exchange rate (default ₹84.50) to see the estate tax impact in INR.",
-        "Read the two cards side by side: Direct Investment (red — shows IRS bill) vs Via Valura GIFT City (green — $0).",
-        "The large savings callout shows the exact amount your family saves.",
-        "Scroll to the 20-year growth projection chart — it shows how estate tax risk grows as your portfolio compounds at 10% CAGR.",
-        "Review the bracket breakdown in the Direct Investment card to see exactly which brackets your estate falls into.",
-      ]} />
-
-      {/* US estate tax brackets */}
-      <SectionHeader>US estate tax brackets for NRAs (hard-coded in the calculator)</SectionHeader>
-      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
-        <table className="w-full text-xs">
-          <thead><tr style={{ background: "#F9FAFB" }}>
-            {["Taxable Estate (above $60K exemption)", "Rate"].map((h) => (
-              <th key={h} className="px-3 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
-            ))}
-          </tr></thead>
-          <tbody>
-            {[
-              ["$0 – $10,000",         "18%"], ["$10,001 – $20,000",      "20%"],
-              ["$20,001 – $40,000",    "22%"], ["$40,001 – $60,000",      "24%"],
-              ["$60,001 – $80,000",    "26%"], ["$80,001 – $100,000",     "28%"],
-              ["$100,001 – $150,000",  "30%"], ["$150,001 – $250,000",    "32%"],
-              ["$250,001 – $500,000",  "34%"], ["$500,001 – $750,000",    "37%"],
-              ["$750,001 – $1,000,000","39%"], ["Above $1,000,000",       "40%"],
-            ].map(([bracket, rate]) => (
-              <tr key={bracket} className="border-t" style={{ borderColor: "#F3F4F6" }}>
-                <td className="px-3 py-2.5 text-gray-600">{bracket}</td>
-                <td className="px-3 py-2.5 font-bold font-mono"
-                  style={{ color: parseFloat(rate) >= 37 ? "#DC2626" : parseFloat(rate) >= 30 ? "#F97316" : "#B8913A" }}>
-                  {rate}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Example */}
-      <SectionHeader>Worked example — $500,000 in US stocks</SectionHeader>
-      <ExampleBox title="Anita holds $500,000 in US stocks (Apple, S&P 500 ETF) via a direct IBKR account.">
-        <CalcLine label="Total holdings"        value="$500,000" />
-        <CalcLine label="NRA exemption"         value="−$60,000" variant="green" />
-        <CalcLine label="Taxable estate"        value="$440,000" variant="red" />
-        <CalcLine label="Tax on first $100K"    value="$23,800 (progressive)" variant="red" />
-        <CalcLine label="Tax on next $150K"     value="$48,000 (32%)" variant="red" />
-        <CalcLine label="Tax on remaining $190K" value="$64,600 (34%)" variant="red" />
-        <CalcLine label="Total IRS bill"        value="~$136,400 (27.3% effective)" variant="red" />
-        <CalcLine label="INR equivalent"        value="~₹1.15 Cr at ₹84.50/$" variant="red" />
-        <CalcLine label="Via Valura GIFT City"  value="$0" variant="green" />
-        <div className="mt-3 p-3 rounded-lg" style={{ background: "#EDFAF3", border: "1px solid #B4E3C8" }}>
-          <p className="text-xs"><strong style={{ color: "#05A049" }}>Anita&apos;s family saves ₹1.15 Cr</strong> by holding via Valura. At 10% CAGR, this $500K becomes ~$3.36M in 20 years — and the estate tax would then be ~$1.22M.</p>
-        </div>
-        <TipBox>The key legal point: When Anita holds Apple shares directly, they are classified as US-situs assets under IRS Rev. Rul. 55-143. When she holds via a Valura IFSC fund, she owns Indian fund units — not US stocks directly. Indian assets are outside IRS jurisdiction.</TipBox>
-      </ExampleBox>
-
-      <WarnBox>
-        India has <strong>no estate or inheritance tax</strong>. The entire risk comes from the US side only. Every Indian with more than $60,000 in direct US stock holdings is exposed. Consult a cross-border estate planning attorney for your specific situation.
-      </WarnBox>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   NRI STATUS CONTENT
-══════════════════════════════════════════════════════════════════ */
-
-function NRIStatusContent() {
-  return (
-    <div>
-      <p className="text-sm leading-relaxed text-gray-600">
-        Your tax residency status under <strong>Section 6 of the Income Tax Act</strong> determines which income is taxable in India — and drives everything from Schedule FA requirements to LRS applicability. This calculator runs the full Section 6 logic to determine whether you are NRI, RNOR, or ROR based on your days in India.
-      </p>
-
-      {/* 3 statuses */}
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {[
-          { label: "NRI",  color: "#05A049", bg: "#EDFAF3", border: "#B4E3C8", desc: "Only India-sourced income taxable. Foreign income exempt. No LRS limit." },
-          { label: "RNOR", color: "#B8913A", bg: "#FFFBF0", border: "#E8C97A", desc: "Golden window. Foreign income NOT taxable in India. Limited duration." },
-          { label: "ROR",  color: "#2B4A8A", bg: "#EFF4FF", border: "#C7D7F8", desc: "Worldwide income taxable. Schedule FA mandatory. FTC via Form 67." },
-        ].map((s) => (
-          <div key={s.label} className="rounded-xl p-3" style={{ background: s.bg, border: `1px solid ${s.border}` }}>
-            <p className="text-base font-extrabold mb-1" style={{ fontFamily: "var(--font-bricolage)", color: s.color }}>{s.label}</p>
-            <p className="text-[10px] leading-relaxed text-gray-500">{s.desc}</p>
-          </div>
-        ))}
-      </div>
-
-      <SectionHeader><BookOpen className="h-4 w-4" style={{ color: "#6B7280" }} /> How to use the calculator</SectionHeader>
-      <StepList steps={[
-        "Step 1 — Enter days spent in India in the current financial year (April 1 to today). The tool auto-shows how many days the FY has progressed.",
-        "Step 1 — Enter days in India for each of the last 4 financial years (FY21-22 through FY24-25) in the 4 compact inputs.",
-        "Step 2 — Use the stepper to set how many of the last 10 financial years you were an NRI (0 to 10).",
-        "Step 2 — Enter total days across all 7 preceding financial years combined. This is the RNOR second test.",
-        "Step 3 — Toggle whether you are an Indian citizen and select your reason for being outside India. Indian citizens leaving for employment use the 182-day threshold, not the 60-day threshold.",
-        "Read the large status badge on the right — it updates live with every input. Read the tax implications, progress bars, and suggested ITR form.",
-      ]} />
-
-      {/* Section 6 rules */}
-      <SectionHeader>Section 6 residency tests — exactly as hard-coded</SectionHeader>
-      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
-        <table className="w-full text-xs">
-          <thead><tr style={{ background: "#F9FAFB" }}>
-            {["Test", "Condition", "Result if met"].map((h) => (
-              <th key={h} className="px-3 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
-            ))}
-          </tr></thead>
-          <tbody>
-            {[
-              ["Basic Test 1",  "≥ 182 days in current FY",                                    "Resident"],
-              ["Basic Test 2",  "≥ 60 days current FY AND ≥ 365 days in previous 4 FYs",       "Resident"],
-              ["Exception",     "Indian citizen leaving for employment abroad",                  "60-day threshold becomes 182 days"],
-              ["NRI",           "Neither Basic Test 1 nor Basic Test 2 met",                    "NRI — only Indian income taxable"],
-              ["RNOR Test A",   "Resident, but NRI in 9 of 10 preceding FYs",                  "RNOR status"],
-              ["RNOR Test B",   "Resident, but ≤ 729 days in India across 7 preceding FYs",    "RNOR status"],
-              ["ROR",           "Resident and neither RNOR test applies",                        "ROR — worldwide income taxable"],
-            ].map(([test, cond, result]) => (
-              <tr key={test} className="border-t" style={{ borderColor: "#F3F4F6" }}>
-                <td className="px-3 py-2.5 font-bold" style={{ color: "#00111B" }}>{test}</td>
-                <td className="px-3 py-2.5 text-gray-600">{cond}</td>
-                <td className="px-3 py-2.5 font-semibold"
-                  style={{ color: result.startsWith("NRI") ? "#05A049" : result.startsWith("RNOR") ? "#B8913A" : result.startsWith("ROR") ? "#2B4A8A" : "#374151" }}>
-                  {result}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Examples */}
-      <SectionHeader>Example 1 — Returning NRI: the RNOR window</SectionHeader>
-      <ExampleBox title="Kavitha moved back to India in April 2024 after 10 years in Singapore.">
-        <CalcLine label="Days in India FY 2025-26"       value="350 days" />
-        <CalcLine label="Basic test 1 result"             value="RESIDENT (350 ≥ 182)" variant="neutral" />
-        <CalcLine label="NRI years in last 10 FYs"        value="9 years" variant="green" />
-        <CalcLine label="RNOR Test A result"              value="RNOR — 9/10 years as NRI" variant="gold" />
-        <CalcLine label="Foreign income taxable in India" value="NO — RNOR golden window" variant="green" />
-        <CalcLine label="Indian income taxable"           value="Yes — at slab rates" variant="neutral" />
-        <div className="mt-3 p-3 rounded-lg" style={{ background: "#FFFBF0", border: "1px solid #E8C97A" }}>
-          <p className="text-xs"><strong>Kavitha&apos;s Singapore savings, foreign dividends, and global investments are NOT taxable in India during her RNOR period</strong> — typically 2–3 years after returning. The calculator shows exactly when her RNOR window expires and how many days remain.</p>
-        </div>
-        <TipBox>Front-load global investments during the RNOR window. Gains realised while RNOR are not taxed in India. Once ROR, all future gains on global holdings are taxable.</TipBox>
-      </ExampleBox>
-
-      <SectionHeader>Example 2 — NRI managing 182-day rule</SectionHeader>
-      <ExampleBox title="Suresh lives in Dubai but visits India regularly. Is he at risk of becoming Resident?">
-        <CalcLine label="Days in India FY 2025-26 (to date)" value="155 days" />
-        <CalcLine label="Progress bar"                    value="85% of 182-day threshold" variant="red" />
-        <CalcLine label="Days remaining"                  value="27 more days = resident" variant="red" />
-        <CalcLine label="Days in India across last 4 FYs" value="280 days" />
-        <CalcLine label="Basic test 2 check"              value="155 ≥ 60 AND 280 < 365 → Test 2 fails" variant="green" />
-        <CalcLine label="Current status"                  value="NRI (Test 1 not met, Test 2 not met)" variant="green" />
-        <div className="mt-3 p-3 rounded-lg" style={{ background: "#EDFAF3", border: "1px solid #B4E3C8" }}>
-          <p className="text-xs">Suresh needs to leave India before crossing 182 days to stay NRI. The calculator&apos;s progress bar turns red above 150 days to give early warning — giving him enough time to plan his travel.</p>
-        </div>
-      </ExampleBox>
-
-      {/* Tax implications by status */}
-      <SectionHeader>Tax implications — what each status means for GIFT City investments</SectionHeader>
-      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
-        <table className="w-full text-xs">
-          <thead><tr style={{ background: "#F9FAFB" }}>
-            {["Item", "NRI", "RNOR", "ROR"].map((h) => (
-              <th key={h} className="px-3 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
-            ))}
-          </tr></thead>
-          <tbody>
-            {[
-              ["Foreign income",     "Not taxable",        "Not taxable ✓",     "Fully taxable"],
-              ["Indian income",      "Fully taxable",      "Fully taxable",      "Fully taxable"],
-              ["Schedule FA",        "Not required",       "Not required",       "Mandatory (GIFT City = foreign asset)"],
-              ["LRS applicability",  "Does not apply",     "Applies",            "Applies (₹10L TCS threshold)"],
-              ["Form 67 (FTC)",      "Required if FTC claimed", "Required",     "Required"],
-              ["GIFT City interest", "0% — Sec 10(15)(ix)","Taxable at slab",   "Taxable at slab"],
-              ["LTCG on GIFT City",  "12.5% (14.95% max)", "12.5% (14.95% max)","12.5% (14.95% max)"],
-              ["US estate tax",      "Applies if direct",  "Applies if direct",  "Applies if direct (use GIFT City route)"],
-            ].map(([item, nri, rnor, ror]) => (
-              <tr key={item} className="border-t" style={{ borderColor: "#F3F4F6" }}>
-                <td className="px-3 py-2.5 font-medium text-gray-700">{item}</td>
-                <td className="px-3 py-2.5" style={{ color: nri.includes("Not") || nri.includes("Does not") ? "#05A049" : "#374151" }}>{nri}</td>
-                <td className="px-3 py-2.5" style={{ color: rnor.includes("Not") || rnor.includes("✓") ? "#05A049" : "#374151" }}>{rnor}</td>
-                <td className="px-3 py-2.5" style={{ color: ror.includes("Mandatory") ? "#DC2626" : "#374151" }}>{ror}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <WarnBox>
-        Schedule FA disclosure is required for Resident Indians (ROR) who hold GIFT City IFSC investments. GIFT City is classified as a foreign asset under FEMA. Failure to disclose carries a penalty of ₹10 lakh per year under the Black Money Act. The NRI Status calculator tells you exactly which ITR form to use and whether Schedule FA applies to you.
-      </WarnBox>
-    </div>
-  );
-}
-
-/* ── tiny missing import fix ── */
-function Globe(props: React.SVGProps<SVGSVGElement> & { className?: string }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-      {...props}>
-      <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    </svg>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PAGE
-═══════════════════════════════════════════════════════════ */
-
-export default function CalcDocsPage() {
-  const [active, setActive] = useState<CalcKey>("lrs");
-
-  const CONTENT: Record<CalcKey, React.ReactNode> = {
-    lrs:   <LRSContent />,
-    cg:    <CGContent />,
-    dtaa:  <DTAAContent />,
-    nr:    <NetReturnsContent />,
-    estate:<EstateTaxContent />,
-    nri:   <NRIStatusContent />,
-  };
-
-  return (
-    <div className="min-h-screen" style={{ background: "#FFFFFC" }}>
-
-      {/* ── Header ── */}
-      <div className="border-b px-4 sm:px-6 md:px-8 py-6" style={{ background: "#fff", borderColor: "#E5E7EB" }}>
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest"
-                style={{ background: "rgba(5,160,73,0.1)", color: "#05A049" }}>Documentation</span>
-              <span className="text-[10px] text-gray-400">FY 2025-26 · Finance Act 2025 · With worked examples</span>
-            </div>
-            <h1 className="text-3xl font-extrabold leading-tight tracking-tight"
-              style={{ fontFamily: "var(--font-bricolage)", color: "#00111B" }}>
-              Calculator Guide
-            </h1>
-            <p className="mt-1 text-sm text-gray-500 max-w-xl">
-              Step-by-step instructions, worked examples, rate tables, and pro tips for all six Valura calculators.
-            </p>
-          </div>
-          <div className="hidden md:flex flex-col gap-2">
-            {CALCULATORS.map((c) => (
-              <Link key={c.key} href={c.href}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-all hover:opacity-80"
-                style={{ background: `${c.color}12`, color: c.color, border: `1px solid ${c.color}30` }}>
-                <c.icon className="h-3.5 w-3.5" />
-                Open {c.label} <ArrowRight className="h-3 w-3 ml-auto" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-6 py-8">
-
-        {/* ── Calculator tabs ── */}
-        <div className="flex gap-2 mb-8 flex-wrap" role="tablist">
-          {CALCULATORS.map((c) => {
-            const isActive = active === c.key;
-            return (
-              <button key={c.key} onClick={() => setActive(c.key)}
-                className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
-                style={{
-                  background: isActive ? c.color : "#F9FAFB",
-                  color: isActive ? "#fff" : "#374151",
-                  border: isActive ? `1px solid ${c.color}` : "1px solid #E5E7EB",
-                  boxShadow: isActive ? `0 4px 12px ${c.color}30` : "none",
-                }}>
-                <c.icon className="h-4 w-4" />
-                {c.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ── Active calculator intro strip ── */}
-        {CALCULATORS.filter((c) => c.key === active).map((c) => (
-          <div key={c.key} className="rounded-2xl p-5 mb-6 flex items-center justify-between gap-4"
-            style={{ background: `${c.color}0D`, border: `1px solid ${c.color}30` }}>
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl flex items-center justify-center"
-                style={{ background: `${c.color}20` }}>
-                <c.icon className="h-5 w-5" style={{ color: c.color }} />
+          {/* Example A */}
+          <Collapse title="Example A — Solo investor, ₹50L in January" badge="Worked example">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Inputs</p>
+                <Row label="Investment amount" value="₹50L" />
+                <Row label="Already remitted" value="₹0" />
+                <Row label="Purpose" value="Investment" />
+                <Row label="Month" value="January" />
+                <Row label="Advance tax?" value="No" />
               </div>
               <div>
-                <p className="font-bold text-sm" style={{ fontFamily: "var(--font-manrope)", color: "#00111B" }}>
-                  {c.label} Calculator
-                </p>
-                <p className="text-xs text-gray-500">{c.tagline}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">What the calculator shows</p>
+                <GreenRow label="TCS-free portion (threshold)" value="₹10L" />
+                <RedRow  label="TCS-liable portion" value="₹40L" />
+                <RedRow  label="TCS deducted (20%)" value="₹8L" />
+                <Row     label="Net reaching GIFT City" value="₹42L" />
+                <RedRow  label="Opportunity cost (9 months, 12% return)" value="₹72,000 lost" />
               </div>
             </div>
-            <Link href={c.href}
-              className="flex-shrink-0 flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all"
-              style={{ background: c.color, color: "#fff" }}>
-              Open calculator <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+            <Warn>Without advance tax, ₹8L is locked from January until ~September. That's ₹72K in return drag on top of the TCS itself.</Warn>
+          </Collapse>
+
+          {/* Example B */}
+          <Collapse title="Example B — Same investor, advance tax toggle ON" badge="Big difference">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Only one thing changes</p>
+                <Row label="Advance tax?" value="YES" color={C.green} />
+                <Row label="Next installment" value="March 15" />
+                <Row label="Lock-up period" value="1.5 months (not 9)" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">New opportunity cost</p>
+                <GreenRow label="New opportunity cost (1.5 months)" value="₹12,000" />
+                <GreenRow label="Saving vs no advance tax" value="₹60,000 saved" />
+              </div>
+            </div>
+            <Win>The TCS appears in Form 26AS Part F — just reduce your March 15 advance tax payment by the TCS amount. No paperwork, no application. Free ₹60K saving.</Win>
+          </Collapse>
+
+          {/* Example C — Family */}
+          <Collapse title="Example C — Sharma family routes ₹30L, zero TCS" badge="Best case">
+            <p className="text-xs text-gray-500 mb-3">Three adults: Arvind, Priya, their son Rohan — all with ₹0 remitted so far this FY.</p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs min-w-[340px]">
+                <thead><tr style={{ background: "#F9FAFB" }}>
+                  <th className="px-3 py-2 text-left text-gray-400 font-semibold">Member</th>
+                  <th className="px-3 py-2 text-right text-gray-400 font-semibold">Route ₹</th>
+                  <th className="px-3 py-2 text-right text-gray-400 font-semibold">TCS-free</th>
+                  <th className="px-3 py-2 text-right text-gray-400 font-semibold">TCS paid</th>
+                </tr></thead>
+                <tbody>
+                  {[
+                    { name: "Arvind", route: "₹10L", free: "₹10L", tcs: "₹0" },
+                    { name: "Priya",  route: "₹10L", free: "₹10L", tcs: "₹0" },
+                    { name: "Rohan",  route: "₹10L", free: "₹10L", tcs: "₹0" },
+                  ].map((r) => (
+                    <tr key={r.name} className="border-t" style={{ borderColor: "#F3F4F6" }}>
+                      <td className="px-3 py-2 font-medium" style={{ color: C.dark }}>{r.name}</td>
+                      <td className="px-3 py-2 text-right">{r.route}</td>
+                      <td className="px-3 py-2 text-right font-semibold" style={{ color: C.green }}>{r.free}</td>
+                      <td className="px-3 py-2 text-right font-semibold" style={{ color: C.green }}>{r.tcs}</td>
+                    </tr>
+                  ))}
+                  <tr style={{ background: "#EDFAF3", borderTop: `2px solid ${C.mint}` }}>
+                    <td className="px-3 py-2 font-bold" style={{ color: C.dark }}>Total</td>
+                    <td className="px-3 py-2 text-right font-bold">₹30L</td>
+                    <td className="px-3 py-2 text-right font-bold" style={{ color: C.green }}>₹30L free</td>
+                    <td className="px-3 py-2 text-right font-bold" style={{ color: C.green }}>₹0 TCS</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <Win>By distributing ₹10L each across 3 PANs, the family invests ₹30L with <strong>zero TCS</strong>. The same amount as a solo investor would trigger ₹4L in TCS.</Win>
+          </Collapse>
+
+          <Tip>Use the AI drawer (green button at the bottom of the calculator) to ask "Should I split this across family members?" — it reads your exact numbers and tells you the optimal split.</Tip>
+        </ScenarioCard>
+
+        {/* ── Scenario 2: Capital Gains ── */}
+        <ScenarioCard
+          number={2}
+          title="I want to sell a position. Should I sell now or wait? What's the exact tax?"
+          subtitle="Use before selling any equity position — the timing can save lakhs."
+          color={C.dark}
+          icon={Calculator}
+          href="/calculators/capital-gains"
+          calcLabel="Capital Gains"
+        >
+          <p className="text-xs leading-relaxed" style={{ color: "#374151" }}>
+            India draws a sharp line at <strong>730 days (24 months)</strong>. Hold longer: 12.5% flat LTCG,
+            surcharge capped at 15%, effective max <strong>14.95%</strong>. Sell before: slab rate up to 30%,
+            surcharge uncapped, effective max <strong>42.74%</strong> for income above ₹5 Cr.
+            That's a <strong>28 percentage point spread</strong> — the single biggest legal tax saving available.
+          </p>
+
+          <SectionH3 icon={<BookOpen size={13} />}>What to enter</SectionH3>
+          <ol className="space-y-2">
+            {[
+              ["Purchase & sale price", "Enter in INR or USD — if USD, set the exchange rate (default ₹84.50)"],
+              ["Holding period", "Years + months, or drag the slider. Watch the STCG/LTCG badge update live."],
+              ["Number of units", "Total shares or units you're selling"],
+              ["Annual income (excluding this gain)", "This sets your slab rate for STCG calculation"],
+              ["Tax regime", "New Regime FY 2025-26 or Old Regime"],
+              ["Carry-forward losses?", "Toggle Yes and enter your STCL / LTCL amounts to see offset benefit"],
+            ].map(([q, a], i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span className="flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-black mt-0.5"
+                  style={{ background: C.dark, color: "#fff" }}>{i + 1}</span>
+                <div>
+                  <p className="text-xs font-semibold" style={{ color: C.dark }}>{q}</p>
+                  <p className="text-[11px]" style={{ color: "#6B7280" }}>{a}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+
+          <Collapse title="Example A — Priya has held a US fund for 22 months. Sell now or wait?" badge="Most common question">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Position</p>
+                <Row label="Buy price (USD)" value="$180" />
+                <Row label="Current price (USD)" value="$260" />
+                <Row label="Units" value="1,000" />
+                <Row label="Gain" value="₹66.8L" />
+                <Row label="Holding" value="22 months (STCG)" color={C.red} />
+                <Row label="Income bracket" value="Above ₹5 Cr" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Sell now vs wait 2 months</p>
+                <RedRow  label="STCG tax if sell today (42.74%)" value="₹28.55L" />
+                <GreenRow label="LTCG tax if wait 2 months (14.95%)" value="₹9.98L" />
+                <GreenRow label="Tax saved by waiting" value="₹18.57L" />
+              </div>
+            </div>
+            <Win>Waiting just 2 more months saves ₹18.57L in tax. The calculator shows a live countdown: "You are 60 days from LTCG" with a red-to-green timeline bar.</Win>
+            <Tip>The calculator automatically shows "The Waiting Game" card whenever your holding is short-term — with the exact date LTCG kicks in and the rupee saving.</Tip>
+          </Collapse>
+
+          <Collapse title="Example B — Using carry-forward losses to offset a gain" badge="ITR trick">
+            <p className="text-xs text-gray-500 mb-3">Vikram has a ₹20L STCG gain and ₹15L in STCL carry-forward losses from previous years.</p>
+            <Row label="Gross STCG gain" value="₹20L" />
+            <GreenRow label="STCL carry-forward offset" value="−₹15L" />
+            <GreenRow label="Net taxable STCG" value="₹5L" />
+            <Row label="Tax on ₹5L (vs ₹20L)" value="₹1.8L saved" color={C.green} />
+            <Tip>Toggle "Do you have carry-forward losses?" to Yes. Enter your STCL and LTCL amounts from your last ITR (Schedule CFL). The calculator nets them automatically.</Tip>
+          </Collapse>
+
+          <Tip>Rate table at the bottom shows every income bracket — STCG rate, LTCG rate, the spread, and "TLH value per ₹1L." Knowing your spread tells you exactly how much each ₹1L of harvested loss is worth.</Tip>
+        </ScenarioCard>
+
+        {/* ── Scenario 3: DTAA ── */}
+        <ScenarioCard
+          number={3}
+          title="I received dividends from US stocks. Am I paying tax twice?"
+          subtitle="For Resident Indians with foreign investment income — Form 67 FTC."
+          color={C.amber}
+          icon={Map}
+          href="/calculators/dtaa"
+          calcLabel="DTAA / FTC"
+        >
+          <p className="text-xs leading-relaxed" style={{ color: "#374151" }}>
+            If you're a <strong>Resident Indian</strong>, India taxes your worldwide income.
+            But when you receive dividends from US stocks, the US already deducted 25% withholding tax before
+            paying you. Without action, you pay 25% to the US <em>and</em> your slab rate to India.
+            <strong> Form 67 lets you credit the US WHT against your Indian tax liability</strong> — so you only pay the higher of the two, never both stacked.
+          </p>
+
+          <div className="rounded-xl p-3 mt-3" style={{ background: "#FFFBF0", border: `1px solid ${C.amber}44` }}>
+            <p className="text-xs font-bold mb-2" style={{ color: C.dark }}>Who this calculator is primarily for:</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="rounded-lg px-3 py-2" style={{ background: "#EDFAF3", border: `1px solid ${C.mint}` }}>
+                <p className="text-xs font-bold" style={{ color: C.green }}>✓ Resident Indian — main use case</p>
+                <p className="text-[11px] mt-0.5" style={{ color: "#374151" }}>Foreign dividends, capital gains. FTC via Form 67.</p>
+              </div>
+              <div className="rounded-lg px-3 py-2" style={{ background: "#F9FAFB", border: "1px solid #E5E7EB" }}>
+                <p className="text-xs font-bold" style={{ color: "#9CA3AF" }}>~ NRI via GIFT City — limited use</p>
+                <p className="text-[11px] mt-0.5" style={{ color: "#9CA3AF" }}>India barely taxes NRIs. DTAA largely irrelevant. See NRI explainer inside.</p>
+              </div>
+            </div>
           </div>
-        ))}
 
-        {/* ── Content ── */}
-        <div>{CONTENT[active]}</div>
+          <Collapse title="Example — Ananya receives $10,000 in US dividends, income above ₹15L slab" badge="Worked example">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Without FTC (double taxation)</p>
+                <RedRow label="US WHT (25% of ₹8.45L)" value="₹2.11L" />
+                <RedRow label="Indian slab tax (30% of ₹8.45L)" value="₹2.54L" />
+                <RedRow label="Total tax paid" value="₹4.65L" />
+                <RedRow label="Effective rate" value="55%" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">With FTC via Form 67</p>
+                <Row    label="US WHT deducted (25%)" value="₹2.11L" />
+                <Row    label="Indian slab tax (30%)" value="₹2.54L" />
+                <GreenRow label="Less: FTC = min(WHT, Indian tax)" value="−₹2.11L" />
+                <GreenRow label="Total actually paid" value="₹2.54L" />
+                <GreenRow label="FTC saves" value="₹2.11L" />
+              </div>
+            </div>
+            <Win>Ananya pays just ₹2.54L instead of ₹4.65L — saving ₹2.11L by filing Form 67. The rule: you pay the <strong>higher of US WHT or Indian slab tax</strong>, never both.</Win>
+          </Collapse>
 
-        {/* ── Footer nav ── */}
-        <div className="mt-12 pt-6 border-t flex flex-wrap gap-3" style={{ borderColor: "#E5E7EB" }}>
-          <p className="text-xs text-gray-400 w-full mb-2">Jump to another calculator:</p>
-          {CALCULATORS.map((c) => (
-            <Link key={c.key} href={c.href}
-              className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all hover:opacity-80"
-              style={{ background: "#F9FAFB", color: "#374151", border: "1px solid #E5E7EB" }}>
-              <c.icon className="h-4 w-4" />
-              {c.label}
-            </Link>
+          <ActionPill color={C.red} label="Deadline">
+            File Form 67 by <strong>March 31 of the Assessment Year</strong>. Missing it means permanently losing the foreign tax credit — it cannot be claimed in future years.
+          </ActionPill>
+
+          <Tip>The GIFT City explainer inside the calculator shows why NRIs investing via IFSC often don't need DTAA at all — GIFT City fund income is already exempt from Indian tax at source.</Tip>
+        </ScenarioCard>
+
+        {/* ── Scenario 4: Net Returns ── */}
+        <ScenarioCard
+          number={4}
+          title="Is it actually better to invest via Valura vs directly through IBKR or Vested?"
+          subtitle="The definitive side-by-side comparison of after-tax wealth over time."
+          color={C.blue}
+          icon={TrendingUp}
+          href="/calculators/net-returns"
+          calcLabel="Net Returns"
+        >
+          <p className="text-xs leading-relaxed" style={{ color: "#374151" }}>
+            Direct investment platforms (IBKR, Vested, INDmoney) are fine products — but they
+            expose you to 20% TCS upfront, 25% US dividend WHT (vs ~15% via Ireland UCITS route),
+            and up to 40% US estate tax on death. Capital gains tax is <strong>identical</strong> either way.
+            This calculator shows the full compounded wealth difference over your investment horizon.
+          </p>
+
+          <SectionH3 icon={<BookOpen size={13} style={{ color: C.blue }} />}>Key inputs to set</SectionH3>
+          <ol className="space-y-2">
+            {[
+              ["Initial investment", "Use ₹ or USD. Try ₹1 Cr to start."],
+              ["Investment horizon", "Use at least 10 years — the compounding gap is dramatic after year 5."],
+              ["Expected annual return", "Default 12%. Lower it to 8% for a conservative view."],
+              ["Dividend yield", "Default 2%. Index funds typically yield 1.5–2%."],
+              ["Holding strategy", "Long Term LTCG is most realistic for most HNIs."],
+              ["Income above ₹5 Cr?", "Toggle ON — STCG surcharge is uncapped, making the gap much larger."],
+              ["Family members for LRS", "Higher count = more TCS-free capacity in Route B."],
+            ].map(([q, a], i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span className="flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-black mt-0.5"
+                  style={{ background: C.blue, color: "#fff" }}>{i + 1}</span>
+                <div>
+                  <p className="text-xs font-semibold" style={{ color: C.dark }}>{q}</p>
+                  <p className="text-[11px]" style={{ color: "#6B7280" }}>{a}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+
+          <Collapse title="Example — ₹1 Cr invested for 15 years, LTCG, income above ₹5 Cr" badge="Worked example">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs min-w-[360px]">
+                <thead><tr style={{ background: C.dark }}>
+                  <th className="px-3 py-2 text-left font-semibold" style={{ color: C.mint }}>Year</th>
+                  <th className="px-3 py-2 text-right font-semibold" style={{ color: C.mint }}>Route A (Direct)</th>
+                  <th className="px-3 py-2 text-right font-semibold" style={{ color: C.mint }}>Route B (Valura)</th>
+                  <th className="px-3 py-2 text-right font-semibold" style={{ color: C.mint }}>Advantage</th>
+                </tr></thead>
+                <tbody>
+                  {[
+                    ["Year 1",  "₹93L",   "₹98L",   "+₹5L"],
+                    ["Year 5",  "₹1.4Cr", "₹1.6Cr", "+₹20L"],
+                    ["Year 10", "₹2.1Cr", "₹2.6Cr", "+₹50L"],
+                    ["Year 15", "₹3.2Cr", "₹4.1Cr", "+₹90L"],
+                  ].map(([yr, a, b, adv]) => (
+                    <tr key={yr} className="border-t" style={{ borderColor: "#F3F4F6" }}>
+                      <td className="px-3 py-2 font-medium" style={{ color: C.dark }}>{yr}</td>
+                      <td className="px-3 py-2 text-right" style={{ color: C.red }}>{a}</td>
+                      <td className="px-3 py-2 text-right" style={{ color: C.green }}>{b}</td>
+                      <td className="px-3 py-2 text-right font-bold" style={{ color: C.green }}>{adv}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Win>The difference at Year 1 looks small (₹5L). By Year 15 it's ₹90L — the gap compounds because Route B never lost that initial TCS to begin with.</Win>
+          </Collapse>
+
+          <Tip>Expand "Advanced" settings to set your INR depreciation assumption and estate tax probability weighting. At 100%, the comparison is fully conservative. Lower it only if you plan to convert back to non-US assets before passing them on.</Tip>
+        </ScenarioCard>
+
+        {/* ── Scenario 5: Estate Tax ── */}
+        <ScenarioCard
+          number={5}
+          title="My family could lose 40% of my US stock portfolio to the IRS when I die. Is that real?"
+          subtitle="The most emotionally important calculator. Run it once. Act on the result."
+          color={C.red}
+          icon={Shield}
+          href="/calculators/estate-tax"
+          calcLabel="Estate Tax"
+        >
+          <p className="text-xs leading-relaxed" style={{ color: "#374151" }}>
+            Yes, it's real and almost no one talks about it. The IRS classifies Indian investors
+            who hold US stocks directly as <strong>Non-Resident Aliens (NRAs)</strong>. On death,
+            their US-situs assets (US stocks, US ETFs) attract estate tax with only a <strong>$60,000 exemption</strong>.
+            Above that, rates go up to 40%. India has no estate tax. The entire problem is from the US side.
+          </p>
+
+          <div className="rounded-xl overflow-hidden" style={{ border: `1.5px solid ${C.red}30` }}>
+            <div className="px-4 py-2" style={{ background: `${C.red}10` }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.red }}>US Estate Tax Brackets (Non-Resident Alien)</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs min-w-[300px]">
+                <thead><tr style={{ background: "#F9FAFB" }}>
+                  <th className="px-3 py-2 text-left text-gray-400 font-semibold">Portfolio value</th>
+                  <th className="px-3 py-2 text-right text-gray-400 font-semibold">IRS takes</th>
+                  <th className="px-3 py-2 text-right text-gray-400 font-semibold">Your family gets</th>
+                </tr></thead>
+                <tbody>
+                  {[
+                    ["$50K (below exemption)", "$0", "100%"],
+                    ["$200K", "~$28K", "86%"],
+                    ["$500K", "~$130K", "74%"],
+                    ["$1M", "~$330K", "67%"],
+                    ["$2M", "~$730K", "64%"],
+                  ].map(([v, t, f]) => (
+                    <tr key={v} className="border-t" style={{ borderColor: "#F3F4F6" }}>
+                      <td className="px-3 py-2" style={{ color: C.dark }}>{v}</td>
+                      <td className="px-3 py-2 text-right font-bold" style={{ color: C.red }}>{t}</td>
+                      <td className="px-3 py-2 text-right" style={{ color: "#374151" }}>{f}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <SectionH3>How to use the calculator</SectionH3>
+          <p className="text-xs" style={{ color: "#374151" }}>
+            Enter your <strong>total US stock and ETF holdings in USD</strong> — use the slider or type the amount.
+            Set the exchange rate. The calculator instantly shows bracket-by-bracket IRS tax vs $0 via Valura GIFT City,
+            with an INR-equivalent of what your family would lose.
+          </p>
+
+          <Collapse title="Example — Mehta family has $300K in US stocks held directly" badge="Worked example">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Direct Investment</p>
+                <RedRow label="Exemption (first $60K)" value="$0 tax" />
+                <RedRow label="Taxable amount ($240K)" value="$70,600 IRS tax" />
+                <RedRow label="Effective estate tax rate" value="23.5%" />
+                <RedRow label="Family receives" value="$229,400 (₹1.9 Cr less)" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Via Valura GIFT City</p>
+                <GreenRow label="IRS estate tax" value="$0" />
+                <GreenRow label="Effective rate" value="0%" />
+                <GreenRow label="Family receives" value="100% of $300K" />
+                <Row      label="Reason" value="IFSC units = Indian assets" />
+              </div>
+            </div>
+            <Win>The Mehta family's estate saves $70,600 (₹59L at ₹84.50) by simply holding through Valura GIFT City instead of directly. The investment return is identical — the structure is everything.</Win>
+          </Collapse>
+
+          <ActionPill color={C.red} label="Why it matters more over time">
+            US stocks at 12% CAGR double every 6 years. A $300K portfolio becomes $1.2M in 12 years.
+            At $1.2M the estate tax is ~$450K. The longer you wait to restructure, the higher the exposure.
+          </ActionPill>
+        </ScenarioCard>
+
+        {/* ── Scenario 6: NRI Status ── */}
+        <ScenarioCard
+          number={6}
+          title="I'm not sure if I'm NRI, RNOR, or ROR this year. How does it affect my tax?"
+          subtitle="Run this before filing ITR. Your residency status changes every year."
+          color="#6B7280"
+          icon={UserCheck}
+          href="/calculators/nri-status"
+          calcLabel="NRI Status"
+        >
+          <p className="text-xs leading-relaxed" style={{ color: "#374151" }}>
+            India taxes you based on <strong>how many days you spent in India</strong>, not just your passport.
+            The rules under Section 6 of the Income Tax Act create three possible statuses each year,
+            with very different tax treatment for global income. Getting it wrong means either
+            overpaying tax or under-declaring foreign income.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
+            {[
+              { s: "NRI",  col: C.green, bg: "#EDFAF3", border: C.mint, desc: "Only Indian income taxable. Foreign income fully exempt. No LRS limit on investing abroad." },
+              { s: "RNOR", col: C.amber, bg: "#FFFBF0", border: "#E8C97A", desc: "Golden window. Foreign income NOT taxable in India. Typically lasts 2–3 years after returning." },
+              { s: "ROR",  col: C.blue,  bg: "#EFF4FF", border: "#C7D7F8", desc: "Worldwide income taxable. GIFT City = foreign asset. Schedule FA mandatory." },
+            ].map((s) => (
+              <div key={s.s} className="rounded-xl p-3" style={{ background: s.bg, border: `1px solid ${s.border}` }}>
+                <p className="text-lg font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: s.col }}>{s.s}</p>
+                <p className="text-[10px] mt-1 leading-relaxed" style={{ color: "#374151" }}>{s.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <Collapse title="Example — Kavitha returns to India after 10 years in Singapore" badge="RNOR golden window">
+            <Row label="Days in India FY 2025-26" value="350 days" />
+            <Row label="Resident test result" value="YES — 350 ≥ 182 days" />
+            <Row label="NRI years in last 10 FYs" value="9 years" color={C.green} />
+            <GoldRow label="RNOR Test A result" value="RNOR — 9/10 years as NRI" />
+            <GreenRow label="Singapore savings taxable in India?" value="NO — RNOR window" />
+            <GreenRow label="Global dividends taxable in India?" value="NO — RNOR window" />
+            <Tip>Kavitha should front-load all global investments during her RNOR window (typically 2 years). Gains realised while RNOR are tax-free in India. Once she becomes ROR, all future gains on foreign holdings are taxable at slab rates.</Tip>
+          </Collapse>
+
+          <Collapse title="Example — Suresh in Dubai visits India frequently. When does he become Resident?" badge="182-day watch">
+            <Row label="Days in India FY 2025-26 so far" value="155 days" color={C.amber} />
+            <Row label="Progress bar" value="85% of 182-day threshold" color={C.red} />
+            <Row label="Days remaining before Resident" value="27 days" color={C.red} />
+            <Win>The calculator shows a red progress bar above 150 days. Suresh knows to leave India by the time he hits 182 days — or he becomes Resident and his foreign income is taxable.</Win>
+          </Collapse>
+        </ScenarioCard>
+
+        <Divider />
+
+        {/* ════════════════════════════════════════════
+            AI ADVISOR GUIDE
+        ════════════════════════════════════════════ */}
+        <SectionH2>Leveraging the AI Advisor</SectionH2>
+        <p className="text-sm text-gray-500 -mt-1">The most powerful feature on the platform. Most users don't use it to its full potential.</p>
+
+        <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${C.green}30` }}>
+          <div className="px-5 py-4" style={{ background: C.dark }}>
+            <div className="flex items-center gap-2 mb-1">
+              <Sparkles className="h-4 w-4" style={{ color: C.mint }} />
+              <p className="text-sm font-bold text-white" style={{ fontFamily: "var(--font-bricolage)" }}>
+                The AI knows your portfolio, the tax rules, and today's date
+              </p>
+            </div>
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+              It calls real calculation tools — not guesswork. Every number it gives you is computed from the same logic as the calculators.
+            </p>
+          </div>
+          <div className="px-5 py-4 space-y-3">
+
+            {/* Two modes */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="rounded-xl p-3.5" style={{ background: "#F0FAF4", border: `1px solid ${C.mint}` }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <MessageSquare size={13} style={{ color: C.green }} />
+                  <p className="text-xs font-bold" style={{ color: C.dark }}>Mode 1: Calculator drawer</p>
+                </div>
+                <p className="text-[11px] leading-relaxed" style={{ color: "#374151" }}>
+                  Click the green <strong>"Ask AI about this result →"</strong> button at the bottom of any calculator.
+                  The AI already knows your exact inputs and outputs — start asking without re-explaining anything.
+                </p>
+              </div>
+              <div className="rounded-xl p-3.5" style={{ background: "#F0F6FF", border: "1px solid #C7D7F8" }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap size={13} style={{ color: C.blue }} />
+                  <p className="text-xs font-bold" style={{ color: C.dark }}>Mode 2: Full chat at /chat</p>
+                </div>
+                <p className="text-[11px] leading-relaxed" style={{ color: "#374151" }}>
+                  Open-ended, multi-step. Ask anything. The AI calls tools, runs audits,
+                  and returns ranked action plans. Best for big-picture questions.
+                </p>
+              </div>
+            </div>
+
+            {/* Best prompts */}
+            <SectionH3 icon={<Zap size={13} style={{ color: C.amber }} />}>
+              Best prompts to use right now (FY end is near)
+            </SectionH3>
+            <div className="space-y-2">
+              {[
+                {
+                  prompt: "Audit my full tax position for FY 2025-26",
+                  what: "Runs the TLH scan, portfolio summary, and capital gains for every holding simultaneously. Returns a ranked action table sorted by rupee impact.",
+                  color: C.red,
+                  label: "Full audit",
+                },
+                {
+                  prompt: "I have 15 days left in the FY — what should I do urgently?",
+                  what: "Calls get_fy_countdown + run_tlh_scan + run_fy_audit. Returns a TODAY / THIS WEEK / BEFORE MARCH 31 action plan with exact deadlines.",
+                  color: C.amber,
+                  label: "FY urgency",
+                },
+                {
+                  prompt: "Should I sell my TATA-SP500 loss position now or wait?",
+                  what: "Calls compare_scenarios for that holding — shows tax if sold today vs tax after LTCG threshold, with rupee difference and clear recommendation.",
+                  color: C.blue,
+                  label: "Hold vs sell",
+                },
+                {
+                  prompt: "Build my Schedule FA data for GIFT City holdings",
+                  what: "Reads from your portfolio and returns a pre-filled Schedule FA draft with all fields needed for ITR-2 or ITR-3.",
+                  color: C.green,
+                  label: "ITR prep",
+                },
+                {
+                  prompt: "Optimize my LRS remittance across family before March 31",
+                  what: "Calls get_fy_countdown then optimize_family_tcs — tells you exactly how much to route through each PAN to hit zero TCS.",
+                  color: C.green,
+                  label: "LRS optimize",
+                },
+              ].map((p) => (
+                <div key={p.prompt} className="rounded-xl p-3.5" style={{ background: "#F9FAFB", border: "1px solid #E5E7EB" }}>
+                  <div className="flex items-start gap-2">
+                    <Tag color={p.color}>{p.label}</Tag>
+                    <p className="text-xs font-semibold flex-1" style={{ color: C.dark, fontFamily: "var(--font-manrope)" }}>
+                      "{p.prompt}"
+                    </p>
+                  </div>
+                  <p className="text-[11px] mt-1.5 leading-relaxed" style={{ color: "#6B7280" }}>
+                    <span className="font-semibold" style={{ color: "#374151" }}>What happens: </span>{p.what}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <Divider />
+
+        {/* ════════════════════════════════════════════
+            FY 2025-26 CHEATSHEET
+        ════════════════════════════════════════════ */}
+        <SectionH2>FY 2025-26 Tax Cheatsheet</SectionH2>
+        <p className="text-sm text-gray-500 -mt-1">Hard-coded into every calculator. Keep this handy.</p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+
+          {/* TCS */}
+          <div className="rounded-2xl p-4" style={{ border: "1px solid #E5E7EB", background: "#fff" }}>
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.green }}>LRS & TCS</p>
+            <Row label="TCS threshold per PAN/FY" value="₹10 Lakh" />
+            <Row label="TCS rate (investments)" value="20%" color={C.red} />
+            <Row label="TCS rate (education — self-funded)" value="5%" color={C.amber} />
+            <Row label="TCS rate (education — 80E loan)" value="0%" color={C.green} />
+            <Row label="Max LRS per adult/FY" value="$250,000" />
+            <Row label="Advance tax dates" value="Jun 15 / Sep 15 / Dec 15 / Mar 15" />
+          </div>
+
+          {/* Capital Gains */}
+          <div className="rounded-2xl p-4" style={{ border: "1px solid #E5E7EB", background: "#fff" }}>
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.dark }}>Capital Gains</p>
+            <Row label="LTCG threshold" value="730 days (24 months)" />
+            <Row label="LTCG rate (Section 112)" value="12.5% flat" color={C.green} />
+            <Row label="LTCG surcharge cap" value="15% (HNI advantage)" color={C.green} />
+            <Row label="LTCG effective max" value="14.95%" color={C.green} />
+            <Row label="STCG rate (slab, income >₹5 Cr)" value="Up to 30%+surcharge" color={C.red} />
+            <Row label="STCG effective max (old regime)" value="42.74%" color={C.red} />
+            <Row label="Loss carry-forward" value="8 assessment years" />
+          </div>
+
+          {/* DTAA */}
+          <div className="rounded-2xl p-4" style={{ border: "1px solid #E5E7EB", background: "#fff" }}>
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.amber }}>Foreign WHT on Dividends (India-sourced)</p>
+            <Row label="USA" value="25% WHT" color={C.red} />
+            <Row label="UK" value="20% WHT" color={C.amber} />
+            <Row label="Singapore / Mauritius" value="0% WHT" color={C.green} />
+            <Row label="Germany" value="26.375% WHT" color={C.red} />
+            <Row label="Netherlands / Japan" value="15% WHT" />
+            <Row label="Ireland UCITS ETF route" value="~15% WHT (vs 25% direct US)" color={C.green} />
+          </div>
+
+          {/* GIFT City exemptions */}
+          <div className="rounded-2xl p-4" style={{ border: "1px solid #E5E7EB", background: "#fff" }}>
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.blue }}>GIFT City Exemptions (NRI)</p>
+            <Row label="Cat III AIF gains/income" value="0% — Section 10(23FBC)" color={C.green} />
+            <Row label="GIFT City bond interest (NRI)" value="0% — Section 10(15)(ix)" color={C.green} />
+            <Row label="GIFT City bond interest (Resident)" value="Slab rate — NOT exempt" color={C.red} />
+            <Row label="US Estate Tax via IFSC units" value="$0 — not US-situs" color={C.green} />
+            <Row label="Schedule FA (Resident Indian)" value="Mandatory — ₹10L penalty" color={C.red} />
+            <Row label="Form 67 FTC deadline" value="March 31 of AY" color={C.amber} />
+          </div>
+        </div>
+
+        {/* New Tax Regime slabs */}
+        <div className="rounded-2xl overflow-hidden mt-4" style={{ border: "1px solid #E5E7EB" }}>
+          <div className="px-4 py-3" style={{ background: "#F9FAFB", borderBottom: "1px solid #E5E7EB" }}>
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: C.dark }}>New Tax Regime Slabs — FY 2025-26</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs min-w-[400px]">
+              <thead><tr style={{ background: C.dark }}>
+                {["Income Slab", "Rate", "STCG if this is your bracket", "LTCG (everyone)"].map((h) => (
+                  <th key={h} className="px-3 py-2.5 text-left font-semibold" style={{ color: C.mint }}>{h}</th>
+                ))}
+              </tr></thead>
+              <tbody>
+                {[
+                  ["Up to ₹3L",       "0%",  "0% base STCG",        "12.5% + surcharge"],
+                  ["₹3L – ₹7L",      "5%",  "5% base STCG",        "12.5% + surcharge"],
+                  ["₹7L – ₹10L",     "10%", "10% base STCG",       "12.5% + surcharge"],
+                  ["₹10L – ₹12L",    "15%", "15% base STCG",       "12.5% + surcharge"],
+                  ["₹12L – ₹15L",    "20%", "20% base STCG",       "12.5% + surcharge"],
+                  ["Above ₹15L",      "30%", "Up to 42.74% (>₹5Cr)", "14.95% max (capped)"],
+                ].map(([slab, rate, stcg, ltcg]) => (
+                  <tr key={slab} className="border-t" style={{ borderColor: "#F3F4F6" }}>
+                    <td className="px-3 py-2" style={{ color: C.dark }}>{slab}</td>
+                    <td className="px-3 py-2 font-semibold" style={{ color: C.dark }}>{rate}</td>
+                    <td className="px-3 py-2" style={{ color: C.red }}>{stcg}</td>
+                    <td className="px-3 py-2" style={{ color: C.green }}>{ltcg}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <Divider />
+
+        {/* ════════════════════════════════════════════
+            FY END ACTION PLAN
+        ════════════════════════════════════════════ */}
+        <SectionH2>Before March 31 — Your 4-step action plan</SectionH2>
+        <p className="text-sm text-gray-500 -mt-1">The financial year ends on March 31. These four actions can collectively save lakhs.</p>
+
+        <div className="space-y-3 mt-4">
+          {[
+            {
+              step: "1", color: C.red, label: "TODAY",
+              title: "Harvest your losses",
+              detail: "Go to the TLH Engine. The proactive banner shows your total harvestable losses. Sell the loss positions and immediately rebuy — India has no wash-sale rule. This books the losses for carry-forward, reducing your taxable gains this FY and for 8 years.",
+              link: "/tlh", cta: "Open TLH Engine →",
+            },
+            {
+              step: "2", color: C.amber, label: "THIS WEEK",
+              title: "Check your LTCG cliffs",
+              detail: "Open Capital Gains calculator. If any position is within 60 days of the 730-day threshold and currently at a gain, model the sell-now vs wait decision. The savings can be enormous — the example above showed ₹18.57L saved by waiting just 2 months.",
+              link: "/calculators/capital-gains", cta: "Open Capital Gains →",
+            },
+            {
+              step: "3", color: C.blue, label: "BEFORE MARCH 15",
+              title: "Offset TCS against advance tax",
+              detail: "If you've made LRS remittances this FY, your TCS appears in Form 26AS Part F. When paying your March 15 advance tax installment (100% of annual tax), reduce your payment by the TCS amount. No application needed — it's automatic.",
+              link: "/calculators/lrs-tcs", cta: "Calculate your offset →",
+            },
+            {
+              step: "4", color: C.green, label: "BEFORE MARCH 31",
+              title: "Prepare Schedule FA and Form 67",
+              detail: "If you're a Resident Indian with GIFT City investments, Schedule FA is mandatory. If you received foreign dividends, Form 67 is needed to claim FTC. Ask the AI to build your Schedule FA draft — takes 30 seconds.",
+              link: "/chat", cta: "Build Schedule FA with AI →",
+            },
+          ].map((a) => (
+            <div key={a.step} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${a.color}25` }}>
+              <div className="flex items-start gap-4 px-5 py-4">
+                <div className="flex-shrink-0 h-9 w-9 rounded-xl flex items-center justify-center text-sm font-black"
+                  style={{ background: a.color, color: "#fff" }}>
+                  {a.step}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: a.color }}>{a.label}</span>
+                    <p className="text-sm font-bold" style={{ fontFamily: "var(--font-manrope)", color: C.dark }}>{a.title}</p>
+                  </div>
+                  <p className="text-xs leading-relaxed" style={{ color: "#374151" }}>{a.detail}</p>
+                  <Link href={a.link}
+                    className="inline-flex items-center gap-1 text-xs font-bold mt-2 transition-opacity hover:opacity-75"
+                    style={{ color: a.color }}>
+                    {a.cta} <ArrowRight size={11} />
+                  </Link>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
 
         {/* Disclaimer */}
-        <p className="text-[10px] text-center mt-6 pb-4" style={{ color: "#9CA3AF" }}>
-          All examples are illustrative only. Tax rates per Finance Act 2025, FY 2025-26. Individual circumstances vary. Consult your CA before making investment or tax decisions.
+        <p className="text-[11px] mt-10 text-center leading-relaxed" style={{ color: "#9CA3AF" }}>
+          All figures are illustrative based on Finance Act 2025, FY 2025-26. Tax rules, rates, and exemptions may change.
+          Consult a qualified CA before making investment or tax decisions. Valura is not a tax advisor.
         </p>
+
       </div>
     </div>
   );
