@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import type { Components } from "react-markdown";
 import { WidgetRenderer, ToolPill } from "@/components/chat/widgets";
 import { getProfile, BRACKET_LABELS } from "@/lib/user-profile";
 
@@ -103,6 +104,168 @@ const WELCOME_CONTENT = `I'm Valura's **Autonomous Tax Agent** — I call multip
 
 I have access to **5 regulatory documents** including the RBI LRS FAQ, IT Act sections, and GIFT City compliance rules — with live semantic search on every question.`;
 
+// ─── Rich markdown renderer (dark theme) ──────────────────────────────────
+
+function ChatMarkdown({ content }: { content: string }) {
+  const ACTION_PREFIXES: Record<string, { label: string; border: string; bg: string; labelColor: string }> = {
+    "today:":          { label: "TODAY",           border: "#DC2626", bg: "rgba(220,38,38,0.08)",   labelColor: "#F87171" },
+    "this week:":      { label: "THIS WEEK",        border: "#B8913A", bg: "rgba(184,145,58,0.08)",  labelColor: "#FCD34D" },
+    "before march 31:":{ label: "BEFORE MARCH 31",  border: "#60A5FA", bg: "rgba(96,165,250,0.08)",  labelColor: "#93C5FD" },
+  };
+
+  const components: Components = {
+    p({ children }) {
+      const text = String(children).toLowerCase().trim();
+      for (const [prefix, style] of Object.entries(ACTION_PREFIXES)) {
+        if (text.startsWith(prefix)) {
+          const rest = String(children).slice(prefix.length).trim();
+          return (
+            <div
+              className="flex items-start gap-2 rounded-lg px-3 py-2 my-2"
+              style={{ background: style.bg, borderLeft: `3px solid ${style.border}` }}
+            >
+              <span className="flex-shrink-0 text-[9px] font-black uppercase tracking-widest mt-0.5"
+                style={{ color: style.labelColor }}>
+                {style.label}
+              </span>
+              <span className="text-sm leading-snug" style={{ color: "hsl(var(--foreground))" }}>
+                {rest}
+              </span>
+            </div>
+          );
+        }
+      }
+      return (
+        <p className="text-sm leading-relaxed my-1.5" style={{ color: "hsl(var(--foreground))" }}>
+          {children}
+        </p>
+      );
+    },
+
+    strong({ children }) {
+      return <strong className="font-semibold text-white">{children}</strong>;
+    },
+
+    em({ children }) {
+      return <em className="italic" style={{ color: "hsl(var(--muted-foreground))" }}>{children}</em>;
+    },
+
+    /* ── Tables ── */
+    table({ children }) {
+      return (
+        <div className="my-3 overflow-x-auto rounded-xl" style={{ border: "1px solid rgba(255,255,255,0.1)" }}>
+          <table className="w-full text-xs" style={{ borderCollapse: "collapse", minWidth: "320px" }}>
+            {children}
+          </table>
+        </div>
+      );
+    },
+    thead({ children }) {
+      return <thead style={{ background: "rgba(5,160,73,0.15)" }}>{children}</thead>;
+    },
+    th({ children }) {
+      return (
+        <th className="px-3 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider"
+          style={{ color: "#86EFAC", borderBottom: "1px solid rgba(5,160,73,0.3)" }}>
+          {children}
+        </th>
+      );
+    },
+    tbody({ children }) {
+      return <tbody>{children}</tbody>;
+    },
+    tr({ children }) {
+      return (
+        <tr className="border-b transition-colors hover:bg-white/[0.03]"
+          style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          {children}
+        </tr>
+      );
+    },
+    td({ children }) {
+      return (
+        <td className="px-3 py-2 text-xs" style={{ color: "hsl(var(--foreground))" }}>
+          {children}
+        </td>
+      );
+    },
+
+    /* ── Lists ── */
+    ul({ children }) {
+      return <ul className="my-2 space-y-1.5 pl-1">{children}</ul>;
+    },
+    ol({ children }) {
+      return <ol className="my-2 space-y-1.5 pl-1 list-decimal list-inside">{children}</ol>;
+    },
+    li({ children }) {
+      return (
+        <li className="flex items-start gap-2 text-sm" style={{ color: "hsl(var(--foreground))" }}>
+          <span className="mt-2 h-1.5 w-1.5 rounded-full flex-shrink-0" style={{ background: "#05A049" }} />
+          <span className="leading-relaxed">{children}</span>
+        </li>
+      );
+    },
+
+    /* ── Headings ── */
+    h1({ children }) {
+      return (
+        <h1 className="text-base font-bold mt-4 mb-2 pb-1.5"
+          style={{ color: "white", borderBottom: "1px solid rgba(255,255,255,0.1)", fontFamily: "var(--font-bricolage)" }}>
+          {children}
+        </h1>
+      );
+    },
+    h2({ children }) {
+      return (
+        <h2 className="text-sm font-bold mt-3 mb-1.5"
+          style={{ color: "white", fontFamily: "var(--font-bricolage)" }}>
+          {children}
+        </h2>
+      );
+    },
+    h3({ children }) {
+      return (
+        <h3 className="text-[13px] font-semibold mt-2.5 mb-1" style={{ color: "#86EFAC" }}>
+          {children}
+        </h3>
+      );
+    },
+
+    /* ── Code ── */
+    code({ children }) {
+      return (
+        <code className="px-1.5 py-0.5 rounded text-[11px] font-mono"
+          style={{ background: "rgba(255,255,255,0.08)", color: "#93C5FD" }}>
+          {children}
+        </code>
+      );
+    },
+
+    /* ── Blockquote — recommendation callout ── */
+    blockquote({ children }) {
+      return (
+        <div className="my-2 rounded-xl px-3 py-2.5"
+          style={{ background: "rgba(5,160,73,0.1)", borderLeft: "3px solid #05A049" }}>
+          <div className="text-sm leading-relaxed" style={{ color: "#86EFAC" }}>
+            {children}
+          </div>
+        </div>
+      );
+    },
+
+    /* ── Horizontal rule ── */
+    hr() {
+      return <hr className="my-3" style={{ borderColor: "rgba(255,255,255,0.08)" }} />;
+    },
+  };
+
+  return (
+    <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      {content}
+    </ReactMarkdown>
+  );
+}
+
 // ─── Message Bubble ───────────────────────────────────────────────────────
 
 function MessageBubble({ message }: { message: Message }) {
@@ -146,11 +309,18 @@ function MessageBubble({ message }: { message: Message }) {
               : "bg-card border border-border rounded-tl-sm"
           }`}>
             {isUser ? (
-              <p>{message.content}</p>
+              <p className="text-sm leading-relaxed">{message.content}</p>
             ) : (
-              <div className="prose prose-sm prose-invert max-w-none prose-p:my-1 prose-headings:my-2 prose-li:my-0.5 prose-code:text-blue-300 prose-strong:text-foreground prose-table:text-xs">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
-                {message.isStreaming && (
+              <div className="min-w-0 w-full">
+                <ChatMarkdown content={message.content} />
+                {message.isStreaming && !message.content && (
+                  <div className="flex items-center gap-1.5 px-1 py-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                )}
+                {message.isStreaming && message.content && (
                   <span className="inline-block h-3.5 w-0.5 bg-primary ml-0.5 animate-pulse" />
                 )}
               </div>
