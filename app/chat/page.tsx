@@ -119,7 +119,7 @@ function MessageBubble({ message }: { message: Message }) {
         {isUser ? <User className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5 text-purple-400" />}
       </div>
 
-      <div className={`flex flex-col gap-2 ${isUser ? "items-end max-w-[75%]" : "items-start flex-1 min-w-0"}`}>
+      <div className={`flex flex-col gap-2 ${isUser ? "items-end max-w-[82%] sm:max-w-[75%]" : "items-start flex-1 min-w-0"}`}>
         {/* Tool pills */}
         {!isUser && message.toolsUsed && message.toolsUsed.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
@@ -410,53 +410,75 @@ function ChatPageInner() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* ── Main chat area ── */}
-      <div className="flex flex-1 flex-col min-w-0 p-4 gap-3">
-        {/* Header */}
-        <div className="flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/20">
-              <Sparkles className="h-4 w-4 text-purple-400" />
+    /* On mobile: full height minus the 56px top nav bar */
+    <div className="flex h-[calc(100vh-3.5rem)] md:h-screen overflow-hidden">
+
+      {/* ══════════════════════════════════════════
+          MAIN CHAT COLUMN
+      ══════════════════════════════════════════ */}
+      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
+
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between px-3 sm:px-4 py-3 flex-shrink-0 border-b border-border">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/20">
+              <Sparkles className="h-3.5 w-3.5 text-purple-400" />
             </div>
-            <div>
-              <h1 className="text-lg font-bold leading-none">Agentic Tax Advisor</h1>
-              <p className="text-[10px] text-muted-foreground mt-0.5">GPT-4o · 5 live tools · 5 regulatory documents</p>
+            <div className="min-w-0">
+              <h1 className="text-sm font-bold leading-none truncate">Agentic Tax Advisor</h1>
+              <p className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">GPT-4o · 10 live tools · RAG on 5 documents</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="gain" className="text-[9px]">GPT-4o</Badge>
-            <Badge variant="info" className="text-[9px]">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <Badge variant="gain" className="text-[9px] hidden sm:inline-flex">GPT-4o</Badge>
+            <Badge variant="info" className="text-[9px] hidden sm:inline-flex">
               <BookOpen className="h-2.5 w-2.5 mr-1" /> RAG
             </Badge>
-            <Button variant="ghost" size="sm" onClick={clearChat}>
+            <Button variant="ghost" size="sm" onClick={clearChat} className="h-8 w-8 p-0">
               <RefreshCw className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 min-h-0 overflow-y-auto pr-2 space-y-4">
+        {/* ── Mobile prompt chips (horizontal scroll) ── */}
+        <div className="md:hidden flex-shrink-0 px-3 py-2 border-b border-border overflow-x-auto">
+          <div className="flex gap-2" style={{ width: "max-content" }}>
+            {SUGGESTED_PROMPTS.map((s, i) => (
+              <button
+                key={i}
+                onClick={() => sendMessage(s.prompt)}
+                disabled={isLoading}
+                className="flex-shrink-0 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium border border-border bg-secondary/20 transition-all hover:border-primary/40 hover:bg-secondary/50 disabled:opacity-40 whitespace-nowrap"
+              >
+                <span>{s.icon}</span>
+                <span className="text-muted-foreground">{s.short}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Messages ── */}
+        <div className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-4 py-4 space-y-4">
           {messages.map((msg) => (
             <MessageBubble key={msg.id} message={msg} />
           ))}
-          {status && !isLoading && <StatusBar status={status} />}
           {isLoading && status && <StatusBar status={status} />}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
-        <div className="flex-shrink-0">
-          <div className="rounded-2xl border border-border bg-card p-3">
-            <div className="flex items-end gap-3">
+        {/* ── Input ── */}
+        <div className="flex-shrink-0 px-3 sm:px-4 py-3 border-t border-border">
+          <div className="rounded-2xl border border-border bg-card p-2.5 sm:p-3">
+            <div className="flex items-end gap-2">
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask anything — I'll calculate live results and show them as cards…"
+                placeholder="Ask anything about your taxes…"
                 rows={2}
-                className="flex-1 resize-none bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none"
+                className="flex-1 resize-none bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none min-h-[44px]"
+                style={{ lineHeight: "1.5" }}
               />
               <Button
                 onClick={() => sendMessage(input)}
@@ -471,15 +493,19 @@ function ChatPageInner() {
                 )}
               </Button>
             </div>
-            <p className="mt-1.5 text-[9px] text-muted-foreground/50">
-              Enter to send · Shift+Enter for new line · For informational purposes only — consult a CA
+            <p className="mt-1.5 text-[9px] text-muted-foreground/40 hidden sm:block">
+              Enter to send · Shift+Enter for new line · Illustrative only — consult a CA
             </p>
           </div>
         </div>
       </div>
 
-      {/* ── Sidebar: suggestions ── */}
-      <div className="w-64 flex-shrink-0 border-l border-border p-3 flex flex-col gap-3 overflow-y-auto">
+      {/* ══════════════════════════════════════════
+          RIGHT SIDEBAR — desktop only
+      ══════════════════════════════════════════ */}
+      <div className="hidden md:flex w-60 lg:w-64 flex-shrink-0 border-l border-border flex-col gap-3 overflow-y-auto p-3">
+
+        {/* Quick prompts */}
         <div>
           <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground mb-2 px-1">
             Quick Prompts
@@ -532,7 +558,7 @@ function ChatPageInner() {
           </div>
         </div>
 
-        {/* Tools */}
+        {/* Live tools */}
         <div className="rounded-xl border border-border bg-secondary/20 p-3">
           <p className="text-[9px] font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Live Tools</p>
           <div className="space-y-1">
@@ -540,8 +566,11 @@ function ChatPageInner() {
               { icon: "⚡", name: "calculate_tcs",           desc: "TCS on any LRS amount" },
               { icon: "📊", name: "calculate_capital_gains", desc: "STCG/LTCG on any trade" },
               { icon: "👨‍👩‍👧", name: "optimize_family_tcs",  desc: "Family split optimizer" },
-              { icon: "✂️", name: "get_tlh_opportunities",  desc: "Live portfolio scan" },
-              { icon: "📈", name: "get_tax_rates",           desc: "Rates by income bracket" },
+              { icon: "✂️", name: "run_tlh_scan",            desc: "Live portfolio scan" },
+              { icon: "🔍", name: "run_fy_audit",            desc: "Full FY tax audit" },
+              { icon: "⚖️", name: "compare_scenarios",       desc: "Hold vs sell analysis" },
+              { icon: "📋", name: "build_schedule_fa_data",  desc: "ITR foreign asset draft" },
+              { icon: "📅", name: "get_fy_countdown",        desc: "FY urgency + deadlines" },
             ].map((t) => (
               <div key={t.name} className="flex items-start gap-2 py-1">
                 <span className="text-xs mt-0.5">{t.icon}</span>
