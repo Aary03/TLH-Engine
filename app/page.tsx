@@ -1,465 +1,403 @@
-"use client";
-
-import { useMemo } from "react";
-import {
-  TrendingUp,
-  TrendingDown,
-  Scissors,
-  Globe,
-  AlertTriangle,
-  Clock,
-  ArrowUpRight,
-  Info,
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
-import {
-  HOLDINGS,
-  FAMILY_MEMBERS,
-  LRS_SUMMARY,
-  COMPLIANCE_DEADLINES,
-  getUnrealizedPnL,
-  getPortfolioSummary,
-} from "@/lib/mock-data";
-import { runTLHScan, getTLHSummary } from "@/lib/tlh-engine";
-import { formatINR, formatUSD, formatPercent, holdingPeriodLabel } from "@/lib/utils";
-import { getHoldingDays } from "@/lib/mock-data";
-import { getLTCGEffectiveRate, getSTCGEffectiveRate } from "@/lib/tax-calculations";
 import Link from "next/link";
+import {
+  ArrowRight, BadgePercent, Calculator, Map, Shield,
+  UserCheck, TrendingUp, BookOpen, Zap, CheckCircle2,
+  ChevronRight, Newspaper,
+} from "lucide-react";
+import { BLOG_POSTS } from "@/lib/blog-data";
 
-const INCOME = 60_000_000; // ₹6Cr (ultra-HNI)
-
-// ─── Simulated portfolio history ──────────────────────────────────────────
-const PORTFOLIO_HISTORY = [
-  { month: "Apr", value: 3.12 },
-  { month: "May", value: 3.28 },
-  { month: "Jun", value: 3.45 },
-  { month: "Jul", value: 3.61 },
-  { month: "Aug", value: 3.52 },
-  { month: "Sep", value: 3.74 },
-  { month: "Oct", value: 3.88 },
-  { month: "Nov", value: 3.71 },
-  { month: "Dec", value: 3.95 },
-  { month: "Jan", value: 4.12 },
-  { month: "Feb", value: 3.98 },
-  { month: "Mar", value: 4.19 },
+/* ── Calculator cards ── */
+const CALCULATORS = [
+  {
+    href: "/calculators/net-returns",
+    icon: TrendingUp,
+    label: "Net Returns",
+    tag: "Flagship",
+    tagColor: "#05A049",
+    desc: "The closing argument. Compare Direct vs Valura after every tax drag — TCS, dividend WHT, estate tax — compounded over 30 years.",
+    color: "#05A049",
+    bg: "#EDFAF3",
+    border: "#B4E3C8",
+  },
+  {
+    href: "/calculators/lrs-tcs",
+    icon: BadgePercent,
+    label: "LRS & TCS",
+    tag: "TCS optimizer",
+    tagColor: "#05A049",
+    desc: "20% TCS on remittances above ₹10L per PAN. Optimize across family members and use advance tax to collapse the lock-up from months to weeks.",
+    color: "#05A049",
+    bg: "#F0FAF5",
+    border: "#D1F0E1",
+  },
+  {
+    href: "/calculators/capital-gains",
+    icon: Calculator,
+    label: "Capital Gains",
+    tag: "730-day rule",
+    tagColor: "#00111B",
+    desc: "LTCG 14.95% max vs STCG up to 42.74%. The surcharge cap for LTCG saves HNIs lakhs. Find your exact break-even day.",
+    color: "#00111B",
+    bg: "#F9FAFB",
+    border: "#E5E7EB",
+  },
+  {
+    href: "/calculators/estate-tax",
+    icon: Shield,
+    label: "US Estate Tax",
+    tag: "NRA rules",
+    tagColor: "#7A2020",
+    desc: "Indian investors buying US stocks directly face up to 40% IRS estate tax above $60K. GIFT City IFSC units are $0. Run your numbers.",
+    color: "#7A2020",
+    bg: "#FEF2F2",
+    border: "#FECACA",
+  },
+  {
+    href: "/calculators/dtaa",
+    icon: Map,
+    label: "DTAA / FTC",
+    tag: "Form 67",
+    tagColor: "#B8913A",
+    desc: "Resident Indians: claim Foreign Tax Credit to stop paying 55% on US dividends. NRIs: understand why GIFT City makes DTAA irrelevant.",
+    color: "#B8913A",
+    bg: "#FFFBF0",
+    border: "#E8C97A",
+  },
+  {
+    href: "/calculators/nri-status",
+    icon: UserCheck,
+    label: "NRI Status",
+    tag: "Section 6",
+    tagColor: "#2B4A8A",
+    desc: "Are you NRI, RNOR, or ROR? Runs the full Section 6 logic. Discover if you're in the RNOR golden window before it closes.",
+    color: "#2B4A8A",
+    bg: "#EFF4FF",
+    border: "#C7D7F8",
+  },
 ];
 
-const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#f43f5e", "#06b6d4", "#84cc16"];
+const PROBLEMS = [
+  {
+    icon: BadgePercent,
+    stat: "Up to ₹1 Cr+",
+    label: "TCS locked per ₹5 Cr remittance",
+    desc: "20% is deducted before your money ever reaches your account. It returns via ITR — but only after 9–18 months of compounding opportunity cost.",
+    fix: "Family LRS optimization + advance tax offset",
+    fixColor: "#05A049",
+  },
+  {
+    icon: Shield,
+    stat: "Up to 40%",
+    label: "US estate tax for NRAs above $60K",
+    desc: "Every Indian holding Apple, an S&P 500 ETF, or any US stock directly is a Non-Resident Alien under IRS rules. Their $60K exemption, not $13.6M.",
+    fix: "IFSC fund units are not US-situs assets — $0 estate tax",
+    fixColor: "#05A049",
+  },
+  {
+    icon: Map,
+    stat: "25% vs 15%",
+    label: "Dividend WHT: direct US stocks vs UCITS route",
+    desc: "Buy Apple directly: IRS withholds 25% on every dividend. Via an Ireland UCITS ETF through Valura: 15% under India-Ireland DTAA. Every single year.",
+    fix: "10 percentage points saved on every dividend payment",
+    fixColor: "#05A049",
+  },
+];
 
-export default function Dashboard() {
-  const summary = useMemo(() => getPortfolioSummary(), []);
-  const tlhOpportunities = useMemo(() => runTLHScan(INCOME, "old", 2_200_000), []);
-  const tlhSummary = useMemo(() => getTLHSummary(tlhOpportunities), [tlhOpportunities]);
-
-  const totalTCS = LRS_SUMMARY.familyTotalTCS;
-  const stcgRate = getSTCGEffectiveRate(INCOME, "old");
-  const ltcgRate = getLTCGEffectiveRate(INCOME, "old");
-
-  // Holdings for pie chart
-  const holdingsForPie = HOLDINGS.map((h) => ({
-    name: h.symbol,
-    value: Math.round((h.currentNAVUSD * h.quantity * 83.5) / 100_000) / 10, // ₹L
-  }));
-
-  // Gain/loss bar data
-  const gainLossData = HOLDINGS.map((h) => {
-    const pnl = getUnrealizedPnL(h);
-    const days = getHoldingDays(h.purchaseDate);
-    return {
-      name: h.symbol.replace("-IFSC", "").replace("-", " "),
-      pnl: Math.round(pnl.pnlINR / 100_000),
-      type: pnl.isLoss ? "loss" : "gain",
-      isLTCG: days > 730,
-    };
-  });
-
-  const criticalDeadlines = COMPLIANCE_DEADLINES.filter(
-    (d) => d.urgency === "critical" || d.urgency === "high"
-  ).slice(0, 3);
+export default function HomePage() {
+  const featuredPosts = BLOG_POSTS.slice(0, 3);
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Portfolio Overview</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Rajesh Mehta Family · FY 2025-26 · GIFT City IFSC
+    <div className="min-h-screen" style={{ background: "#FFFFFC" }}>
+
+      {/* ══════════════════════════════════════════
+          HERO
+      ══════════════════════════════════════════ */}
+      <section style={{ background: "#00111B" }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 pt-10 sm:pt-14 pb-12 sm:pb-16">
+
+          {/* Tags */}
+          <div className="flex flex-wrap items-center gap-2 mb-6">
+            <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest"
+              style={{ background: "rgba(5,160,73,0.2)", color: "#05A049" }}>
+              Finance Act 2025 · FY 2025-26
+            </span>
+            <span className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest"
+              style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.4)" }}>
+              GIFT City · IFSC
+            </span>
+            <span className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest"
+              style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.4)" }}>
+              Free to use
+            </span>
+          </div>
+
+          {/* Headline */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight tracking-tight text-white mb-4"
+            style={{ fontFamily: "var(--font-bricolage)" }}>
+            India&apos;s sharpest tax calculators
+            <span style={{ color: "#05A049" }}> for GIFT City investors</span>
+          </h1>
+          <p className="text-base sm:text-lg max-w-2xl mb-8 leading-relaxed"
+            style={{ color: "rgba(255,255,255,0.5)" }}>
+            Six precision calculators covering LRS, capital gains, US estate tax, DTAA, NRI residency, and full net returns — built for Indian HNIs who invest globally.
           </p>
+
+          {/* CTAs */}
+          <div className="flex flex-wrap gap-3 mb-10">
+            <Link href="/calculators/net-returns"
+              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-extrabold transition-all hover:opacity-90"
+              style={{ background: "#05A049", color: "#fff", boxShadow: "0 4px 16px rgba(5,160,73,0.35)" }}>
+              Start calculating <ArrowRight className="h-4 w-4" />
+            </Link>
+            <a href="/signup"
+              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all"
+              style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.12)" }}>
+              Open Valura Account
+            </a>
+          </div>
+
+          {/* Stat chips */}
+          <div className="flex flex-wrap gap-3">
+            {[
+              { value: "₹0", label: "TCS via family optimization" },
+              { value: "$0", label: "US estate tax via GIFT City" },
+              { value: "14.95%", label: "max LTCG effective rate" },
+              { value: "6", label: "free precision calculators" },
+            ].map((s) => (
+              <div key={s.label} className="rounded-xl px-4 py-2.5 flex items-baseline gap-2"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                <span className="text-lg font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: "#05A049" }}>{s.value}</span>
+                <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>{s.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="info">₹1 = $0.01198 (₹83.50)</Badge>
-          <Badge variant="warning">20 days to FY end</Badge>
-        </div>
-      </div>
+      </section>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-4 gap-4">
-        <KPICard
-          title="Portfolio Value"
-          value={formatINR(summary.totalValueINR)}
-          subValue={formatUSD(summary.totalValueINR / 83.5)}
-          change={formatPercent(summary.totalPnLPercent)}
-          isPositive={summary.totalPnLPercent >= 0}
-          icon={<TrendingUp className="h-4 w-4" />}
-          description="7 GIFT City IFSC holdings"
-        />
-        <KPICard
-          title="Unrealized P&L"
-          value={formatINR(summary.totalPnLINR)}
-          subValue={`${formatINR(summary.totalGainINR)} gains`}
-          change={`${formatINR(Math.abs(summary.totalLossINR))} losses`}
-          isPositive={summary.totalPnLINR >= 0}
-          icon={summary.totalPnLINR >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-          description="Across all IFSC positions"
-        />
-        <KPICard
-          title="TLH Savings Available"
-          value={formatINR(tlhSummary.totalPotentialSavings)}
-          subValue={`${tlhSummary.opportunityCount} opportunities`}
-          change={`${tlhSummary.stclCount} STCL @ ${(stcgRate * 100).toFixed(1)}%`}
-          isPositive={false}
-          isOpportunity
-          icon={<Scissors className="h-4 w-4" />}
-          description="If all losses harvested now"
-          href="/tlh"
-        />
-        <KPICard
-          title="Family TCS Paid"
-          value={formatINR(totalTCS)}
-          subValue={`₹${(LRS_SUMMARY.familyTotalRemittedINR / 10_000_000).toFixed(2)}Cr remitted`}
-          change="Refundable via ITR"
-          isPositive={false}
-          isWarning
-          icon={<Globe className="h-4 w-4" />}
-          description="3 family members · FY 2025-26"
-          href="/lrs"
-        />
-      </div>
+      {/* ══════════════════════════════════════════
+          CALCULATORS GRID
+      ══════════════════════════════════════════ */}
+      <section className="py-14 sm:py-20" style={{ background: "#FFFFFC" }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="mb-10">
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "#05A049" }}>The tools</p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold leading-tight" style={{ fontFamily: "var(--font-bricolage)", color: "#00111B" }}>
+              Six calculators. Every angle covered.
+            </h2>
+            <p className="mt-2 text-sm text-gray-500 max-w-xl">
+              Each calculator is built on hard-coded Finance Act 2025 tax rules — no generic AI estimates, no approximations.
+            </p>
+          </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-3 gap-4">
-        {/* Portfolio value over time */}
-        <Card className="col-span-2">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold">Portfolio Value (₹Cr)</CardTitle>
-              <Badge variant="gain">+34.3% YTD</Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={180}>
-              <AreaChart data={PORTFOLIO_HISTORY}>
-                <defs>
-                  <linearGradient id="portfolioGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="month" tick={{ fill: "#6b7280", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: "#6b7280", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v}Cr`} />
-                <Tooltip
-                  contentStyle={{ background: "hsl(222 47% 9%)", border: "1px solid hsl(222 47% 15%)", borderRadius: "8px", color: "#f1f5f9" }}
-                  formatter={(v: number) => [`₹${v}Cr`, "Portfolio"]}
-                />
-                <Area type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} fill="url(#portfolioGrad)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Holdings allocation */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Allocation by Fund</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={180}>
-              <PieChart>
-                <Pie data={holdingsForPie} cx="50%" cy="50%" innerRadius={45} outerRadius={75} dataKey="value" paddingAngle={2}>
-                  {holdingsForPie.map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ background: "hsl(222 47% 9%)", border: "1px solid hsl(222 47% 15%)", borderRadius: "8px", color: "#f1f5f9" }}
-                  formatter={(v: number) => [`₹${v}L`, ""]}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="mt-2 grid grid-cols-2 gap-1">
-              {HOLDINGS.slice(0, 6).map((h, i) => (
-                <div key={h.id} className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
-                  <span className="truncate text-[10px] text-muted-foreground">{h.symbol.split("-")[0]}</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {CALCULATORS.map((c) => (
+              <Link key={c.href} href={c.href}
+                className="group rounded-2xl p-5 flex flex-col transition-all hover:shadow-lg hover:-translate-y-0.5"
+                style={{ background: "#fff", border: `1px solid ${c.border}` }}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: c.bg }}>
+                    <c.icon className="h-5 w-5" style={{ color: c.color }} />
+                  </div>
+                  <span className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest"
+                    style={{ background: `${c.tagColor}15`, color: c.tagColor }}>
+                    {c.tag}
+                  </span>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                <p className="text-sm font-bold mb-1.5" style={{ fontFamily: "var(--font-manrope)", color: "#00111B" }}>
+                  {c.label}
+                </p>
+                <p className="text-xs text-gray-500 leading-relaxed flex-1">{c.desc}</p>
+                <div className="mt-4 flex items-center gap-1 text-xs font-semibold group-hover:gap-2 transition-all"
+                  style={{ color: c.color }}>
+                  Open calculator <ChevronRight className="h-3.5 w-3.5" />
+                </div>
+              </Link>
+            ))}
+          </div>
 
-      {/* Holdings Table + Gain/Loss Chart */}
-      <div className="grid grid-cols-3 gap-4">
-        {/* Gain/Loss Chart */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Gain / Loss by Fund (₹L)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={gainLossData} layout="vertical" margin={{ left: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={false} />
-                <XAxis type="number" tick={{ fill: "#6b7280", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v}L`} />
-                <YAxis type="category" dataKey="name" tick={{ fill: "#9ca3af", fontSize: 10 }} axisLine={false} tickLine={false} width={70} />
-                <Tooltip
-                  contentStyle={{ background: "hsl(222 47% 9%)", border: "1px solid hsl(222 47% 15%)", borderRadius: "8px", color: "#f1f5f9" }}
-                  formatter={(v: number) => [`₹${v}L`, "P&L"]}
-                />
-                <Bar dataKey="pnl" radius={[0, 4, 4, 0]}>
-                  {gainLossData.map((entry, i) => (
-                    <Cell key={i} fill={entry.pnl >= 0 ? "#10b981" : "#f43f5e"} />
+          <div className="mt-6 text-center">
+            <Link href="/calculators/docs"
+              className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all hover:bg-gray-100"
+              style={{ background: "#F9FAFB", color: "#374151", border: "1px solid #E5E7EB" }}>
+              <BookOpen className="h-4 w-4" />
+              Read the calculator guide with worked examples
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════
+          PROBLEM → GIFT CITY SOLUTION
+      ══════════════════════════════════════════ */}
+      <section className="py-14 sm:py-20" style={{ background: "#00111B" }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="mb-10">
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "rgba(180,227,200,0.5)" }}>The problem</p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold leading-tight text-white" style={{ fontFamily: "var(--font-bricolage)" }}>
+              Direct investment has hidden costs<br className="hidden sm:block" /> you&apos;re not seeing
+            </h2>
+            <p className="mt-2 text-sm max-w-xl" style={{ color: "rgba(255,255,255,0.4)" }}>
+              IBKR, Vested, and INDmoney give you market access. They don&apos;t optimize your Indian tax. Three drags compound silently over decades.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+            {PROBLEMS.map((p) => (
+              <div key={p.label} className="rounded-2xl p-5"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <p className="text-2xl font-extrabold mb-1" style={{ fontFamily: "var(--font-bricolage)", color: "#DC2626" }}>
+                  {p.stat}
+                </p>
+                <p className="text-xs font-bold mb-2" style={{ color: "rgba(255,255,255,0.6)" }}>{p.label}</p>
+                <p className="text-xs leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.3)" }}>{p.desc}</p>
+                <div className="flex items-start gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" style={{ color: "#05A049" }} />
+                  <p className="text-[11px] leading-relaxed" style={{ color: "#B4E3C8" }}>{p.fix}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* GIFT City advantages */}
+          <div className="rounded-2xl p-6 sm:p-8" style={{ background: "rgba(5,160,73,0.08)", border: "1px solid rgba(5,160,73,0.2)" }}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div>
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="h-8 w-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(5,160,73,0.2)" }}>
+                    <Zap className="h-4 w-4" style={{ color: "#05A049" }} />
+                  </div>
+                  <p className="font-bold text-white text-sm" style={{ fontFamily: "var(--font-manrope)" }}>
+                    Valura GIFT City IFSC eliminates all three
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-x-6 gap-y-2">
+                  {[
+                    "Family LRS optimization → TCS = ₹0",
+                    "IFSC units not US-situs → Estate tax = $0",
+                    "Ireland UCITS route → Dividend WHT = 15%",
+                    "LTCG surcharge capped at 15%",
+                  ].map((f) => (
+                    <div key={f} className="flex items-center gap-1.5 text-[11px]" style={{ color: "#B4E3C8" }}>
+                      <CheckCircle2 className="h-3.5 w-3.5" style={{ color: "#05A049" }} />
+                      {f}
+                    </div>
                   ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Holdings Table */}
-        <Card className="col-span-2">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold">Holdings</CardTitle>
-              <span className="text-[10px] text-muted-foreground">All GIFT City IFSC</span>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="px-5 py-2.5 text-left font-medium text-muted-foreground">Fund</th>
-                    <th className="px-3 py-2.5 text-right font-medium text-muted-foreground">NAV (USD)</th>
-                    <th className="px-3 py-2.5 text-right font-medium text-muted-foreground">Value</th>
-                    <th className="px-3 py-2.5 text-right font-medium text-muted-foreground">P&L</th>
-                    <th className="px-3 py-2.5 text-right font-medium text-muted-foreground">Holding</th>
-                    <th className="px-3 py-2.5 text-center font-medium text-muted-foreground">Type</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {HOLDINGS.map((h) => {
-                    const pnl = getUnrealizedPnL(h);
-                    const days = getHoldingDays(h.purchaseDate);
-                    const isLTCG = days > 730;
-                    const valueINR = h.currentNAVUSD * h.quantity * 83.5;
-                    const daysToLTCG = Math.max(0, 730 - days);
-                    return (
-                      <tr key={h.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                        <td className="px-5 py-3">
-                          <p className="font-medium text-foreground">{h.amc}</p>
-                          <p className="text-muted-foreground text-[10px]">{h.symbol}</p>
-                        </td>
-                        <td className="px-3 py-3 text-right">
-                          <p className="font-mono">${h.currentNAVUSD}</p>
-                          <p className="text-[10px] text-muted-foreground">
-                            avg ${h.avgCostUSD}
-                          </p>
-                        </td>
-                        <td className="px-3 py-3 text-right font-medium">{formatINR(valueINR)}</td>
-                        <td className="px-3 py-3 text-right">
-                          <p className={pnl.isLoss ? "text-loss font-medium" : "text-gain font-medium"}>
-                            {pnl.isLoss ? "-" : "+"}{formatINR(Math.abs(pnl.pnlINR))}
-                          </p>
-                          <p className={`text-[10px] ${pnl.isLoss ? "text-loss/70" : "text-gain/70"}`}>
-                            {formatPercent(pnl.pnlPercent)}
-                          </p>
-                        </td>
-                        <td className="px-3 py-3 text-right">
-                          <p className="font-mono text-muted-foreground">{holdingPeriodLabel(days)}</p>
-                          {!isLTCG && daysToLTCG <= 120 && (
-                            <p className="text-[10px] text-amber-400">{daysToLTCG}d to LTCG</p>
-                          )}
-                        </td>
-                        <td className="px-3 py-3 text-center">
-                          <Badge variant={isLTCG ? "ltcg" : pnl.isLoss ? "stcl" : "stcg"} className="text-[9px]">
-                            {isLTCG ? "LTCG" : pnl.isLoss ? "STCL" : "STCG"}
-                          </Badge>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Bottom row: TLH summary + Deadlines */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* TLH Summary */}
-        <Card className="border-rose-500/20 bg-rose-500/5">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <Scissors className="h-4 w-4 text-rose-400" />
-                TLH Opportunities
-              </CardTitle>
-              <Link href="/tlh">
-                <Button size="sm" variant="loss">
-                  View all <ArrowUpRight className="h-3 w-3" />
-                </Button>
+                </div>
+              </div>
+              <Link href="/calculators/net-returns"
+                className="flex-shrink-0 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-extrabold transition-all hover:opacity-90 whitespace-nowrap"
+                style={{ background: "#05A049", color: "#fff" }}>
+                See the numbers <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-4">
-              <StatBlock label="Losses Available" value={formatINR(tlhSummary.totalLossAvailable)} accent="loss" />
-              <StatBlock label="Tax Savings" value={formatINR(tlhSummary.totalPotentialSavings)} accent="loss" />
-              <StatBlock label="STCL Count" value={`${tlhSummary.stclCount} positions`} accent="warning" />
-            </div>
-            <p className="mt-3 text-[10px] text-muted-foreground bg-secondary/50 rounded-lg p-2">
-              <span className="text-amber-400 font-semibold">India has no wash sale rules.</span>{" "}
-              Sell at a loss and immediately rebuy the same security. New cost basis = rebuy price.
-              STCL harvested now saves up to <span className="text-rose-400 font-semibold">{(stcgRate * 100).toFixed(2)}%</span> in taxes.
-            </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+      </section>
 
-        {/* Deadlines */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Clock className="h-4 w-4 text-amber-400" />
-              Compliance Deadlines
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {criticalDeadlines.map((d) => {
-                const today = new Date("2026-03-11");
-                const daysLeft = Math.ceil((d.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                return (
-                  <div key={d.id} className="flex items-start gap-3">
-                    <div className={`mt-0.5 h-2 w-2 rounded-full flex-shrink-0 ${
-                      d.urgency === "critical" ? "bg-rose-400 animate-pulse" :
-                      d.urgency === "high" ? "bg-amber-400" : "bg-blue-400"
-                    }`} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-medium">{d.label}</p>
-                        <span className={`text-[10px] font-semibold ${
-                          daysLeft <= 20 ? "text-rose-400" : daysLeft <= 60 ? "text-amber-400" : "text-muted-foreground"
-                        }`}>
-                          {daysLeft > 0 ? `${daysLeft}d` : "OVERDUE"}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{d.description}</p>
-                    </div>
+      {/* ══════════════════════════════════════════
+          BLOG PREVIEW
+      ══════════════════════════════════════════ */}
+      <section className="py-14 sm:py-20" style={{ background: "#FFFFFC" }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "#05A049" }}>Knowledge base</p>
+              <h2 className="text-2xl sm:text-3xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: "#00111B" }}>
+                Understand the rules before you optimize
+              </h2>
+            </div>
+            <Link href="/blog"
+              className="flex-shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold"
+              style={{ color: "#05A049" }}>
+              All articles <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {featuredPosts.map((post) => (
+              <Link key={post.slug} href={`/blog/${post.slug}`}
+                className="group rounded-2xl overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5"
+                style={{ border: "1px solid #E5E7EB", background: "#fff" }}>
+                {/* Color header */}
+                <div className="h-2" style={{ background: post.accentColor }} />
+                <div className="p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-widest rounded-full px-2 py-0.5"
+                      style={{ background: `${post.accentColor}15`, color: post.accentColor }}>
+                      {post.category}
+                    </span>
+                    <span className="text-[10px] text-gray-400">{post.readTime} min read</span>
                   </div>
-                );
-              })}
+                  <h3 className="text-sm font-bold leading-snug mb-2"
+                    style={{ fontFamily: "var(--font-manrope)", color: "#00111B" }}>
+                    {post.title}
+                  </h3>
+                  <p className="text-[11px] text-gray-500 leading-relaxed line-clamp-3">{post.excerpt}</p>
+                  <div className="mt-4 flex items-center gap-1 text-[11px] font-semibold group-hover:gap-2 transition-all"
+                    style={{ color: post.accentColor }}>
+                    Read article <ChevronRight className="h-3 w-3" />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════
+          BOTTOM CTA
+      ══════════════════════════════════════════ */}
+      <section style={{ background: "#00111B" }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 py-14 sm:py-20">
+          <div className="rounded-2xl overflow-hidden" style={{ border: "2px solid rgba(5,160,73,0.4)" }}>
+            <div className="px-6 sm:px-10 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+              style={{ background: "rgba(5,160,73,0.06)" }}>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-2"
+                  style={{ color: "rgba(180,227,200,0.5)" }}>
+                  Ready to invest smarter
+                </p>
+                <p className="text-2xl sm:text-3xl font-extrabold text-white mb-2"
+                  style={{ fontFamily: "var(--font-bricolage)" }}>
+                  Open your Valura GIFT City account
+                </p>
+                <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>
+                  Zero TCS. Zero estate tax. Ireland UCITS ETF access. IFSCA regulated.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  {["Zero TCS via family optimization", "$0 US estate tax", "15% dividend WHT", "LTCG capped at 14.95%"].map((f) => (
+                    <div key={f} className="flex items-center gap-1.5 text-[11px]" style={{ color: "#B4E3C8" }}>
+                      <CheckCircle2 className="h-3.5 w-3.5" style={{ color: "#05A049" }} />
+                      {f}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 flex-shrink-0">
+                <a href="/signup"
+                  className="inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-extrabold transition-all hover:opacity-90 whitespace-nowrap"
+                  style={{ background: "#05A049", color: "#fff", boxShadow: "0 4px 16px rgba(5,160,73,0.35)" }}>
+                  Open Account in 10 Minutes <ArrowRight className="h-4 w-4" />
+                </a>
+                <Link href="/calculators/net-returns"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all"
+                  style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                  Run your numbers first
+                </Link>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Disclaimer */}
+      <div className="py-4 text-center" style={{ background: "#00111B" }}>
+        <p className="text-[9px] px-4" style={{ color: "rgba(255,255,255,0.2)" }}>
+          All calculators are illustrative only. Tax rates per Finance Act 2025, FY 2025-26. Consult your CA and financial advisor before making investment or tax decisions.
+        </p>
       </div>
-
-      {/* Tax rate reference */}
-      <Card className="bg-gradient-to-r from-blue-950/30 to-purple-950/30 border-blue-900/30">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Info className="h-4 w-4 text-blue-400" />
-            <p className="text-xs font-semibold text-blue-400">Effective Tax Rates — Ultra HNI (above ₹5Cr income)</p>
-          </div>
-          <div className="grid grid-cols-4 gap-4">
-            <TaxRateBlock label="STCG Rate" value={`${(stcgRate * 100).toFixed(2)}%`} sub="Slab 30% + 37% surcharge + 4% cess" color="text-yellow-400" />
-            <TaxRateBlock label="LTCG Rate" value={`${(ltcgRate * 100).toFixed(2)}%`} sub="12.5% flat + 15% surcharge cap + 4% cess" color="text-emerald-400" />
-            <TaxRateBlock label="STCL Value" value="3× LTCG" sub="Can offset STCG AND LTCG — broadest offset" color="text-rose-400" />
-            <TaxRateBlock label="IFSC Advantage" value="Zero STT/GST" sub="No stamp duty, no STT — cost advantage" color="text-blue-400" />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-// ─── Sub-components ───────────────────────────────────────────────────────
-
-function KPICard({
-  title, value, subValue, change, isPositive, isOpportunity, isWarning, icon, description, href,
-}: {
-  title: string; value: string; subValue: string; change: string;
-  isPositive: boolean; isOpportunity?: boolean; isWarning?: boolean;
-  icon: React.ReactNode; description: string; href?: string;
-}) {
-  const content = (
-    <Card className={`hover:border-primary/30 transition-colors cursor-default ${
-      isOpportunity ? "border-rose-500/20" : isWarning ? "border-amber-500/20" : ""
-    }`}>
-      <CardContent className="p-5">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-medium text-muted-foreground">{title}</p>
-          <div className={`p-1.5 rounded-md ${
-            isOpportunity ? "bg-rose-500/10 text-rose-400" :
-            isWarning ? "bg-amber-500/10 text-amber-400" :
-            isPositive ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
-          }`}>
-            {icon}
-          </div>
-        </div>
-        <p className="text-2xl font-bold tracking-tight">{value}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{subValue}</p>
-        <div className="mt-2 flex items-center justify-between">
-          <span className={`text-[10px] font-medium ${
-            isOpportunity ? "text-rose-400" : isWarning ? "text-amber-400" :
-            isPositive ? "text-emerald-400" : "text-rose-400"
-          }`}>
-            {change}
-          </span>
-          <span className="text-[9px] text-muted-foreground">{description}</span>
-        </div>
-      </CardContent>
-    </Card>
-  );
-  if (href) return <Link href={href}>{content}</Link>;
-  return content;
-}
-
-function StatBlock({ label, value, accent }: { label: string; value: string; accent: "gain" | "loss" | "warning" }) {
-  const color = accent === "gain" ? "text-gain" : accent === "loss" ? "text-loss" : "text-amber-400";
-  return (
-    <div>
-      <p className="text-[10px] text-muted-foreground">{label}</p>
-      <p className={`text-sm font-bold mt-0.5 ${color}`}>{value}</p>
-    </div>
-  );
-}
-
-function TaxRateBlock({ label, value, sub, color }: { label: string; value: string; sub: string; color: string }) {
-  return (
-    <div className="rounded-lg bg-background/40 p-3">
-      <p className="text-[10px] text-muted-foreground">{label}</p>
-      <p className={`text-lg font-bold mt-1 ${color}`}>{value}</p>
-      <p className="text-[9px] text-muted-foreground mt-0.5">{sub}</p>
     </div>
   );
 }

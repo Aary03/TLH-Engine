@@ -5,13 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
   Scissors,
   Calculator,
   MessageSquare,
   Globe,
   Zap,
-  FolderOpen,
   BadgePercent,
   ChevronRight,
   Sparkles,
@@ -22,34 +20,36 @@ import {
   TrendingUp,
   Menu,
   X,
+  Home,
+  Newspaper,
 } from "lucide-react";
 
 const NAV_SECTIONS = [
   {
-    label: "Overview",
+    label: "Home",
     items: [
-      { href: "/", label: "Dashboard", icon: LayoutDashboard, desc: "Portfolio overview" },
-      { href: "/portfolio", label: "Portfolio", icon: FolderOpen, desc: "Holdings · Post-Tax XIRR" },
+      { href: "/",     label: "Overview",    icon: Home,      desc: "Calculators & guides" },
+      { href: "/blog", label: "Blog",        icon: Newspaper, desc: "GIFT City knowledge base" },
     ],
   },
   {
     label: "Calculators",
     items: [
-      { href: "/calculators/net-returns",    label: "Net Returns",   icon: TrendingUp,   desc: "Direct vs Valura · flagship", badge: "New" },
-      { href: "/calculators/lrs-tcs",        label: "LRS & TCS",     icon: BadgePercent, desc: "Minimize remittance TCS" },
-      { href: "/calculators/capital-gains",  label: "Capital Gains", icon: Calculator,   desc: "STCG / LTCG + 730-day rule" },
-      { href: "/calculators/dtaa",           label: "DTAA / FTC",    icon: Map,          desc: "NRI double-tax relief" },
-      { href: "/calculators/estate-tax",     label: "Estate Tax",    icon: Shield,       desc: "US NRA exposure" },
-      { href: "/calculators/nri-status",     label: "NRI Status",    icon: UserCheck,    desc: "NRI / RNOR / ROR check" },
-      { href: "/calculators/docs",           label: "Calc Guide",    icon: BookOpen,     desc: "Examples & formulas" },
-      { href: "/lrs",                        label: "LRS Tracker",   icon: Globe,        desc: "Family remittance tracker" },
+      { href: "/calculators/net-returns",   label: "Net Returns",   icon: TrendingUp,   desc: "Direct vs Valura · flagship", badge: "New" },
+      { href: "/calculators/lrs-tcs",       label: "LRS & TCS",     icon: BadgePercent, desc: "Minimize remittance TCS" },
+      { href: "/calculators/capital-gains", label: "Capital Gains", icon: Calculator,   desc: "STCG / LTCG + 730-day rule" },
+      { href: "/calculators/dtaa",          label: "DTAA / FTC",    icon: Map,          desc: "NRI double-tax relief" },
+      { href: "/calculators/estate-tax",    label: "Estate Tax",    icon: Shield,       desc: "US NRA exposure" },
+      { href: "/calculators/nri-status",    label: "NRI Status",    icon: UserCheck,    desc: "NRI / RNOR / ROR check" },
+      { href: "/calculators/docs",          label: "Calc Guide",    icon: BookOpen,     desc: "Examples & formulas" },
     ],
   },
   {
     label: "Tools",
     items: [
-      { href: "/tlh",  label: "TLH Engine", icon: Scissors,       desc: "Tax-loss harvesting", badge: "4 found" },
-      { href: "/chat", label: "AI Advisor",  icon: MessageSquare,  desc: "GPT-4o + 6 tools" },
+      { href: "/lrs",  label: "LRS Tracker",  icon: Globe,          desc: "Family remittance tracker" },
+      { href: "/tlh",  label: "TLH Engine",   icon: Scissors,       desc: "Tax-loss harvesting", badge: "4 found" },
+      { href: "/chat", label: "AI Advisor",   icon: MessageSquare,  desc: "GPT-4o + 6 tools" },
     ],
   },
 ];
