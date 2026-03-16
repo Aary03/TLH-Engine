@@ -111,11 +111,16 @@ export default function CalcDrawer({ page, inputs, outputs, chips, open, onClose
           if (done) break;
           buffer += decoder.decode(value, { stream: true });
 
-          const events = sseParseChunk(buffer);
-          buffer = ""; // events consumed
+          // Only consume complete lines; keep any trailing incomplete line in the buffer
+          const lastNewline = buffer.lastIndexOf("\n");
+          if (lastNewline === -1) continue;
+          const complete = buffer.slice(0, lastNewline + 1);
+          buffer = buffer.slice(lastNewline + 1);
+
+          const events = sseParseChunk(complete);
 
           for (const event of events) {
-            if (event.type === "token" && event.content) {
+            if ((event.type === "text_chunk" || event.type === "token") && event.content) {
               setMessages((prev) => {
                 const copy = [...prev];
                 const last = copy[copy.length - 1];
