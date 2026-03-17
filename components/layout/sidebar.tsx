@@ -190,10 +190,10 @@ export function Sidebar() {
         </div>
         <a
           href="/journey"
-          className="text-center text-[10px] font-medium py-1 rounded-lg transition-colors hover:bg-white/5"
-          style={{ color: "rgba(255,255,255,0.25)" }}
+          className="flex items-center justify-center gap-1.5 text-[11px] font-semibold py-2 rounded-xl transition-colors hover:bg-white/10"
+          style={{ color: "rgba(180,227,200,0.7)", border: "1px solid rgba(180,227,200,0.15)" }}
         >
-          Start fresh ↗
+          🗺 Start guided journey
         </a>
       </div>
     </>
