@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { BLOG_POSTS } from "@/lib/blog-data";
 import ProactiveBanner from "@/components/layout/ProactiveBanner";
+import JourneyRedirect from "@/components/journey/JourneyRedirect";
 
 /* ── Calculator cards ── */
 const CALCULATORS = [
@@ -109,6 +110,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen" style={{ background: "#FFFFFC" }}>
+      {/* Redirect first-time visitors to /journey */}
+      <JourneyRedirect />
 
       {/* ══════════════════════════════════════════
           HERO

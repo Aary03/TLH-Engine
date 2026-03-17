@@ -188,6 +188,13 @@ export function Sidebar() {
             Illustrative only. Consult your CA.
           </p>
         </div>
+        <a
+          href="/journey"
+          className="text-center text-[10px] font-medium py-1 rounded-lg transition-colors hover:bg-white/5"
+          style={{ color: "rgba(255,255,255,0.25)" }}
+        >
+          Start fresh ↗
+        </a>
       </div>
     </>
   );
