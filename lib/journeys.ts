@@ -42,9 +42,12 @@ export interface JourneyStep {
   danger?: string;
   callout?: string;
   calculator?: CalculatorType;
+  calculatorLink?: string;      // href to the full calculator page
+  calculatorLabel?: string;     // CTA label, e.g. "Open full TCS calculator"
   documents?: string[];
   checklist?: ChecklistItem[];
   rateTable?: RateTableRow[];
+  visual?: "lrs" | "tcs" | "gains" | "estate" | "nri" | "family" | "tlh" | "dtaa" | "compliance";
 }
 
 export interface UseCaseCard {
@@ -177,6 +180,9 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
         whatThisMeans:
           "Your bank will deduct a small tax called TCS (Tax Collected at Source) when you send money above ₹10 lakh (about $12,000) in a year. This is not a permanent cost — you get every rupee back when you file your income tax return. It's just a timing difference, not an extra charge.",
         calculator: "tcs_basic",
+        calculatorLink: "/calculators/lrs-tcs",
+        calculatorLabel: "Open full LRS & TCS calculator",
+        visual: "tcs",
       },
       {
         id: "tcs_optimize",
@@ -186,7 +192,10 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
         whatThisMeans:
           "This is completely legal and specifically how the government designed it. Each person has their own PAN card and their own ₹10 lakh limit. Valura's LRS tracker helps you coordinate this automatically — it shows each person's used and remaining limit in one dashboard.",
         calculator: "family_tcs",
+        calculatorLink: "/calculators/lrs-tcs",
+        calculatorLabel: "Optimize across your family →",
         tip: "A family of 4 adults can invest ₹40 lakh every year with exactly ₹0 TCS deducted. That's ₹40 lakh working for you from day one, not sitting with the tax department waiting to be refunded.",
+        visual: "family",
       },
       {
         id: "investing",
@@ -205,7 +214,10 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
         whatThisMeans:
           "The difference between selling after 2 years vs. before 2 years can be enormous. On a ₹50 lakh profit, waiting past the 2-year mark could save you over ₹14 lakh in tax — more than the return on many investments.",
         calculator: "waiting_game",
+        calculatorLink: "/calculators/capital-gains",
+        calculatorLabel: "Calculate your exact capital gains tax",
         tip: "India has no 'wash sale rule' unlike the USA. If a position drops in value, you can sell it to book a loss (which reduces your tax) and immediately rebuy the same investment. Valura's TLH engine does this automatically.",
+        visual: "gains",
       },
     ],
   },
@@ -239,6 +251,9 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
         whatThisMeans:
           "In the USA, there is a 'wash sale rule' — you must wait 30 days before buying back the same stock after selling it for a loss. India has no such rule. So Valura can sell your losing position, book the tax loss, and immediately rebuy it. Your portfolio doesn't change — your tax bill goes down.",
         calculator: "tlh_savings",
+        calculatorLink: "/tlh",
+        calculatorLabel: "Open TLH engine — scan your portfolio",
+        visual: "tlh",
       },
       {
         id: "waiting_game",
@@ -248,6 +263,9 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
         whatThisMeans:
           "Valura tracks every position's holding period automatically. When any of your investments approaches the 730-day mark, we alert you: 'Don't sell yet — wait X more days and save ₹Y in tax.' No spreadsheets needed.",
         calculator: "waiting_game",
+        calculatorLink: "/calculators/capital-gains",
+        calculatorLabel: "See the full capital gains breakdown",
+        visual: "gains",
       },
       {
         id: "schedule_fa",
@@ -257,6 +275,9 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
         whatThisMeans:
           "This is not optional and not complicated once you know about it. Valura generates a pre-filled Schedule FA report every year with all the numbers you need to paste into your ITR. Takes 5 minutes with your CA.",
         danger: "₹10 lakh per year penalty for not disclosing foreign assets, under the Black Money Act, 2015. Valura auto-generates your Schedule FA data so you never miss this.",
+        calculatorLink: "/chat",
+        calculatorLabel: "Build my Schedule FA data with AI",
+        visual: "compliance",
       },
       {
         id: "action_plan",
@@ -290,6 +311,9 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
         whatThisMeans:
           "A husband and wife can each invest $2,50,000 per year — a total of $5,00,000 (about ₹4.2 crore) between them. Add an adult child and it's $7,50,000. Each person's limit resets to zero on April 1 every year.",
         calculator: "family_capacity",
+        calculatorLink: "/calculators/lrs-tcs",
+        calculatorLabel: "Optimize your family's LRS allocation",
+        visual: "family",
       },
       {
         id: "huf",
@@ -440,6 +464,9 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
         whatThisMeans:
           "Most people who spent 3+ years abroad qualify automatically. The RNOR period lasts until you've been resident for enough years to lose the NRI history. Use the quick calculator below to check — or use our full NRI Status Calculator for a precise answer.",
         calculator: "nri_status_simple",
+        calculatorLink: "/calculators/nri-status",
+        calculatorLabel: "Get my precise NRI/RNOR/ROR status",
+        visual: "nri",
       },
       {
         id: "rnor_actions",
