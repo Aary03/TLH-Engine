@@ -194,11 +194,13 @@ interface FeeCalc extends Record<FeeKey, number> {
   effectivePct: number;
 }
 
-function calcFees(platform: Platform, amount: number): FeeCalc {
+function calcFees(platform: Platform, amount: number, includeForex = true): FeeCalc {
   const result = {} as Record<FeeKey, number>;
   let total = 0;
   for (const key of FEE_KEYS) {
-    const val = parseFloat((platform.fees[key](amount)).toFixed(4));
+    const raw = platform.fees[key](amount);
+    // Zero out forex_markup when toggle is off
+    const val = parseFloat((!includeForex && key === "forex_markup" ? 0 : raw).toFixed(4));
     result[key] = val;
     total += val;
   }
@@ -266,11 +268,12 @@ export default function FeeComparisonPage() {
   const [tradeAmount, setTradeAmount] = useState(1000);
   const [inputVal, setInputVal]       = useState("1000");
   const [activeTab, setActiveTab]     = useState<"chart" | "table" | "scenarios">("chart");
+  const [includeForex, setIncludeForex] = useState(true);
   const [aiOpen, setAiOpen]           = useState(false);
 
   const feeData = useMemo(
-    () => platforms.map((p) => ({ ...p, calc: calcFees(p, tradeAmount) })),
-    [tradeAmount],
+    () => platforms.map((p) => ({ ...p, calc: calcFees(p, tradeAmount, includeForex) })),
+    [tradeAmount, includeForex],
   );
 
   const valuraCost = feeData.find((p) => p.isHero)?.calc.total ?? 0;
@@ -311,6 +314,22 @@ export default function FeeComparisonPage() {
           .fee-tab-btn.active { color: #05A049; border-bottom-color: #05A049; }
           .fee-tab-btn:hover { color: #B4E3C8; }
           .platform-row:hover { background: #0a1f18 !important; }
+          .forex-toggle-pill {
+            display: inline-flex; align-items: center;
+            background: #010f18; border: 1.5px solid #0a2a1a;
+            border-radius: 10px; padding: 4px; gap: 0;
+          }
+          .forex-toggle-opt {
+            padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 700;
+            font-family: var(--font-manrope); cursor: pointer; border: none;
+            transition: all 0.2s; white-space: nowrap;
+          }
+          .forex-toggle-opt.on  { background: #05A049; color: #00111B; }
+          .forex-toggle-opt.off { background: transparent; color: #4a7a5a; }
+          .forex-toggle-opt.off:hover { color: #B4E3C8; }
+          .forex-toggle-opt.off-active { background: #331010; color: #FF6B6B; border: none; }
+          .forex-toggle-opt.off-inactive { background: transparent; color: #4a7a5a; }
+          .forex-toggle-opt.off-inactive:hover { color: #B4E3C8; }
         `}</style>
 
         {/* ── Header ── */}
@@ -409,17 +428,44 @@ export default function FeeComparisonPage() {
                   ))}
                 </div>
               </div>
+
+              {/* ── Forex Toggle ── */}
+              <div style={{ marginLeft: "auto" }}>
+                <div style={{
+                  color: "#4a7a5a", fontFamily: "var(--font-manrope)", fontSize: 11,
+                  fontWeight: 700, letterSpacing: "0.1em", marginBottom: 8, textTransform: "uppercase",
+                }}>Forex Markup</div>
+                <div className="forex-toggle-pill">
+                  <button
+                    className={`forex-toggle-opt ${includeForex ? "on" : "off"}`}
+                    onClick={() => setIncludeForex(true)}
+                  >
+                    💱 With Forex
+                  </button>
+                  <button
+                    className={`forex-toggle-opt ${!includeForex ? "off-active" : "off-inactive"}`}
+                    onClick={() => setIncludeForex(false)}
+                  >
+                    Without Forex
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* ── Valura Savings Hero ── */}
           <div style={{
-            background: "linear-gradient(135deg, #032a12 0%, #051a0c 100%)",
-            border: "1.5px solid #05A049", borderRadius: 14, padding: "20px 28px",
+            background: includeForex
+              ? "linear-gradient(135deg, #032a12 0%, #051a0c 100%)"
+              : "linear-gradient(135deg, #1a1000 0%, #0f0800 100%)",
+            border: `1.5px solid ${includeForex ? "#05A049" : "#FF9900"}`,
+            borderRadius: 14, padding: "20px 28px",
             marginBottom: 20, display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap",
+            transition: "all 0.3s ease",
           }}>
             <div style={{
-              background: "#05A049", color: "#00111B", borderRadius: 10, padding: "10px 18px",
+              background: includeForex ? "#05A049" : "#CC7700",
+              color: "#00111B", borderRadius: 10, padding: "10px 18px",
               fontFamily: "var(--font-bricolage)", fontWeight: 800, fontSize: 28,
               letterSpacing: "-0.02em", whiteSpace: "nowrap",
             }}>
@@ -428,22 +474,35 @@ export default function FeeComparisonPage() {
             <div>
               <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 700, fontSize: 16, color: "#B4E3C8" }}>
                 With Valura, you pay{" "}
-                <span style={{ color: "#05A049" }}>${valuraCost.toFixed(2)}</span>
+                <span style={{ color: includeForex ? "#05A049" : "#FFB347" }}>${valuraCost.toFixed(2)}</span>
                 {" "}on a ${tradeAmount.toLocaleString()} trade
               </div>
               <div style={{ fontFamily: "var(--font-inter)", fontSize: 13, color: "#3a6a4a", marginTop: 4 }}>
                 vs up to{" "}
                 <span style={{ color: "#FF6B6B" }}>${maxOther.toFixed(2)}</span>
                 {" "}on other platforms — saving you{" "}
-                <span style={{ color: "#05A049" }}>${savings.toFixed(2)}</span> per trade
+                <span style={{ color: includeForex ? "#05A049" : "#FFB347" }}>${savings.toFixed(2)}</span> per trade
               </div>
+              {!includeForex && (
+                <div style={{
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  marginTop: 8, padding: "4px 10px", borderRadius: 6,
+                  background: "rgba(255,107,107,0.12)", border: "1px solid rgba(255,107,107,0.25)",
+                  fontFamily: "var(--font-manrope)", fontSize: 11, fontWeight: 700, color: "#FF6B6B",
+                }}>
+                  ⚠️ Forex excluded — showing brokerage + GST only
+                </div>
+              )}
             </div>
             <div style={{ marginLeft: "auto", textAlign: "right" }}>
               <div style={{ color: "#4a7a5a", fontFamily: "var(--font-manrope)", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em" }}>
                 EFFECTIVE RATE
               </div>
-              <div style={{ fontFamily: "var(--font-bricolage)", fontWeight: 800, fontSize: 22, color: "#05A049" }}>
+              <div style={{ fontFamily: "var(--font-bricolage)", fontWeight: 800, fontSize: 22, color: includeForex ? "#05A049" : "#FFB347" }}>
                 {feeData.find((p) => p.isHero)?.calc.effectivePct}%
+              </div>
+              <div style={{ fontFamily: "var(--font-inter)", fontSize: 10, color: "#3a5a48", marginTop: 2 }}>
+                {includeForex ? "incl. forex" : "excl. forex"}
               </div>
             </div>
           </div>
@@ -469,10 +528,21 @@ export default function FeeComparisonPage() {
           {activeTab === "chart" && (
             <div style={{ background: "#010f18", border: "1px solid #0a2a1a", borderRadius: 16, padding: "24px 12px" }}>
               <div style={{
-                fontFamily: "var(--font-manrope)", fontWeight: 700, fontSize: 14,
-                color: "#B4E3C8", marginBottom: 20, paddingLeft: 12,
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                marginBottom: 20, paddingLeft: 12, paddingRight: 12, flexWrap: "wrap", gap: 8,
               }}>
-                Total Cost Comparison — ${tradeAmount.toLocaleString()} Trade (USD)
+                <div style={{ fontFamily: "var(--font-manrope)", fontWeight: 700, fontSize: 14, color: "#B4E3C8" }}>
+                  Total Cost Comparison — ${tradeAmount.toLocaleString()} Trade (USD)
+                </div>
+                <div style={{
+                  fontFamily: "var(--font-manrope)", fontSize: 11, fontWeight: 700,
+                  color: includeForex ? "#05A049" : "#FF6B6B",
+                  background: includeForex ? "rgba(5,160,73,0.1)" : "rgba(255,107,107,0.1)",
+                  border: `1px solid ${includeForex ? "rgba(5,160,73,0.25)" : "rgba(255,107,107,0.25)"}`,
+                  borderRadius: 6, padding: "4px 10px",
+                }}>
+                  {includeForex ? "💱 Forex Included" : "🚫 Forex Excluded"}
+                </div>
               </div>
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -547,26 +617,45 @@ export default function FeeComparisonPage() {
                 </thead>
                 <tbody>
                   {FEE_KEYS.map((key) => {
-                    const anyNonZero = feeData.some((p) => p.calc[key] > 0);
-                    if (!anyNonZero) return null;
+                    // When forex is excluded, still show the row but greyed/struck out
+                    const isForexRow = key === "forex_markup";
+                    const isExcluded = isForexRow && !includeForex;
+                    // Use original (un-toggled) values for the forex row display when excluded
+                    const anyNonZeroRaw = platforms.some((p) => p.fees[key](tradeAmount) > 0);
+                    if (!anyNonZeroRaw) return null;
                     return (
-                      <tr key={key} style={{ borderBottom: "1px solid #060f14" }}>
+                      <tr key={key} style={{
+                        borderBottom: "1px solid #060f14",
+                        opacity: isExcluded ? 0.35 : 1,
+                        transition: "opacity 0.25s",
+                      }}>
                         <td style={{ padding: "12px 16px", color: "#8aa89a", fontWeight: 500 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <div style={{ width: 8, height: 8, borderRadius: 2, background: FEE_COLORS[key], flexShrink: 0 }} />
-                            {FEE_LABELS[key]}
+                            <span style={{ textDecoration: isExcluded ? "line-through" : "none" }}>
+                              {FEE_LABELS[key]}
+                            </span>
+                            {isExcluded && (
+                              <span style={{ fontSize: 10, fontFamily: "var(--font-manrope)", fontWeight: 700, color: "#FF6B6B", background: "rgba(255,107,107,0.12)", borderRadius: 4, padding: "1px 6px" }}>
+                                excluded
+                              </span>
+                            )}
                           </div>
                         </td>
                         {feeData.map((p) => {
                           const v = p.calc[key];
+                          // Show original value struck through when excluded
+                          const rawVal = isExcluded ? parseFloat(p.fees[key](tradeAmount).toFixed(2)) : v;
                           return (
                             <td key={p.id} style={{
                               textAlign: "right", padding: "12px 16px",
                               background: p.isHero ? "#010e08" : "transparent",
-                              fontWeight: v === 0 ? 600 : 500,
-                              color: v === 0 ? "#05A049" : key === "forex_markup" ? "#FF6B6B" : "#FFFFFC",
+                              fontWeight: rawVal === 0 ? 600 : 500,
+                              color: rawVal === 0 ? "#05A049" : isForexRow && !isExcluded ? "#FF6B6B" : "#FFFFFC",
                             }}>
-                              {v === 0 ? "—" : `$${v.toFixed(2)}`}
+                              {isExcluded
+                                ? <span style={{ textDecoration: "line-through", color: "#FF6B6B" }}>${rawVal.toFixed(2)}</span>
+                                : rawVal === 0 ? "—" : `$${rawVal.toFixed(2)}`}
                             </td>
                           );
                         })}
@@ -634,8 +723,23 @@ export default function FeeComparisonPage() {
           {/* ════════════════ SCENARIOS TAB ════════════════ */}
           {activeTab === "scenarios" && (
             <div>
+              {/* Forex context banner */}
+              <div style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "12px 16px", marginBottom: 16,
+                borderRadius: 10,
+                background: includeForex ? "rgba(5,160,73,0.07)" : "rgba(255,107,107,0.07)",
+                border: `1px solid ${includeForex ? "rgba(5,160,73,0.2)" : "rgba(255,107,107,0.2)"}`,
+                fontFamily: "var(--font-manrope)", fontSize: 13, fontWeight: 600,
+                color: includeForex ? "#B4E3C8" : "#FF9999",
+              }}>
+                <span>{includeForex ? "💱" : "🚫"}</span>
+                {includeForex
+                  ? "Showing total cost including forex markup. Forex is the biggest fee component — it's where Valura's GIFT City advantage is most visible."
+                  : "Forex excluded. Numbers reflect brokerage + GST only. Toggle on to see the full picture including forex conversion cost."}
+              </div>
               {([100, 1000, 10000, 50000] as const).map((amt) => {
-                const data = platforms.map((p) => ({ ...p, calc: calcFees(p, amt) }));
+                const data = platforms.map((p) => ({ ...p, calc: calcFees(p, amt, includeForex) }));
                 const valuraTotal = data.find((p) => p.isHero)?.calc.total ?? 0;
                 const maxOtherAmt = Math.max(...data.filter((p) => !p.isHero).map((p) => p.calc.total));
                 return (
@@ -773,6 +877,7 @@ export default function FeeComparisonPage() {
         page="Fee Comparison"
         inputs={{
           tradeAmountUSD: tradeAmount,
+          forexIncluded: includeForex,
           platformsCompared: platforms.map((p) => p.name).join(", "),
         }}
         outputs={{
