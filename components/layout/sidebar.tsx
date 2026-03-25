@@ -23,6 +23,7 @@ import {
   Home,
   Newspaper,
   SlidersHorizontal,
+  BarChart2,
 } from "lucide-react";
 import { useProfile } from "@/components/profile/ProfileContext";
 import { BRACKET_LABELS } from "@/lib/user-profile";
@@ -44,6 +45,7 @@ const NAV_SECTIONS = [
       { href: "/calculators/dtaa",          label: "DTAA / FTC",    icon: Map,          desc: "NRI double-tax relief" },
       { href: "/calculators/estate-tax",    label: "Estate Tax",    icon: Shield,       desc: "US NRA exposure" },
       { href: "/calculators/nri-status",    label: "NRI Status",    icon: UserCheck,    desc: "NRI / RNOR / ROR check" },
+      { href: "/calculators/fee-comparison", label: "Fee Comparison", icon: BarChart2,    desc: "Valura vs 5 platforms", badge: "New" },
       { href: "/calculators/docs",          label: "Calc Guide",    icon: BookOpen,     desc: "Examples & formulas" },
     ],
   },
