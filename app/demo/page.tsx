@@ -13,8 +13,9 @@ const SCENE_NAMES = [
   "The TLH Engine",
   "The AI",
   "The Payoff",
+  "The Delivery",
 ];
-const SCENE_DURATIONS = [18, 10, 14, 16, 16, 18, 22, 16];
+const SCENE_DURATIONS = [18, 10, 14, 16, 16, 18, 22, 16, 20];
 
 // ─── Design tokens (light theme matching calculators) ─────────────────────────
 const T = {
@@ -77,6 +78,44 @@ const DEMO_STYLES = `
   @keyframes d-ping {
     0%   { transform:scale(1);   opacity:1; }
     100% { transform:scale(2.2); opacity:0; }
+  }
+
+  /* Delivery scene */
+  @keyframes d-report-in  { from { opacity:0; transform:scale(0.82) translateY(40px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  @keyframes d-fly-wa  {
+    0%   { opacity:1; transform:translate(0,0) scale(1); }
+    30%  { opacity:1; transform:translate(-180px,20px) scale(0.9); }
+    70%  { opacity:1; transform:translate(-380px,80px) scale(0.5); }
+    100% { opacity:0; transform:translate(-520px,120px) scale(0.15); }
+  }
+  @keyframes d-fly-mail {
+    0%   { opacity:1; transform:translate(0,0) scale(1); }
+    30%  { opacity:1; transform:translate(180px,20px) scale(0.9); }
+    70%  { opacity:1; transform:translate(380px,80px) scale(0.5); }
+    100% { opacity:0; transform:translate(520px,120px) scale(0.15); }
+  }
+  @keyframes d-channel-pop {
+    0%   { opacity:0; transform:scale(0.4) translateY(30px); }
+    60%  { opacity:1; transform:scale(1.08) translateY(-4px); }
+    100% { opacity:1; transform:scale(1) translateY(0); }
+  }
+  @keyframes d-notif-bounce {
+    0%   { transform:scale(0); opacity:0; }
+    50%  { transform:scale(1.3); opacity:1; }
+    75%  { transform:scale(0.9); }
+    100% { transform:scale(1); opacity:1; }
+  }
+  @keyframes d-tick-draw {
+    from { stroke-dashoffset:40; }
+    to   { stroke-dashoffset:0; }
+  }
+  @keyframes d-glow-pulse {
+    0%,100% { box-shadow:0 0 0 0 rgba(5,160,73,0); }
+    50%     { box-shadow:0 0 0 18px rgba(5,160,73,0.12); }
+  }
+  @keyframes d-float {
+    0%,100% { transform:translateY(0px); }
+    50%     { transform:translateY(-8px); }
   }
 
   .demo-chat::-webkit-scrollbar { width:4px; }
@@ -702,13 +741,13 @@ function Scene5() {
       <div style={{ ...anim("d-up", 600, 0), marginBottom: 18 }}>
         <div style={{
           fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)",
-          fontSize: 28, fontWeight: 800, color: T.dark,
+          fontSize: 36, fontWeight: 800, color: T.dark,
         }}>
           Rajesh&rsquo;s Global Portfolio
         </div>
         <div style={{
           fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
-          fontSize: 11, color: T.muted, marginTop: 3,
+          fontSize: 13, color: T.muted, marginTop: 4,
         }}>
           6 positions · FY 2025-26 · Exchange rate ₹84.50
         </div>
@@ -721,12 +760,12 @@ function Scene5() {
       }}>
         <div style={{
           display: "grid",
-          gridTemplateColumns: "88px minmax(0,1fr) 56px 74px 84px 108px 64px 148px",
-          padding: "11px 20px",
+          gridTemplateColumns: "96px minmax(0,1fr) 60px 80px 90px 120px 72px 160px",
+          padding: "13px 22px",
           borderBottom: `1px solid ${T.border}`,
           background: T.cardBg,
           fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
-          fontSize: 9, color: T.muted,
+          fontSize: 11, color: T.muted,
           letterSpacing: "0.1em", textTransform: "uppercase",
         }}>
           <span>STOCK</span><span>NAME</span><span>UNITS</span>
@@ -744,16 +783,16 @@ function Scene5() {
           const positive = pnl > 0;
 
           const taxText: React.ReactNode = pos.type === "STCL"
-            ? <span style={{ color: T.green, fontSize: 11 }}>+{fmtINR(pos.taxSavedIfHarvested ?? 0)} saved</span>
+            ? <span style={{ color: T.green, fontSize: 13 }}>+{fmtINR(pos.taxSavedIfHarvested ?? 0)} saved</span>
             : pos.type === "LTCG"
-              ? <span style={{ color: T.amber, fontSize: 11 }}>{fmtINR(pos.taxPayable ?? 0)} LTCG</span>
-              : <span style={{ color: T.amber, fontSize: 11 }}>{fmtINR(pos.taxIfSellNow ?? 0)} STCG</span>;
+              ? <span style={{ color: T.amber, fontSize: 13 }}>{fmtINR(pos.taxPayable ?? 0)} LTCG</span>
+              : <span style={{ color: T.amber, fontSize: 13 }}>{fmtINR(pos.taxIfSellNow ?? 0)} STCG</span>;
 
           return (
             <div key={pos.ticker} style={{
               display: "grid",
-              gridTemplateColumns: "88px minmax(0,1fr) 56px 74px 84px 108px 64px 148px",
-              padding: "12px 20px",
+              gridTemplateColumns: "96px minmax(0,1fr) 60px 80px 90px 120px 72px 160px",
+              padding: "15px 22px",
               borderBottom: `1px solid ${T.border}`,
               borderLeft: `3px solid ${borderColor[pos.type]}`,
               background: glowing ? T.greenBg : rowBg[pos.type],
@@ -765,23 +804,23 @@ function Scene5() {
             }}>
               <span style={{
                 fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
-                fontSize: 13, fontWeight: 700, color: T.dark,
+                fontSize: 15, fontWeight: 700, color: T.dark,
               }}>{pos.ticker}</span>
-              <span style={{ fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 12, color: T.body }}>
+              <span style={{ fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: T.body }}>
                 {pos.name}
               </span>
-              <span style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 12, color: T.body }}>
+              <span style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 14, color: T.body }}>
                 {pos.units}
               </span>
-              <span style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 12, color: T.muted, textAlign: "right" }}>
+              <span style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 14, color: T.muted, textAlign: "right" }}>
                 ${pos.buyPrice}
               </span>
-              <span style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 12, color: T.dark, textAlign: "right", fontWeight: 600 }}>
+              <span style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 14, color: T.dark, textAlign: "right", fontWeight: 600 }}>
                 ${pos.currentPrice}
               </span>
               <span style={{
                 fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
-                fontSize: 12, color: positive ? T.green : T.red,
+                fontSize: 14, color: positive ? T.green : T.red,
                 fontWeight: 700, textAlign: "right",
               }}>
                 {positive ? "+" : ""}{fmtINR(pnl)}
@@ -790,13 +829,13 @@ function Scene5() {
                 <span style={{
                   ...pillStyle[pos.type],
                   fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
-                  fontSize: 9, fontWeight: 700, padding: "3px 7px", borderRadius: 4,
+                  fontSize: 10, fontWeight: 700, padding: "4px 8px", borderRadius: 4,
                 }}>{pos.type}</span>
                 {glowing && (
                   <span style={{
                     ...anim("d-fade", 400, 0),
                     fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
-                    fontSize: 8, color: T.green, fontWeight: 700,
+                    fontSize: 9, color: T.green, fontWeight: 700,
                   }}>⚡ HARVEST</span>
                 )}
               </div>
@@ -810,8 +849,8 @@ function Scene5() {
         <div style={{
           ...anim("d-up", 600, 0), marginTop: 14,
           background: T.greenBg, border: `1px solid ${T.greenBrd}`,
-          borderRadius: 12, padding: "13px 22px",
-          fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: T.body,
+          borderRadius: 12, padding: "15px 24px",
+          fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 16, color: T.body,
         }}>
           3 positions in loss → ₹9,68,877 harvestable STCL →{" "}
           <strong style={{ color: T.green }}>₹4,13,941 potential tax saving</strong>
@@ -1342,6 +1381,305 @@ function Scene8() {
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SCENE 9 — The Delivery  (Valura report → WhatsApp + Email)
+// ─────────────────────────────────────────────────────────────────────────────
+function Scene9() {
+  const [phase, setPhase] = useState<0|1|2|3>(0);
+  // 0 = report visible, 1 = flying, 2 = channels glow, 3 = ticks + final line
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase(1), 3200);
+    const t2 = setTimeout(() => setPhase(2), 4400);
+    const t3 = setTimeout(() => setPhase(3), 6200);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, []);
+
+  const reportActions = [
+    { icon: "⚡", label: "Harvest NVDA + TSLA + GOOGL immediately",  saved: "₹4,13,941", color: T.green },
+    { icon: "⏳", label: "Hold MSFT — 150 days to LTCG threshold",   saved: "₹20,535",   color: T.amber },
+    { icon: "👨‍👩‍👧", label: "Route ₹10L via Priya next FY",             saved: "₹14,00,000", color: T.green },
+  ];
+
+  return (
+    <div style={{
+      height: "100%", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      padding: "32px 80px", background: T.bg,
+      overflow: "hidden", position: "relative",
+    }}>
+
+      {/* ── Valura Report Card ── */}
+      <div style={{
+        animation: "d-report-in 900ms cubic-bezier(0.16,1,0.3,1) 200ms both",
+        ...(phase >= 1 ? {
+          animation: `${phase === 1 ? "d-fly-wa 900ms cubic-bezier(0.4,0,1,1) 0ms forwards" : "none"}`,
+          opacity: phase >= 2 ? 0 : 1,
+        } : {}),
+        width: 640, flexShrink: 0, position: "relative", zIndex: 2,
+      }}>
+        {/* Report header */}
+        <div style={{
+          background: T.dark, borderRadius: "20px 20px 0 0",
+          padding: "22px 28px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            {/* Valura logo */}
+            <img src="/valura-logo.png" alt="Valura" style={{ height: 32, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+            <div style={{ width: 1, height: 28, background: "rgba(255,255,255,0.15)" }} />
+            <div>
+              <div style={{
+                fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
+                fontSize: 9, color: "rgba(255,255,255,0.4)", letterSpacing: "0.15em",
+                textTransform: "uppercase",
+              }}>GIFT CITY IFSC · ADVISOR REPORT</div>
+              <div style={{
+                fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)",
+                fontSize: 14, fontWeight: 700, color: "#fff", marginTop: 2,
+              }}>FY 2025-26 Action Summary</div>
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 9, color: "rgba(255,255,255,0.35)", letterSpacing: "0.12em" }}>
+              PREPARED BY
+            </div>
+            <div style={{ fontFamily: "var(--font-manrope,'Manrope',sans-serif)", fontSize: 13, fontWeight: 700, color: "#fff" }}>
+              Suresh Iyer
+            </div>
+            <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 9, color: "rgba(255,255,255,0.35)" }}>
+              Wealth Manager
+            </div>
+          </div>
+        </div>
+
+        {/* Client header */}
+        <div style={{
+          background: T.greenBg, borderTop: "none",
+          padding: "14px 28px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          borderBottom: `1px solid ${T.greenBrd}`,
+        }}>
+          <div>
+            <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 9, color: T.green, letterSpacing: "0.15em" }}>CLIENT</div>
+            <div style={{ fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)", fontSize: 22, fontWeight: 800, color: T.dark }}>
+              Rajesh Kumar
+            </div>
+            <div style={{ fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 12, color: T.muted }}>
+              New Delhi · PAN AAAPK7890Q · HNI Old Regime
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 9, color: T.muted }}>TOTAL VALUE CREATED</div>
+            <div style={{ fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)", fontSize: 28, fontWeight: 800, color: T.green }}>
+              ₹19,25,941
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div style={{ background: T.card, padding: "18px 28px", display: "flex", flexDirection: "column", gap: 12 }}>
+          {reportActions.map((a, i) => (
+            <div key={i} style={{
+              display: "flex", alignItems: "center", gap: 14,
+              padding: "13px 16px", borderRadius: 12,
+              background: T.cardBg, border: `1px solid ${T.border}`,
+              ...anim("d-up", 500, 600 + i * 150),
+            }}>
+              <div style={{ fontSize: 22, flexShrink: 0 }}>{a.icon}</div>
+              <div style={{ flex: 1, fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: T.body }}>
+                {a.label}
+              </div>
+              <div style={{
+                fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)",
+                fontSize: 16, fontWeight: 800, color: a.color, flexShrink: 0,
+              }}>
+                {a.saved}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          background: T.cardBg, borderRadius: "0 0 20px 20px",
+          padding: "14px 28px", borderTop: `1px solid ${T.border}`,
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+        }}>
+          <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 9, color: T.muted }}>
+            Generated by Valura AI · March 28, 2026 · 09:41 AM
+          </div>
+          <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 9, color: T.green, fontWeight: 700 }}>
+            Execute by March 29 (T+2) →
+          </div>
+        </div>
+      </div>
+
+      {/* ── Flying report mini-clones ── */}
+      {phase === 1 && (
+        <>
+          {/* flies to WhatsApp (left) */}
+          <div style={{
+            position: "absolute", left: "50%", top: "50%",
+            marginLeft: -320, marginTop: -180,
+            width: 200, height: 120,
+            background: T.card, borderRadius: 12,
+            border: `1px solid ${T.border}`,
+            boxShadow: "0 4px 20px rgba(0,17,27,0.12)",
+            animation: "d-fly-wa 900ms cubic-bezier(0.4,0,1,1) 0ms forwards",
+            zIndex: 5, overflow: "hidden",
+            display: "flex", flexDirection: "column",
+          }}>
+            <div style={{ background: T.dark, height: 28, padding: "0 12px", display: "flex", alignItems: "center" }}>
+              <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 8, color: "rgba(255,255,255,0.5)" }}>Valura Report</div>
+            </div>
+            <div style={{ padding: "8px 12px", fontSize: 10, color: T.muted, fontFamily: "var(--font-inter,'Inter',sans-serif)" }}>
+              Rajesh Kumar · ₹19,25,941 saved
+            </div>
+          </div>
+          {/* flies to Email (right) */}
+          <div style={{
+            position: "absolute", left: "50%", top: "50%",
+            marginLeft: 120, marginTop: -180,
+            width: 200, height: 120,
+            background: T.card, borderRadius: 12,
+            border: `1px solid ${T.border}`,
+            boxShadow: "0 4px 20px rgba(0,17,27,0.12)",
+            animation: "d-fly-mail 900ms cubic-bezier(0.4,0,1,1) 0ms forwards",
+            zIndex: 5, overflow: "hidden",
+            display: "flex", flexDirection: "column",
+          }}>
+            <div style={{ background: T.dark, height: 28, padding: "0 12px", display: "flex", alignItems: "center" }}>
+              <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 8, color: "rgba(255,255,255,0.5)" }}>Valura Report</div>
+            </div>
+            <div style={{ padding: "8px 12px", fontSize: 10, color: T.muted, fontFamily: "var(--font-inter,'Inter',sans-serif)" }}>
+              Rajesh Kumar · ₹19,25,941 saved
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Channel icons ── */}
+      {phase >= 2 && (
+        <div style={{
+          position: "absolute", bottom: 120, left: 0, right: 0,
+          display: "flex", justifyContent: "center", gap: 120,
+        }}>
+
+          {/* WhatsApp channel */}
+          <div style={{
+            animation: "d-channel-pop 700ms cubic-bezier(0.16,1,0.3,1) 0ms both",
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 14,
+          }}>
+            <div style={{ position: "relative", animation: phase >= 2 ? "d-glow-pulse 2s ease-in-out infinite" : "none" }}>
+              <img src="/whatsapp-logo.png" alt="WhatsApp" style={{ width: 80, height: 80, objectFit: "contain", borderRadius: 22 }} />
+              {phase >= 3 && (
+                <div style={{
+                  position: "absolute", top: -8, right: -8,
+                  width: 26, height: 26, borderRadius: "50%",
+                  background: "#25D366",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  animation: "d-notif-bounce 600ms cubic-bezier(0.16,1,0.3,1) 0ms both",
+                  border: "2px solid #fff",
+                }}>
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                    <polyline points="2,8 6,12 14,4" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                      style={{ strokeDasharray: 40, strokeDashoffset: 40, animation: "d-tick-draw 400ms ease 100ms forwards" }} />
+                  </svg>
+                </div>
+              )}
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{
+                fontFamily: "var(--font-manrope,'Manrope',sans-serif)",
+                fontSize: 15, fontWeight: 700, color: T.dark,
+              }}>WhatsApp</div>
+              {phase >= 3 && (
+                <div style={{
+                  ...anim("d-fade", 400, 200),
+                  fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
+                  fontSize: 10, color: "#25D366", fontWeight: 600,
+                }}>Delivered ✓✓</div>
+              )}
+            </div>
+          </div>
+
+          {/* Center arrow / logo */}
+          <div style={{
+            ...anim("d-fade", 600, 300),
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10,
+          }}>
+            <img src="/valura-logo.png" alt="Valura" style={{ height: 40, objectFit: "contain", animation: "d-float 3s ease-in-out infinite" }} />
+            <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 10, color: T.muted, letterSpacing: "0.1em" }}>
+              SENT VIA VALURA
+            </div>
+          </div>
+
+          {/* Email channel */}
+          <div style={{
+            animation: "d-channel-pop 700ms cubic-bezier(0.16,1,0.3,1) 80ms both",
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 14,
+          }}>
+            <div style={{ position: "relative", animation: phase >= 2 ? "d-glow-pulse 2s ease-in-out 0.3s infinite" : "none" }}>
+              <img src="/mail-logo.png" alt="Email" style={{ width: 80, height: 80, objectFit: "contain", borderRadius: 22 }} />
+              {phase >= 3 && (
+                <div style={{
+                  position: "absolute", top: -8, right: -8,
+                  width: 26, height: 26, borderRadius: "50%",
+                  background: "#3B82F6",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  animation: "d-notif-bounce 600ms cubic-bezier(0.16,1,0.3,1) 150ms both",
+                  border: "2px solid #fff",
+                }}>
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                    <polyline points="2,8 6,12 14,4" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                      style={{ strokeDasharray: 40, strokeDashoffset: 40, animation: "d-tick-draw 400ms ease 250ms forwards" }} />
+                  </svg>
+                </div>
+              )}
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{
+                fontFamily: "var(--font-manrope,'Manrope',sans-serif)",
+                fontSize: 15, fontWeight: 700, color: T.dark,
+              }}>Email</div>
+              {phase >= 3 && (
+                <div style={{
+                  ...anim("d-fade", 400, 350),
+                  fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
+                  fontSize: 10, color: "#3B82F6", fontWeight: 600,
+                }}>Delivered ✓✓</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Final tagline */}
+      {phase >= 3 && (
+        <div style={{
+          ...anim("d-up", 700, 800),
+          position: "absolute", bottom: 52, left: 0, right: 0,
+          textAlign: "center",
+        }}>
+          <div style={{
+            fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)",
+            fontSize: 26, fontWeight: 800, color: T.dark, marginBottom: 6,
+          }}>
+            Rajesh gets his action plan. Instantly.
+          </div>
+          <div style={{
+            fontFamily: "var(--font-inter,'Inter',sans-serif)",
+            fontSize: 15, color: T.muted, fontStyle: "italic",
+          }}>
+            No email chains. No follow-ups. Just clarity — delivered in seconds.
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Scene renderer ───────────────────────────────────────────────────────────
 function renderScene(idx: number) {
   switch (idx) {
@@ -1353,12 +1691,13 @@ function renderScene(idx: number) {
     case 5: return <Scene6 />;
     case 6: return <Scene7 />;
     case 7: return <Scene8 />;
+    case 8: return <Scene9 />;
     default: return null;
   }
 }
 
-const EXIT_ANIMS  = ["d-fadeScaleOut","d-slideLeftOut","d-fadeOut","d-fadeOut","d-fadeOut","d-slideLeftOut","d-fadeOut","d-dissolveOut"];
-const ENTER_ANIMS = ["d-fadeIn","d-slideUpIn","d-slideRightIn","d-scaleUpIn","d-fadeIn","d-slideRightIn","d-scaleUpIn","d-explodeIn"];
+const EXIT_ANIMS  = ["d-fadeScaleOut","d-slideLeftOut","d-fadeOut","d-fadeOut","d-fadeOut","d-slideLeftOut","d-fadeOut","d-dissolveOut","d-fadeOut"];
+const ENTER_ANIMS = ["d-fadeIn","d-slideUpIn","d-slideRightIn","d-scaleUpIn","d-fadeIn","d-slideRightIn","d-scaleUpIn","d-explodeIn","d-scaleUpIn"];
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function DemoPage() {
@@ -1412,7 +1751,7 @@ export default function DemoPage() {
         case "r": case "R": setDisplayScene(0); setExitScene(null); setIsTransitioning(false); break;
         case "a": case "A": setAutoPlay(p => !p); break;
         case "f": case "F": document.documentElement.requestFullscreen?.().catch(() => {}); break;
-        default: if (e.key >= "1" && e.key <= "8") goTo(parseInt(e.key) - 1);
+        default: if (e.key >= "1" && e.key <= "9") goTo(parseInt(e.key) - 1);
       }
     };
     window.addEventListener("keydown", onKey);
