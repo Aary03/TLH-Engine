@@ -6,9 +6,9 @@ import { DEMO_CLIENT } from "@/lib/demo-data";
 // ─── Scene metadata ───────────────────────────────────────────────────────────
 const SCENE_NAMES = [
   "The First Message", "The Client", "The Problem", "The Optimization",
-  "The Portfolio", "The TLH Engine", "The AI", "The Payoff", "The Delivery",
+  "The Portfolio", "The TLH Engine", "The AI", "The Payoff", "The Delivery", "The Close",
 ];
-const SCENE_DURATIONS = [18, 10, 14, 16, 16, 18, 22, 16, 20];
+const SCENE_DURATIONS = [18, 10, 14, 16, 16, 18, 22, 16, 20, 20];
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
@@ -92,6 +92,14 @@ const DEMO_STYLES = `
   /* ── Record mode flash ── */
   @keyframes d-rec-flash { 0%{opacity:0} 15%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
 
+  /* ── The Close scene ── */
+  @keyframes d-scan-line  { from{transform:translateX(-100%)} to{transform:translateX(100vw)} }
+  @keyframes d-glow-text  {
+    0%,100% { text-shadow:0 0 80px rgba(5,160,73,0.4); }
+    50%     { text-shadow:0 0 140px rgba(5,160,73,0.65),0 0 40px rgba(5,160,73,0.3); }
+  }
+  @keyframes d-close-dot  { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.6);opacity:0.7} }
+
   /* ── Delivery scene ── */
   @keyframes d-report-in  { from{opacity:0;transform:scale(0.85) translateY(36px)} to{opacity:1;transform:scale(1) translateY(0)} }
   @keyframes fly-to-wa    { 0%{opacity:1;transform:translate(0,0) scale(1);filter:blur(0)} 100%{opacity:0;transform:translate(-310px,200px) scale(0.1);filter:blur(3px)} }
@@ -114,6 +122,15 @@ const DEMO_STYLES = `
   .demo-chat::-webkit-scrollbar-thumb { background:${T.greenBrd}; border-radius:2px; }
   .demo-root * { box-sizing:border-box; }
 `;
+
+// ─── Shared background helpers ───────────────────────────────────────────────
+const GRID_BG: React.CSSProperties = {
+  backgroundImage: [
+    "linear-gradient(rgba(5,160,73,0.025) 1px,transparent 1px)",
+    "linear-gradient(90deg,rgba(5,160,73,0.025) 1px,transparent 1px)",
+  ].join(","),
+  backgroundSize: "48px 48px",
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function fmtINR(n: number) {
@@ -202,6 +219,7 @@ function Counter({
         display: "inline-block",
         transform: bouncing ? "scale(1.07)" : "scale(1)",
         transition: "transform 0.36s cubic-bezier(0.34,1.56,0.64,1)",
+        filter: "drop-shadow(0 2px 12px rgba(5,160,73,0.3))",
       }}>
         {prefix}{val.toLocaleString("en-IN")}
       </span>
@@ -316,6 +334,11 @@ const GUIDE_POINTS: { text: string; time: number }[][] = [
     { text: "Watch it fly to Rajesh's WhatsApp and email", time: 3200 },
     { text: "Rajesh gets clarity in seconds. You look like a genius.", time: 6200 },
   ],
+  [ // Scene 9 — The Close
+    { text: "The complexity stays with us. The credit goes to you.", time: 0 },
+    { text: "Every client conversation. Every time.", time: 3800 },
+    { text: "This is what Valura does for advisors.", time: 5500 },
+  ],
 ];
 
 // ─── Speaker Overlay ──────────────────────────────────────────────────────────
@@ -390,7 +413,7 @@ function Scene1() {
     <div style={{
       height: "100%", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
-      padding: "40px 100px", background: T.bg,
+      padding: "40px 100px", background: T.bg, ...GRID_BG,
     }}>
       <div style={{ ...anim("d-fade", 500, 0), textAlign: "center", marginBottom: 36 }}>
         <div style={{
@@ -495,7 +518,7 @@ function Scene2() {
   ]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", background: T.bg }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", background: T.bg, ...GRID_BG }}>
       <div style={{ ...anim("d-fade", 600, 0), fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 10, color: T.green, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 28 }}>
         DEMO CLIENT · FY 2025-26
       </div>
@@ -541,7 +564,7 @@ function Scene3() {
   ]);
 
   return (
-    <div style={{ display: "flex", height: "100%", alignItems: "center", padding: "0 90px", gap: 80, background: T.bg }}>
+    <div style={{ display: "flex", height: "100%", alignItems: "center", padding: "0 90px", gap: 80, background: T.bg, ...GRID_BG }}>
       <div style={{ flex: "0 0 44%", ...anim("d-left", 700, 0) }}>
         <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 10, color: T.green, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 22 }}>THE TCS SITUATION</div>
 
@@ -623,7 +646,7 @@ function Scene4() {
   ]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", padding: "0 100px", background: T.bg }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", padding: "0 100px", background: T.bg, ...GRID_BG }}>
       <div id="opt-question" style={{ ...anim("d-fade", 600, 0), fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)", fontSize: 44, fontWeight: 800, color: T.dark, textAlign: "center", marginBottom: 48 }}>
         What if his wife had invested{" "}<span style={{ color: T.green }}>₹10L</span>?
       </div>
@@ -718,13 +741,13 @@ function Scene5() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "28px 64px 24px", background: T.bg }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "28px 64px 24px", background: T.bg, ...GRID_BG }}>
       <div style={{ ...anim("d-up", 600, 0), marginBottom: 18 }}>
         <div style={{ fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)", fontSize: 36, fontWeight: 800, color: T.dark }}>Rajesh&rsquo;s Global Portfolio</div>
         <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 13, color: T.muted, marginTop: 4 }}>6 positions · FY 2025-26 · Exchange rate ₹84.50</div>
       </div>
 
-      <div style={{ flex: 1, background: T.card, borderRadius: 16, overflow: "hidden", border: `1px solid ${T.border}`, boxShadow: "0 1px 8px rgba(0,17,27,0.06)", position: "relative" }}>
+      <div style={{ flex: 1, background: T.card, borderRadius: 16, overflow: "hidden", border: `1px solid ${T.border}`, boxShadow: "0 1px 3px rgba(0,17,27,0.04),0 4px 16px rgba(0,17,27,0.07)", position: "relative" }}>
         {/* Scanner line */}
         {scanning && !harvestOn && (
           <div style={{ position: "absolute", left: 0, right: 0, height: 2, background: `linear-gradient(90deg,transparent,${T.green},transparent)`, zIndex: 10, animation: "d-scanner 600ms linear forwards", pointerEvents: "none" }} />
@@ -826,7 +849,7 @@ function Scene6() {
   ];
 
   return (
-    <div style={{ display: "flex", height: "100%", alignItems: "stretch", padding: "32px 68px", gap: 44, background: T.bg }}>
+    <div style={{ display: "flex", height: "100%", alignItems: "stretch", padding: "32px 68px", gap: 44, background: T.bg, ...GRID_BG }}>
       <div style={{ flex: "0 0 40%", display: "flex", flexDirection: "column", justifyContent: "center", ...anim("d-left", 700, 0) }}>
         <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 10, color: T.green, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 14 }}>TAX LOSS HARVESTING</div>
         <div style={{ ...anim("d-up", 600, 200), fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)", fontSize: 36, fontWeight: 800, lineHeight: 1.18, color: T.dark, marginBottom: 30 }}>
@@ -835,7 +858,7 @@ function Scene6() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
           {actions.map((ac) => (
-            <div key={ac.ticker} id={ac.id} style={{ ...anim("d-left", 500, ac.delay), display: "flex", gap: 14, alignItems: "flex-start", background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: "14px 16px", boxShadow: "0 1px 4px rgba(0,17,27,0.05)" }}>
+            <div key={ac.ticker} id={ac.id} style={{ ...anim("d-left", 500, ac.delay), display: "flex", gap: 14, alignItems: "flex-start", background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,17,27,0.04),0 4px 16px rgba(0,17,27,0.06)" }}>
               <div style={{ width: 28, height: 28, borderRadius: 8, background: T.green, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 12, fontWeight: 700, color: "#fff", flexShrink: 0 }}>{ac.num}</div>
               <div>
                 <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 13, fontWeight: 700, color: T.dark }}>{ac.ticker} ← {ac.action}</div>
@@ -998,7 +1021,7 @@ function Scene7() {
     );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", height: "100%", padding: "32px 80px 24px", background: T.bg }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", height: "100%", padding: "32px 80px 24px", background: T.bg, ...GRID_BG }}>
       <div style={{ ...anim("d-fade", 600, 0), textAlign: "center", marginBottom: 24, flexShrink: 0 }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: T.greenBg, border: `1px solid ${T.greenBrd}`, borderRadius: 100, padding: "5px 14px", marginBottom: 12 }}>
           <span style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 10, color: T.green, fontWeight: 700, letterSpacing: "0.12em" }}>VALURA AI · GIFT CITY ADVISOR</span>
@@ -1103,7 +1126,7 @@ function Scene8() {
               animation: `${boxAnims[i]} 700ms cubic-bezier(0.16,1,0.3,1) ${b.delay}ms both`,
               background: T.card, border: `1px solid ${T.border}`,
               borderRadius: 20, padding: "26px 28px",
-              boxShadow: "0 2px 16px rgba(0,17,27,0.06)",
+              boxShadow: "0 1px 3px rgba(0,17,27,0.04),0 4px 20px rgba(0,17,27,0.08)",
               borderTop: `3px solid ${b.color}`,
             }}>
               <div style={{ fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)", fontSize: 40, fontWeight: 800, color: b.color, lineHeight: 1, marginBottom: 10 }}>
@@ -1169,7 +1192,7 @@ function Scene9() {
   const reportBlurred = phase === 1;
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 100px", background: T.bg, overflow: "hidden", position: "relative" }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 100px", background: T.bg, overflow: "hidden", position: "relative", ...GRID_BG }}>
 
       {/* ── REPORT CARD ── */}
       <div id="delivery-report" style={{
@@ -1339,6 +1362,140 @@ function Scene9() {
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SCENE 10 — The Close  (dark, typographic, final)
+// ─────────────────────────────────────────────────────────────────────────────
+function Scene10() {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const times = [400, 1000, 1400, 2200, 2600, 3800, 5500];
+    const timers = times.map((t, i) => setTimeout(() => setStep(i + 1), t));
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  const lineStyle = (delay: number, extra?: React.CSSProperties): React.CSSProperties => ({
+    fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)",
+    fontSize: 96, fontWeight: 800, lineHeight: 1.0, letterSpacing: "-0.04em",
+    ...anim("d-up", 700, delay),
+    ...extra,
+  });
+
+  return (
+    <div style={{
+      height: "100%", width: "100%",
+      background: "#00111B",
+      backgroundImage: [
+        "radial-gradient(ellipse at 40% 60%,rgba(5,160,73,0.12) 0%,transparent 55%)",
+        "radial-gradient(ellipse at 70% 30%,rgba(180,227,200,0.06) 0%,transparent 50%)",
+      ].join(","),
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      overflow: "hidden", position: "relative",
+    }}>
+      {/* Scanner line (step 1) */}
+      {step >= 1 && (
+        <div style={{
+          position: "absolute", top: "50%", left: 0,
+          width: "100%", height: 1.5,
+          background: "rgba(5,160,73,0.6)",
+          animation: "d-scan-line 600ms ease-out both",
+          pointerEvents: "none", zIndex: 1,
+        }} />
+      )}
+
+      {/* Headline block */}
+      <div style={{ position: "relative", zIndex: 2, textAlign: "center" }}>
+        {/* Line 1 */}
+        {step >= 2 && (
+          <div style={lineStyle(0, { color: "#FFFFFC", display: "block" })}>
+            The complexity
+          </div>
+        )}
+
+        {/* Line 2 */}
+        {step >= 3 && (
+          <div style={lineStyle(0, { color: "rgba(255,255,255,0.32)", display: "block", marginBottom: 4 })}>
+            stays with us.
+          </div>
+        )}
+
+        {/* Gap */}
+        <div style={{ height: 12 }} />
+
+        {/* Line 3 */}
+        {step >= 4 && (
+          <div style={lineStyle(0, { color: "#FFFFFC", display: "block" })}>
+            The credit
+          </div>
+        )}
+
+        {/* Line 4 — THE payoff line */}
+        {step >= 5 && (
+          <div style={{
+            ...lineStyle(0),
+            color: "#05A049",
+            display: "block",
+            textShadow: "0 0 80px rgba(5,160,73,0.4)",
+            animation: `d-up 700ms cubic-bezier(0.16,1,0.3,1) 0ms both, d-glow-text 2s ease-in-out 800ms infinite`,
+          }}>
+            goes to you.
+          </div>
+        )}
+
+        {/* Sub-line */}
+        {step >= 6 && (
+          <div style={{
+            ...anim("d-fade", 800, 0),
+            marginTop: 40,
+            fontFamily: "var(--font-manrope,'Manrope',sans-serif)",
+            fontSize: 22, fontWeight: 500,
+            color: "rgba(255,255,255,0.28)",
+            fontStyle: "italic",
+            lineHeight: 1.65,
+            textAlign: "center",
+          }}>
+            So you walk into every client conversation
+            <br />as the smartest person in the room.
+          </div>
+        )}
+      </div>
+
+      {/* Bottom branding */}
+      {step >= 7 && (
+        <div style={{
+          ...anim("d-fade", 600, 0),
+          position: "absolute", bottom: 52, left: 0, right: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          gap: 32,
+        }}>
+          <div style={{
+            fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)",
+            fontSize: 18, fontWeight: 700, color: "#FFFFFC",
+            letterSpacing: "-0.02em",
+          }}>
+            Valura · GIFT City
+          </div>
+
+          <div style={{
+            width: 8, height: 8, borderRadius: "50%",
+            background: "#05A049",
+            animation: "d-close-dot 2s ease-in-out infinite",
+          }} />
+
+          <div style={{
+            fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
+            fontSize: 12, color: "rgba(255,255,255,0.3)",
+            letterSpacing: "0.04em",
+          }}>
+            Launching April 3rd, 2026
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Scene renderer ───────────────────────────────────────────────────────────
 function renderScene(idx: number) {
   switch (idx) {
@@ -1351,12 +1508,13 @@ function renderScene(idx: number) {
     case 6: return <Scene7 />;
     case 7: return <Scene8 />;
     case 8: return <Scene9 />;
+    case 9: return <Scene10 />;
     default: return null;
   }
 }
 
-const EXIT_ANIMS  = ["d-fadeScaleOut","d-slideLeftOut","d-fadeOut","d-fadeOut","d-fadeOut","d-slideLeftOut","d-fadeOut","d-flashOut","d-fadeOut"];
-const ENTER_ANIMS = ["d-fadeIn","d-slideUpIn","d-slideRightIn","d-scaleUpIn","d-fadeIn","d-slideRightIn","d-scaleUpIn","d-explodeIn","d-scaleUpIn"];
+const EXIT_ANIMS  = ["d-fadeScaleOut","d-slideLeftOut","d-fadeOut","d-fadeOut","d-fadeOut","d-slideLeftOut","d-fadeOut","d-flashOut","d-fadeOut","d-fadeOut"];
+const ENTER_ANIMS = ["d-fadeIn","d-slideUpIn","d-slideRightIn","d-scaleUpIn","d-fadeIn","d-slideRightIn","d-scaleUpIn","d-explodeIn","d-scaleUpIn","d-fadeIn"];
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function DemoPage() {
@@ -1491,6 +1649,7 @@ export default function DemoPage() {
           display: "flex", alignItems: "center", gap: 14,
           backdropFilter: "blur(24px)",
           boxShadow: "0 4px 24px rgba(0,17,27,0.12)",
+          borderTop: "1px solid rgba(5,160,73,0.15)",
           zIndex: 10000, userSelect: "none",
           opacity: recordMode ? 0 : 1,
           pointerEvents: recordMode ? "none" : "auto",
@@ -1501,7 +1660,7 @@ export default function DemoPage() {
 
           <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
             {SCENE_NAMES.map((name, i) => (
-              <button key={i} onClick={() => goTo(i)} title={name} style={{ width: i === displayScene ? 26 : 7, height: 7, borderRadius: 4, background: i === displayScene ? T.green : T.border, border: "none", cursor: "pointer", padding: 0, transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)", position: "relative" }} />
+              <button key={i} onClick={() => goTo(i)} title={name} style={{ width: i === displayScene ? 26 : 7, height: 7, borderRadius: 4, background: i === displayScene ? T.green : T.border, border: "none", cursor: "pointer", padding: 0, transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)", position: "relative", boxShadow: i === displayScene ? "0 0 12px rgba(5,160,73,0.45)" : "none" }} />
             ))}
           </div>
 
