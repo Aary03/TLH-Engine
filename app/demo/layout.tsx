@@ -6,7 +6,7 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
         position: "fixed",
         inset: 0,
         zIndex: 9999,
-        background: "#FFFFFC",
+        background: "#00111B",
         overflow: "hidden",
       }}
     >

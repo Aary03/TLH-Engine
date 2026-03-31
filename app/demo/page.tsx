@@ -12,11 +12,23 @@ const SCENE_DURATIONS = [18, 10, 14, 16, 16, 18, 22, 16, 20, 20];
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
-  bg: "#FFFFFC", card: "#ffffff", cardBg: "#F9FAFB", border: "#E5E7EB",
-  dark: "#00111B", body: "#374151", muted: "#9CA3AF",
-  green: "#05A049", greenBg: "#EDFAF3", greenBrd: "#B4E3C8", mint: "#B4E3C8",
-  red: "#DC2626", redBg: "#FEF2F2", redBrd: "#FECACA",
-  amber: "#F59E0B", amberBg: "rgba(245,158,11,0.08)", amberBrd: "rgba(245,158,11,0.25)",
+  bg:       "#00111B",
+  card:     "#0A1E2A",
+  cardBg:   "#071520",
+  border:   "rgba(255,255,255,0.08)",
+  dark:     "#FFFFFC",
+  body:     "rgba(255,255,255,0.75)",
+  muted:    "rgba(255,255,255,0.35)",
+  green:    "#05A049",
+  greenBg:  "rgba(5,160,73,0.1)",
+  greenBrd: "rgba(5,160,73,0.25)",
+  mint:     "#B4E3C8",
+  red:      "#F87171",
+  redBg:    "rgba(248,113,113,0.08)",
+  redBrd:   "rgba(248,113,113,0.2)",
+  amber:    "#F59E0B",
+  amberBg:  "rgba(245,158,11,0.08)",
+  amberBrd: "rgba(245,158,11,0.2)",
 };
 
 // ─── CSS (all keyframes + spotlight classes) ──────────────────────────────────
@@ -126,8 +138,8 @@ const DEMO_STYLES = `
 // ─── Shared background helpers ───────────────────────────────────────────────
 const GRID_BG: React.CSSProperties = {
   backgroundImage: [
-    "linear-gradient(rgba(5,160,73,0.025) 1px,transparent 1px)",
-    "linear-gradient(90deg,rgba(5,160,73,0.025) 1px,transparent 1px)",
+    "linear-gradient(rgba(5,160,73,0.04) 1px,transparent 1px)",
+    "linear-gradient(90deg,rgba(5,160,73,0.04) 1px,transparent 1px)",
   ].join(","),
   backgroundSize: "48px 48px",
 };
@@ -440,7 +452,7 @@ function Scene1() {
             <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#6366F1", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: "#fff", flexShrink: 0, fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)" }}>RK</div>
             <div>
               <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", marginBottom: 4 }}>Rajesh Kumar · Client</div>
-              <div style={{ background: T.cardBg, border: `1px solid ${T.border}`, borderRadius: "4px 14px 14px 14px", padding: "12px 16px", fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: T.dark, lineHeight: 1.7, boxShadow: "0 1px 4px rgba(0,17,27,0.06)" }}>
+              <div style={{ background: "#0D2535", border: `1px solid ${T.border}`, borderRadius: "4px 14px 14px 14px", padding: "12px 16px", fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.7 }}>
                 {clientMsg.split("₹14 lakhs").map((part, i) => (
                   <span key={i}>{part}{i === 0 && <span id="chat-tcs-amount" style={{ color: T.red, fontWeight: 700 }}>₹14 lakhs</span>}</span>
                 ))}
@@ -454,7 +466,7 @@ function Scene1() {
             <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#0EA5E9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: "#fff", flexShrink: 0, fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)" }}>SI</div>
             <div>
               <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", marginBottom: 4, textAlign: "right" }}>Suresh Iyer · Wealth Manager</div>
-              <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: "14px 4px 14px 14px", padding: "12px 16px", fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: T.dark, lineHeight: 1.7, boxShadow: "0 1px 4px rgba(0,17,27,0.06)" }}>
+              <div style={{ background: T.card, border: `1px solid rgba(255,255,255,0.1)`, borderRadius: "14px 4px 14px 14px", padding: "12px 16px", fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.7 }}>
                 {partnerMsg}
               </div>
             </div>
@@ -485,7 +497,7 @@ function Scene1() {
         {step >= 4 && (
           <div style={{ ...anim("d-msg", 500, 0), alignSelf: "flex-end", maxWidth: 680 }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", marginBottom: 4, textAlign: "right" }}>Suresh Iyer · Asking Valura AI</div>
-            <div style={{ background: "#F3F4F6", border: `1px solid ${T.border}`, borderRadius: "14px 4px 14px 14px", padding: "12px 16px", fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: T.dark, lineHeight: 1.7 }}>
+            <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: "14px 4px 14px 14px", padding: "12px 16px", fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.7 }}>
               <TypedText text={valuraQuery} mspChar={14} />
             </div>
           </div>
@@ -497,7 +509,7 @@ function Scene1() {
               <div style={{ width: 20, height: 20, borderRadius: 6, background: T.green, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11 }}>⚡</div>
               <span style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 10, color: T.green, fontWeight: 700 }}>Valura AI · GIFT City Advisor</span>
             </div>
-            <div style={{ background: T.greenBg, border: `1.5px solid ${T.greenBrd}`, borderRadius: "4px 14px 14px 14px", padding: "14px 18px", fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: T.dark, lineHeight: 1.75 }}>
+            <div style={{ background: T.greenBg, border: `1.5px solid rgba(5,160,73,0.3)`, borderRadius: "4px 14px 14px 14px", padding: "14px 18px", fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: "rgba(255,255,255,0.9)", lineHeight: 1.75 }}>
               <TypedText mspChar={11} text={aiReply} />
             </div>
           </div>
@@ -593,16 +605,16 @@ function Scene3() {
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {[
-            { label: "₹80,00,000 remitted", w: "100%", bg: "rgba(5,160,73,0.15)", c: T.green, del: 400 },
-            { label: "₹10,00,000 — TCS-free threshold", w: "12.5%", bg: "rgba(180,227,200,0.4)", c: "#059669", del: 700 },
-            { label: "₹70,00,000 — TCS at 20%", w: "87.5%", bg: "rgba(220,38,38,0.1)", c: T.red, del: 1000, pulse: true },
+            { label: "₹80,00,000 remitted", w: "100%", bg: "rgba(5,160,73,0.18)", c: T.green, brd: "rgba(5,160,73,0.3)", del: 400 },
+            { label: "₹10,00,000 — TCS-free threshold", w: "12.5%", bg: "rgba(180,227,200,0.15)", c: T.mint, brd: "rgba(180,227,200,0.3)", del: 700 },
+            { label: "₹70,00,000 — TCS at 20%", w: "87.5%", bg: "rgba(248,113,113,0.12)", c: T.red, brd: "rgba(248,113,113,0.25)", del: 1000, pulse: true },
           ].map((r) => (
             <div key={r.label} style={{ ...anim("d-up", 500, r.del) }}>
               <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 12, color: r.c, marginBottom: 6 }}>{r.label}</div>
               <div style={{
                 height: 32, background: r.bg, borderRadius: 6, width: r.w,
                 ...anim("d-barX", 600, r.del, "ease-out"),
-                transformOrigin: "left center", border: `1px solid ${r.c}33`,
+                transformOrigin: "left center", border: `1px solid ${r.brd ?? r.c + "33"}`,
                 animation: r.pulse
                   ? `d-barX 600ms cubic-bezier(0.16,1,0.3,1) ${r.del}ms both, d-bar-pulse 1.5s ease-in-out 1.8s infinite`
                   : `d-barX 600ms cubic-bezier(0.16,1,0.3,1) ${r.del}ms both`,
@@ -669,7 +681,7 @@ function Scene4() {
           borderRadius: 18, padding: "24px 28px",
           opacity: priyaActive ? 1 : 0.5,
           transition: "all 0.9s cubic-bezier(0.16,1,0.3,1)",
-          boxShadow: priyaActive ? "0 0 36px rgba(5,160,73,0.15)" : "none",
+          boxShadow: priyaActive ? "0 0 40px rgba(5,160,73,0.1)" : "none",
         }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
             <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 9, color: priyaActive ? T.green : T.muted, letterSpacing: "0.15em" }}>PRIYA (WIFE)</div>
@@ -685,7 +697,7 @@ function Scene4() {
       </div>
 
       {showResult && (
-        <div style={{ ...anim("d-scale", 600, 0), width: "100%", maxWidth: 820, background: "linear-gradient(135deg,rgba(5,160,73,0.07),rgba(5,160,73,0.03))", border: `1.5px solid ${T.greenBrd}`, borderRadius: 20, padding: "24px 34px", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 22, boxShadow: "0 4px 24px rgba(5,160,73,0.1)" }}>
+        <div style={{ ...anim("d-scale", 600, 0), width: "100%", maxWidth: 820, background: "linear-gradient(135deg,rgba(5,160,73,0.09),rgba(5,160,73,0.04))", border: `1.5px solid rgba(5,160,73,0.25)`, borderRadius: 20, padding: "24px 34px", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 22, boxShadow: "0 4px 24px rgba(5,160,73,0.1)" }}>
           <div>
             <div style={{ fontFamily: "var(--font-manrope,'Manrope',sans-serif)", fontSize: 10, fontWeight: 700, color: T.green, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>NEXT FY STRATEGY</div>
             <div style={{ fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)", fontSize: 22, fontWeight: 700, color: T.dark, marginBottom: 8 }}>Route ₹10L through Priya before April 1st</div>
@@ -733,7 +745,7 @@ function Scene5() {
 
   const portfolio = DEMO_CLIENT.portfolio;
   const borderColor: Record<string, string> = { LTCG: T.green, STCL: T.red, STCG: T.amber };
-  const rowBg: Record<string, string> = { LTCG: "rgba(5,160,73,0.03)", STCL: "rgba(220,38,38,0.03)", STCG: "rgba(245,158,11,0.03)" };
+  const rowBg: Record<string, string> = { LTCG: "rgba(5,160,73,0.04)", STCL: "rgba(248,113,113,0.04)", STCG: "rgba(245,158,11,0.04)" };
   const pillStyle: Record<string, React.CSSProperties> = {
     LTCG: { background: T.greenBg, color: T.green, border: `1px solid ${T.greenBrd}` },
     STCL: { background: T.redBg, color: T.red, border: `1px solid ${T.redBrd}` },
@@ -747,7 +759,7 @@ function Scene5() {
         <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 13, color: T.muted, marginTop: 4 }}>6 positions · FY 2025-26 · Exchange rate ₹84.50</div>
       </div>
 
-      <div style={{ flex: 1, background: T.card, borderRadius: 16, overflow: "hidden", border: `1px solid ${T.border}`, boxShadow: "0 1px 3px rgba(0,17,27,0.04),0 4px 16px rgba(0,17,27,0.07)", position: "relative" }}>
+      <div style={{ flex: 1, background: T.card, borderRadius: 16, overflow: "hidden", border: `1px solid ${T.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.2),0 4px 20px rgba(0,0,0,0.35)", position: "relative" }}>
         {/* Scanner line */}
         {scanning && !harvestOn && (
           <div style={{ position: "absolute", left: 0, right: 0, height: 2, background: `linear-gradient(90deg,transparent,${T.green},transparent)`, zIndex: 10, animation: "d-scanner 600ms linear forwards", pointerEvents: "none" }} />
@@ -1016,7 +1028,7 @@ function Scene7() {
   const highlightRupees = (text: string): React.ReactNode =>
     text.split(/(₹[\d,]+(?:\.\d+)?(?:\s*(?:L|Cr|K|lakh|crore))?)/gi).map((p, i) =>
       /^₹/.test(p)
-        ? <span key={i} style={{ background: T.greenBg, color: T.green, borderRadius: 3, padding: "0 2px", fontWeight: 600 }}>{p}</span>
+        ? <span key={i} style={{ background: "rgba(5,160,73,0.15)", color: T.mint, borderRadius: 3, padding: "0 2px", fontWeight: 600 }}>{p}</span>
         : p
     );
 
@@ -1037,7 +1049,7 @@ function Scene7() {
       <div ref={chatRef} className="demo-chat" style={{ width: "100%", maxWidth: 740, flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 16, paddingRight: 4 }}>
         {typedQ && (
           <div id="ai-question-bubble" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-            <div style={{ background: T.cardBg, border: `1px solid ${T.border}`, borderRadius: "4px 14px 14px 14px", padding: "13px 17px", maxWidth: "84%", fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: T.dark, lineHeight: 1.68, boxShadow: "0 1px 4px rgba(0,17,27,0.06)" }}>
+            <div style={{ background: "#0D2535", border: `1px solid rgba(255,255,255,0.08)`, borderRadius: "4px 14px 14px 14px", padding: "13px 17px", maxWidth: "84%", fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.68 }}>
               {typedQ}{typedQ.length < QUESTION.length && <span style={{ borderRight: `2px solid ${T.green}`, animation: "d-cursor 0.8s step-end infinite", marginLeft: 1 }} />}
             </div>
             <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 9, color: T.muted, marginTop: 4, marginLeft: 4 }}>just now</div>
@@ -1055,7 +1067,7 @@ function Scene7() {
         {aiText && (
           <div id="ai-response-bubble" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
             <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 9, color: T.green, marginBottom: 5, marginRight: 4, fontWeight: 700 }}>Valura AI</div>
-            <div style={{ background: T.greenBg, border: `1.5px solid ${T.greenBrd}`, borderRadius: "14px 14px 4px 14px", padding: "15px 19px", maxWidth: "92%", fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: T.dark, lineHeight: 1.75, whiteSpace: "pre-wrap", boxShadow: "0 2px 12px rgba(5,160,73,0.1)" }}>
+            <div style={{ background: "rgba(5,160,73,0.1)", border: `1.5px solid rgba(5,160,73,0.28)`, borderRadius: "14px 14px 4px 14px", padding: "15px 19px", maxWidth: "92%", fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 14, color: "rgba(255,255,255,0.9)", lineHeight: 1.75, whiteSpace: "pre-wrap", boxShadow: "0 2px 16px rgba(5,160,73,0.08)" }}>
               {highlightRupees(aiText)}
               {!done && <span style={{ borderRight: `2px solid ${T.green}`, animation: "d-cursor 0.8s step-end infinite", marginLeft: 1 }} />}
             </div>
@@ -1107,7 +1119,7 @@ function Scene8() {
     <div style={{
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       height: "100%", padding: "32px 90px",
-      background: "radial-gradient(ellipse at 50% 40%,rgba(5,160,73,0.06) 0%,#FFFFFC 60%)",
+      background: "radial-gradient(ellipse at 50% 40%,rgba(5,160,73,0.09) 0%,#00111B 60%)",
       position: "relative", overflow: "hidden",
     }}>
       {/* subtle grid bg */}
@@ -1126,7 +1138,7 @@ function Scene8() {
               animation: `${boxAnims[i]} 700ms cubic-bezier(0.16,1,0.3,1) ${b.delay}ms both`,
               background: T.card, border: `1px solid ${T.border}`,
               borderRadius: 20, padding: "26px 28px",
-              boxShadow: "0 1px 3px rgba(0,17,27,0.04),0 4px 20px rgba(0,17,27,0.08)",
+              boxShadow: "0 2px 20px rgba(0,0,0,0.35)",
               borderTop: `3px solid ${b.color}`,
             }}>
               <div style={{ fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)", fontSize: 40, fontWeight: 800, color: b.color, lineHeight: 1, marginBottom: 10 }}>
@@ -1207,7 +1219,7 @@ function Scene9() {
         border: "1px solid rgba(5,160,73,0.18)",
       }}>
         {/* Dark header */}
-        <div style={{ background: T.dark, padding: "20px 26px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ background: "#000C12", padding: "20px 26px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)", fontSize: 22, fontWeight: 800, color: T.green, letterSpacing: "-0.03em" }}>valura</div>
             <div style={{ width: 1, height: 26, background: "rgba(255,255,255,0.12)" }} />
@@ -1239,16 +1251,16 @@ function Scene9() {
         {/* Actions */}
         <div style={{ background: T.card, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
           {actions.map((a, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 14px", borderRadius: 12, background: T.cardBg, border: `1px solid ${T.border}`, ...anim("d-up", 500, 600 + i * 140) }}>
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 14px", borderRadius: 12, background: "#0D2535", border: `1px solid rgba(255,255,255,0.08)`, ...anim("d-up", 500, 600 + i * 140) }}>
               <span style={{ fontSize: 20, flexShrink: 0 }}>{a.icon}</span>
-              <span style={{ flex: 1, fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 13, color: T.body }}>{a.label}</span>
+              <span style={{ flex: 1, fontFamily: "var(--font-inter,'Inter',sans-serif)", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>{a.label}</span>
               <span style={{ fontFamily: "var(--font-bricolage,'Bricolage Grotesque',sans-serif)", fontSize: 15, fontWeight: 800, color: a.color, flexShrink: 0 }}>{a.saved}</span>
             </div>
           ))}
         </div>
 
         {/* Footer */}
-        <div style={{ background: T.cardBg, padding: "12px 26px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${T.border}` }}>
+        <div style={{ background: "#071520", padding: "12px 26px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid rgba(255,255,255,0.08)` }}>
           <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 9, color: T.muted }}>Generated by Valura AI · March 28, 2026 · 09:41 AM</div>
           <div style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 9, color: T.green, fontWeight: 700 }}>Execute by March 29 (T+2) →</div>
         </div>
@@ -1595,7 +1607,7 @@ export default function DemoPage() {
     <>
       <style>{DEMO_STYLES}</style>
 
-      <div style={{ width: "100vw", height: "100vh", background: T.bg, overflow: "hidden", position: "relative" }}>
+      <div style={{ width: "100vw", height: "100vh", background: "#00111B", overflow: "hidden", position: "relative" }}>
 
         {/* Auto-play progress bar */}
         {autoPlay && !recordMode && (
@@ -1644,7 +1656,7 @@ export default function DemoPage() {
         {/* ── Navigator ── */}
         <div style={{
           position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)",
-          background: "rgba(255,255,255,0.96)", border: `1px solid ${T.border}`,
+          background: "rgba(0,17,27,0.92)", border: "1px solid rgba(180,227,200,0.12)",
           borderRadius: 100, padding: "10px 22px",
           display: "flex", alignItems: "center", gap: 14,
           backdropFilter: "blur(24px)",
@@ -1656,7 +1668,7 @@ export default function DemoPage() {
           transition: "opacity 0.35s ease, transform 0.35s cubic-bezier(0.16,1,0.3,1)",
           ...(recordMode ? { transform: "translateX(-50%) scale(0.1)" } : {}),
         }}>
-          <button onClick={() => nav(-1)} disabled={displayScene === 0} style={{ background: "none", border: "none", color: displayScene === 0 ? T.border : T.muted, cursor: displayScene === 0 ? "default" : "pointer", fontSize: 16, padding: "0 4px", transition: "color 0.2s" }}>←</button>
+          <button onClick={() => nav(-1)} disabled={displayScene === 0} style={{ background: "none", border: "none", color: displayScene === 0 ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.4)", cursor: displayScene === 0 ? "default" : "pointer", fontSize: 16, padding: "0 4px", transition: "color 0.2s" }}>←</button>
 
           <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
             {SCENE_NAMES.map((name, i) => (
@@ -1664,25 +1676,25 @@ export default function DemoPage() {
             ))}
           </div>
 
-          <span style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 11, color: T.muted, whiteSpace: "nowrap" }}>
+          <span style={{ fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", fontSize: 11, color: "rgba(255,255,255,0.4)", whiteSpace: "nowrap" }}>
             {displayScene + 1} / {TOTAL} · {SCENE_NAMES[displayScene]}
           </span>
 
-          <button onClick={() => nav(1)} disabled={displayScene === TOTAL - 1} style={{ background: "none", border: "none", color: displayScene === TOTAL - 1 ? T.border : T.muted, cursor: displayScene === TOTAL - 1 ? "default" : "pointer", fontSize: 16, padding: "0 4px", transition: "color 0.2s" }}>→</button>
+          <button onClick={() => nav(1)} disabled={displayScene === TOTAL - 1} style={{ background: "none", border: "none", color: displayScene === TOTAL - 1 ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.4)", cursor: displayScene === TOTAL - 1 ? "default" : "pointer", fontSize: 16, padding: "0 4px", transition: "color 0.2s" }}>→</button>
 
-          <div style={{ width: 1, height: 18, background: T.border }} />
+          <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.1)" }} />
 
-          <button onClick={() => setShowGuide(g => !g)} style={{ background: showGuide ? T.greenBg : "transparent", border: `1px solid ${showGuide ? T.greenBrd : T.border}`, borderRadius: 6, color: showGuide ? T.green : T.muted, cursor: "pointer", fontSize: 11, padding: "4px 10px", fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", transition: "all 0.2s" }}>
+          <button onClick={() => setShowGuide(g => !g)} style={{ background: showGuide ? T.greenBg : "transparent", border: `1px solid ${showGuide ? T.greenBrd : "rgba(255,255,255,0.1)"}`, borderRadius: 6, color: showGuide ? T.green : "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 11, padding: "4px 10px", fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", transition: "all 0.2s" }}>
             💬 GUIDE
           </button>
 
-          <div style={{ width: 1, height: 18, background: T.border }} />
+          <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.1)" }} />
 
-          <button onClick={() => setAutoPlay(p => !p)} style={{ background: autoPlay ? T.greenBg : "transparent", border: `1px solid ${autoPlay ? T.greenBrd : T.border}`, borderRadius: 6, color: autoPlay ? T.green : T.muted, cursor: "pointer", fontSize: 11, padding: "4px 10px", fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", transition: "all 0.2s" }}>
+          <button onClick={() => setAutoPlay(p => !p)} style={{ background: autoPlay ? T.greenBg : "transparent", border: `1px solid ${autoPlay ? T.greenBrd : "rgba(255,255,255,0.1)"}`, borderRadius: 6, color: autoPlay ? T.green : "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 11, padding: "4px 10px", fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", transition: "all 0.2s" }}>
             {autoPlay ? "⏸ MANUAL" : "▶ AUTO"}
           </button>
 
-          <div style={{ width: 1, height: 18, background: T.border }} />
+          <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.1)" }} />
 
           <button onClick={() => { setRecordMode(true); setShowRecFlash(true); setTimeout(() => setShowRecFlash(false), 800); }} style={{ background: T.redBg, border: `1px solid ${T.redBrd}`, borderRadius: 100, color: T.red, cursor: "pointer", fontSize: 11, padding: "4px 13px", fontFamily: "var(--font-mono,'JetBrains Mono',monospace)", display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: T.red, animation: "d-rec-dot 1.4s step-end infinite" }} />
