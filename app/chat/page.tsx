@@ -108,9 +108,9 @@ I have access to **5 regulatory documents** including the RBI LRS FAQ, IT Act se
 
 function ChatMarkdown({ content }: { content: string }) {
   const ACTION_PREFIXES: Record<string, { label: string; border: string; bg: string; labelColor: string }> = {
-    "today:":          { label: "TODAY",           border: "#DC2626", bg: "rgba(220,38,38,0.08)",   labelColor: "#F87171" },
-    "this week:":      { label: "THIS WEEK",        border: "#B8913A", bg: "rgba(184,145,58,0.08)",  labelColor: "#FCD34D" },
-    "before march 31:":{ label: "BEFORE MARCH 31",  border: "#60A5FA", bg: "rgba(96,165,250,0.08)",  labelColor: "#93C5FD" },
+    "today:":          { label: "TODAY",           border: "#DC2626", bg: "#FEF2F2",   labelColor: "#DC2626" },
+    "this week:":      { label: "THIS WEEK",        border: "#B8913A", bg: "#FFFBF0",  labelColor: "#B8913A" },
+    "before march 31:":{ label: "BEFORE MARCH 31",  border: "#2563EB", bg: "#EFF4FF",  labelColor: "#2563EB" },
   };
 
   const components: Components = {
@@ -143,7 +143,7 @@ function ChatMarkdown({ content }: { content: string }) {
     },
 
     strong({ children }) {
-      return <strong className="font-semibold text-white">{children}</strong>;
+      return <strong className="font-bold" style={{ color: "#00111B" }}>{children}</strong>;
     },
 
     em({ children }) {
@@ -153,7 +153,7 @@ function ChatMarkdown({ content }: { content: string }) {
     /* ── Tables ── */
     table({ children }) {
       return (
-        <div className="my-3 overflow-x-auto rounded-xl" style={{ border: "1px solid rgba(255,255,255,0.1)" }}>
+        <div className="my-3 overflow-x-auto rounded-xl" style={{ border: "1px solid #E5E7EB" }}>
           <table className="w-full text-xs" style={{ borderCollapse: "collapse", minWidth: "320px" }}>
             {children}
           </table>
@@ -161,12 +161,12 @@ function ChatMarkdown({ content }: { content: string }) {
       );
     },
     thead({ children }) {
-      return <thead style={{ background: "rgba(5,160,73,0.15)" }}>{children}</thead>;
+      return <thead style={{ background: "#EDFAF3" }}>{children}</thead>;
     },
     th({ children }) {
       return (
         <th className="px-3 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider"
-          style={{ color: "#86EFAC", borderBottom: "1px solid rgba(5,160,73,0.3)" }}>
+          style={{ color: "#047857", borderBottom: "1px solid #B4E3C8" }}>
           {children}
         </th>
       );
@@ -176,15 +176,15 @@ function ChatMarkdown({ content }: { content: string }) {
     },
     tr({ children }) {
       return (
-        <tr className="border-b transition-colors hover:bg-white/[0.03]"
-          style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+        <tr className="border-b transition-colors hover:bg-[#F9FAFB]"
+          style={{ borderColor: "#EEF0F2" }}>
           {children}
         </tr>
       );
     },
     td({ children }) {
       return (
-        <td className="px-3 py-2 text-xs" style={{ color: "hsl(var(--foreground))" }}>
+        <td className="px-3 py-2 text-xs" style={{ color: "#374151" }}>
           {children}
         </td>
       );
@@ -210,7 +210,7 @@ function ChatMarkdown({ content }: { content: string }) {
     h1({ children }) {
       return (
         <h1 className="text-base font-bold mt-4 mb-2 pb-1.5"
-          style={{ color: "white", borderBottom: "1px solid rgba(255,255,255,0.1)", fontFamily: "var(--font-bricolage)" }}>
+          style={{ color: "#00111B", borderBottom: "1px solid #E5E7EB", fontFamily: "var(--font-bricolage)" }}>
           {children}
         </h1>
       );
@@ -218,14 +218,14 @@ function ChatMarkdown({ content }: { content: string }) {
     h2({ children }) {
       return (
         <h2 className="text-sm font-bold mt-3 mb-1.5"
-          style={{ color: "white", fontFamily: "var(--font-bricolage)" }}>
+          style={{ color: "#00111B", fontFamily: "var(--font-bricolage)" }}>
           {children}
         </h2>
       );
     },
     h3({ children }) {
       return (
-        <h3 className="text-[13px] font-semibold mt-2.5 mb-1" style={{ color: "#86EFAC" }}>
+        <h3 className="text-[13px] font-semibold mt-2.5 mb-1" style={{ color: "#047857" }}>
           {children}
         </h3>
       );
@@ -235,7 +235,7 @@ function ChatMarkdown({ content }: { content: string }) {
     code({ children }) {
       return (
         <code className="px-1.5 py-0.5 rounded text-[11px] font-mono"
-          style={{ background: "rgba(255,255,255,0.08)", color: "#93C5FD" }}>
+          style={{ background: "#F1F5F9", color: "#2B4A8A" }}>
           {children}
         </code>
       );
@@ -245,8 +245,8 @@ function ChatMarkdown({ content }: { content: string }) {
     blockquote({ children }) {
       return (
         <div className="my-2 rounded-xl px-3 py-2.5"
-          style={{ background: "rgba(5,160,73,0.1)", borderLeft: "3px solid #05A049" }}>
-          <div className="text-sm leading-relaxed" style={{ color: "#86EFAC" }}>
+          style={{ background: "#EDFAF3", borderLeft: "3px solid #05A049" }}>
+          <div className="text-sm leading-relaxed font-medium" style={{ color: "#14532d" }}>
             {children}
           </div>
         </div>
@@ -255,7 +255,7 @@ function ChatMarkdown({ content }: { content: string }) {
 
     /* ── Horizontal rule ── */
     hr() {
-      return <hr className="my-3" style={{ borderColor: "rgba(255,255,255,0.08)" }} />;
+      return <hr className="my-3" style={{ borderColor: "#E5E7EB" }} />;
     },
   };
 
