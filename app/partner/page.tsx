@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   FileText, FileSpreadsheet, FileCheck2, Layers, TrendingUp, Banknote,
   Download, DownloadCloud, CheckCircle2, Calendar, Video, ArrowRight,
-  ShieldCheck, Sparkles, Clock, Loader2,
+  ShieldCheck, Sparkles, Clock, Loader2, ChevronDown, HelpCircle, BookOpen,
 } from "lucide-react";
 import { CLIENTS, clientTotals, type Client } from "@/lib/partner/clients";
 import { generateDoc, generateAll, type DocType } from "@/lib/partner/generateDocs";
@@ -15,13 +15,67 @@ const C = {
   border: "#E5E7EB", muted: "#6b7280", page: "#FFFFFC",
 };
 
-const DOCS: { type: DocType; icon: typeof FileText; title: string; desc: string; accent: string }[] = [
-  { type: "pnl", icon: TrendingUp, title: "Capital Gains — Tax P&L", desc: "Realised STCG / LTCG on every foreign trade, with holding period and ₹ gain.", accent: "#2B4A8A" },
-  { type: "dividend", icon: Banknote, title: "Dividend Report", desc: "Foreign dividends and the 25% US tax withheld — your FTC starting point.", accent: C.green },
-  { type: "holdings", icon: Layers, title: "Holdings Statement", desc: "Every current global holding, valued in ₹ — your Schedule FA reference.", accent: C.orange },
-  { type: "fsi", icon: FileText, title: "Schedule FSI", desc: "Foreign source income, pre-formatted for the FSI section of your ITR.", accent: "#7A2020" },
-  { type: "tr", icon: FileCheck2, title: "Schedule TR", desc: "Summary of foreign tax paid and the relief you can claim.", accent: "#B8913A" },
-  { type: "form67", icon: FileSpreadsheet, title: "Form 67 (FTC)", desc: "Foreign Tax Credit application — file before your return to avoid double tax.", accent: C.green },
+interface DocInfo {
+  type: DocType; icon: typeof FileText; title: string; desc: string; accent: string;
+  whatIs: string; why: string; todo: string[];
+}
+const DOCS: DocInfo[] = [
+  {
+    type: "pnl", icon: TrendingUp, title: "Capital Gains — Tax P&L", desc: "Realised STCG / LTCG on every foreign trade, with holding period and ₹ gain.", accent: "#2B4A8A",
+    whatIs: "A list of everything you sold this year and the profit or loss you made on each.",
+    why: "The government taxes your profits. This shows exactly how much you made — split into short-term (held ≤2 years, taxed higher) and long-term (held >2 years, taxed at 12.5%).",
+    todo: [
+      "Hand it to your CA, or use the totals yourself.",
+      "Put the short-term and long-term gain figures into the 'Capital Gains' section of your tax return.",
+      "If you made losses, they can cancel out gains and cut your tax — keep this sheet as proof.",
+    ],
+  },
+  {
+    type: "dividend", icon: Banknote, title: "Dividend Report", desc: "Foreign dividends and the 25% US tax withheld — your FTC starting point.", accent: C.green,
+    whatIs: "A list of every dividend (company payout) you received, and the tax the US already took out of it.",
+    why: "You must declare this income in India. And the US already grabbed 25% of it — you can claim that back so you don't pay tax twice.",
+    todo: [
+      "Report the total dividend income in your tax return (under 'Income from Other Sources').",
+      "Note the 'US tax paid' figure — you'll need it for Form 67 to get that money back.",
+    ],
+  },
+  {
+    type: "holdings", icon: Layers, title: "Holdings Statement", desc: "Every current global holding, valued in ₹ — your Schedule FA reference.", accent: C.orange,
+    whatIs: "A snapshot of everything you currently own abroad, with each holding's value in rupees.",
+    why: "India makes every resident declare all their foreign assets in a section called 'Schedule FA'. Forgetting even one can mean a ₹10 lakh penalty.",
+    todo: [
+      "Open the 'Schedule FA' section of your tax return.",
+      "List each holding from this sheet — name, value, and when you bought it.",
+    ],
+  },
+  {
+    type: "fsi", icon: FileText, title: "Schedule FSI", desc: "Foreign source income, pre-formatted for the FSI section of your ITR.", accent: "#7A2020",
+    whatIs: "A one-page summary of all the income you earned outside India — your foreign gains and dividends together.",
+    why: "Residents must report foreign income in this exact schedule. It also records the foreign tax you paid, which sets up your refund.",
+    todo: [
+      "Copy these rows straight into the 'Schedule FSI' part of your ITR.",
+      "Make sure the 'tax paid outside India' column matches your Form 67.",
+    ],
+  },
+  {
+    type: "tr", icon: FileCheck2, title: "Schedule TR", desc: "Summary of foreign tax paid and the relief you can claim.", accent: "#B8913A",
+    whatIs: "A short summary of the total foreign tax you paid and the credit (relief) you're allowed to claim back.",
+    why: "It's the 'relief' figure that tells the tax department to reduce your bill so you aren't taxed twice on the same income.",
+    todo: [
+      "Enter the relief amount in the 'Schedule TR' section of your return.",
+      "It links to Schedule FSI — keep both together when filing.",
+    ],
+  },
+  {
+    type: "form67", icon: FileSpreadsheet, title: "Form 67 (FTC)", desc: "Foreign Tax Credit application — file before your return to avoid double tax.", accent: C.green,
+    whatIs: "The official form that actually claims back the foreign tax you already paid (the 25% the US withheld).",
+    why: "Without this form, India won't give you credit for the US tax — so you'd end up paying tax on the same money twice. It must be filed BEFORE your tax return.",
+    todo: [
+      "Log in to the income-tax website and file Form 67 online — before you file your ITR.",
+      "Attach your US '1042-S' statement as proof of the tax already paid.",
+      "Once accepted, the credit reduces your Indian tax bill.",
+    ],
+  },
 ];
 
 const STEPS = [
@@ -115,24 +169,23 @@ export default function PartnerPage() {
               Download all 6
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {/* Plain-English overview of how the 6 fit together */}
+          <div className="rounded-2xl border p-4 mb-3" style={{ background: C.greenBg, borderColor: C.greenBorder }}>
+            <div className="flex items-start gap-2.5">
+              <BookOpen className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: C.green }} />
+              <p className="text-[13px] leading-relaxed" style={{ color: "#33514a" }}>
+                <b style={{ color: C.navy }}>In plain English: </b>
+                Three of these <i>show what happened</i> (what you <b>own</b>, what you <b>sold</b>, and the <b>dividends</b> you got).
+                The other three <i>go into your tax return</i> (<b>Schedule FSI</b> reports the foreign income,
+                <b> Form 67</b> claims back the US tax, and <b>Schedule TR</b> records that relief).
+                Tap <span className="font-semibold" style={{ color: C.green }}>“Why &amp; what to do”</span> on any card to see it step by step.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-start">
             {DOCS.map((d) => (
-              <div key={d.type} className="rounded-2xl border p-4 flex flex-col" style={{ background: "#fff", borderColor: C.border }}>
-                <div className="flex items-start justify-between mb-2.5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0" style={{ background: `${d.accent}12` }}>
-                    <d.icon className="h-5 w-5" style={{ color: d.accent }} />
-                  </div>
-                  <span className="rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider" style={{ background: "#F1F5F9", color: C.muted }}>.xlsx</span>
-                </div>
-                <p className="text-sm font-bold" style={{ color: C.navy }}>{d.title}</p>
-                <p className="text-[12px] leading-relaxed mt-1 flex-1" style={{ color: C.muted }}>{d.desc}</p>
-                <button onClick={() => dl(d.type)} disabled={!!busy}
-                  className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-all hover:bg-[#F9FAFB] disabled:opacity-60"
-                  style={{ borderColor: C.border, color: C.navy }}>
-                  {busy === d.type ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" style={{ color: d.accent }} />}
-                  Download Excel
-                </button>
-              </div>
+              <DocCard key={d.type} d={d} busy={busy} onDownload={() => dl(d.type)} />
             ))}
           </div>
           <p className="mt-3 flex items-center gap-1.5 text-[11px]" style={{ color: C.muted }}>
@@ -219,6 +272,53 @@ export default function PartnerPage() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function DocCard({ d, busy, onDownload }: { d: DocInfo; busy: string | null; onDownload: () => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-2xl border p-4 flex flex-col" style={{ background: "#fff", borderColor: C.border }}>
+      <div className="flex items-start justify-between mb-2.5">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0" style={{ background: `${d.accent}12` }}>
+          <d.icon className="h-5 w-5" style={{ color: d.accent }} />
+        </div>
+        <span className="rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider" style={{ background: "#F1F5F9", color: C.muted }}>.xlsx</span>
+      </div>
+      <p className="text-sm font-bold" style={{ color: C.navy }}>{d.title}</p>
+      <p className="text-[12px] leading-relaxed mt-1" style={{ color: C.muted }}>{d.desc}</p>
+
+      <button onClick={() => setOpen((v) => !v)}
+        className="mt-2.5 inline-flex items-center gap-1 text-[12px] font-semibold w-fit" style={{ color: d.accent }}>
+        <HelpCircle className="h-3.5 w-3.5" /> Why &amp; what to do
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="mt-2.5 rounded-xl p-3 animate-fade-in" style={{ background: "#F9FAFB" }}>
+          <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.muted }}>What it is</p>
+          <p className="text-[12px] leading-relaxed mt-0.5" style={{ color: "#374151" }}>{d.whatIs}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider mt-2.5" style={{ color: C.muted }}>Why you need it</p>
+          <p className="text-[12px] leading-relaxed mt-0.5" style={{ color: "#374151" }}>{d.why}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider mt-2.5" style={{ color: C.muted }}>What to do with it</p>
+          <ol className="mt-1 space-y-1.5">
+            {d.todo.map((s, i) => (
+              <li key={i} className="flex items-start gap-2 text-[12px] leading-relaxed" style={{ color: "#374151" }}>
+                <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-[9px] font-bold mt-0.5" style={{ background: C.greenBg, color: C.green }}>{i + 1}</span>
+                {s}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      <button onClick={onDownload} disabled={!!busy}
+        className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-all hover:bg-[#F9FAFB] disabled:opacity-60"
+        style={{ borderColor: C.border, color: C.navy }}>
+        {busy === d.type ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" style={{ color: d.accent }} />}
+        Download Excel
+      </button>
     </div>
   );
 }
