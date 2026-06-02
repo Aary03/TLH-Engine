@@ -153,10 +153,10 @@ export default function HomePage() {
               style={{ background: "#05A049", color: "#fff", boxShadow: "0 4px 16px rgba(5,160,73,0.35)" }}>
               Start calculating <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/journey"
+            <Link href="/magic"
               className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all hover:opacity-90"
               style={{ background: "rgba(180,227,200,0.12)", color: "#B4E3C8", border: "1px solid rgba(180,227,200,0.25)" }}>
-              🗺 New here? Start your journey
+              ▶ Watch the 90-sec demo
             </Link>
             <a href="/signup"
               className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all"

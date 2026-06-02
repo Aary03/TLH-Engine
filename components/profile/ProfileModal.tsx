@@ -1,9 +1,13 @@
 "use client";
 
 import { X, Minus, Plus } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useProfile } from "./ProfileContext";
 import { DEFAULT_PROFILE, ValuraProfile, BRACKET_LABELS, saveProfile } from "@/lib/user-profile";
 import { useState } from "react";
+
+/** Routes where the onboarding modal must never interrupt (presentation/demo). */
+const SUPPRESS_ON = ["/magic", "/demo"];
 
 const BRACKETS: ValuraProfile["incomeBracket"][] = [
   "up_to_50L",
@@ -21,6 +25,7 @@ const INVESTOR_OPTIONS: { value: ValuraProfile["investorType"]; icon: string; la
 
 export default function ProfileModal() {
   const { showModal, setShowModal, updateProfile } = useProfile();
+  const pathname = usePathname();
 
   const [bracket, setBracket] = useState<ValuraProfile["incomeBracket"]>(DEFAULT_PROFILE.incomeBracket);
   const [investorType, setInvestorType] = useState<ValuraProfile["investorType"]>(DEFAULT_PROFILE.investorType);
@@ -28,6 +33,7 @@ export default function ProfileModal() {
   const [familyCount, setFamilyCount] = useState(1);
 
   if (!showModal) return null;
+  if (SUPPRESS_ON.some((p) => pathname?.startsWith(p))) return null;
 
   function handleSave() {
     const members: ValuraProfile["familyMembers"] = Array.from({ length: familyCount }, (_, i) =>

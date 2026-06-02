@@ -102,6 +102,38 @@ input[type=range] { accent-color: #05A049; }
 .animate-fade-up { animation: fade-up 0.35s ease-out; }
 .animate-pulse-green { animation: pulse-green 2s ease-in-out infinite; }
 
+/* ── Magic-show motion ── */
+@keyframes magic-rise {
+  from { opacity: 0; transform: translateY(28px) scale(0.97); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@keyframes magic-pop {
+  0%   { opacity: 0; transform: scale(0.7); }
+  60%  { opacity: 1; transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+@keyframes magic-glow {
+  0%,100% { box-shadow: 0 0 80px rgba(5,160,73,0.18), inset 0 0 0 1px rgba(255,255,255,0.06); }
+  50%     { box-shadow: 0 0 120px rgba(5,160,73,0.34), inset 0 0 0 1px rgba(255,255,255,0.10); }
+}
+@keyframes magic-blob {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(24px,-28px) scale(1.12); }
+}
+@keyframes grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes drift-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+.magic-rise { animation: magic-rise 0.7s cubic-bezier(0.16,1,0.3,1) both; }
+.magic-pop  { animation: magic-pop 0.7s cubic-bezier(0.16,1,0.3,1) both; }
+.magic-glow { animation: magic-glow 4s ease-in-out infinite; }
+.magic-blob { animation: magic-blob 14s ease-in-out infinite; }
+.magic-grow { transform-origin: left center; animation: grow-x 0.9s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
+.magic-stagger > * { animation: drift-up 0.6s ease-out both; }
+.magic-stagger > *:nth-child(1) { animation-delay: 0.15s; }
+.magic-stagger > *:nth-child(2) { animation-delay: 0.30s; }
+.magic-stagger > *:nth-child(3) { animation-delay: 0.45s; }
+.magic-stagger > *:nth-child(4) { animation-delay: 0.60s; }
+
 /* ── Tooltip ── */
 [data-tooltip] { position: relative; cursor: help; }
 [data-tooltip]:hover::after {
