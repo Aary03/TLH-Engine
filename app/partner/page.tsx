@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FileText, FileSpreadsheet, FileCheck2, Layers, TrendingUp, Banknote,
   Download, DownloadCloud, CheckCircle2, Calendar, Video, ArrowRight,
   ShieldCheck, Sparkles, Clock, Loader2, ChevronDown, HelpCircle, BookOpen,
+  X, Star, Phone, Languages, Check, PartyPopper,
 } from "lucide-react";
 import { CLIENTS, clientTotals, type Client } from "@/lib/partner/clients";
 import { generateDoc, generateAll, type DocType } from "@/lib/partner/generateDocs";
@@ -78,6 +79,13 @@ const DOCS: DocInfo[] = [
   },
 ];
 
+interface CA { id: string; name: string; initials: string; exp: string; specialty: string[]; langs: string; rating: number; reviews: number; slots: string[]; }
+const CAS: CA[] = [
+  { id: "anjali", name: "CA Anjali Rao", initials: "AR", exp: "12 yrs", specialty: ["Foreign assets", "Form 67", "Schedule FA"], langs: "English · Hindi", rating: 4.9, reviews: 218, slots: ["Tomorrow · 11:00 AM", "Tomorrow · 3:30 PM", "Thu · 10:00 AM"] },
+  { id: "vikram", name: "CA Vikram Shah", initials: "VS", exp: "15 yrs", specialty: ["HNI returns", "Estate planning", "DTAA"], langs: "English · Gujarati", rating: 4.8, reviews: 341, slots: ["Thu · 4:30 PM", "Fri · 12:00 PM", "Sat · 11:00 AM"] },
+  { id: "meera", name: "CA Meera Iyer", initials: "MI", exp: "9 yrs", specialty: ["NRI taxation", "Capital gains", "Tax-loss harvesting"], langs: "English · Tamil", rating: 5.0, reviews: 156, slots: ["Tomorrow · 5:00 PM", "Fri · 9:30 AM", "Mon · 2:00 PM"] },
+];
+
 const STEPS = [
   { t: "Download your 6 documents", d: "One click below generates every co-branded statement your CA needs — already in the ITR format." },
   { t: "Declare holdings in Schedule FA", d: "Use the Holdings Statement to list each foreign asset. Mandatory for residents — ₹10L/yr penalty if missed." },
@@ -89,6 +97,7 @@ const STEPS = [
 export default function PartnerPage() {
   const [client, setClient] = useState<Client>(CLIENTS[0]);
   const [busy, setBusy] = useState<string | null>(null);
+  const [bookOpen, setBookOpen] = useState(false);
   const t = clientTotals(client);
 
   const dl = async (type: DocType) => {
@@ -233,10 +242,11 @@ export default function PartnerPage() {
                 <p className="text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: C.muted }}>Next available</p>
                 <div className="space-y-2 mb-4">
                   {[
-                    { d: "Tomorrow, 11:00 AM", who: "CA Anjali Rao" },
-                    { d: "Thu, 4:30 PM", who: "CA Vikram Shah" },
+                    { d: "Tomorrow · 11:00 AM", who: "CA Anjali Rao" },
+                    { d: "Thu · 4:30 PM", who: "CA Vikram Shah" },
                   ].map((s) => (
-                    <div key={s.d} className="flex items-center justify-between rounded-xl border px-3 py-2.5" style={{ borderColor: C.border }}>
+                    <button key={s.d} onClick={() => setBookOpen(true)}
+                      className="w-full flex items-center justify-between rounded-xl border px-3 py-2.5 text-left transition-all hover:border-[#05A049]" style={{ borderColor: C.border }}>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" style={{ color: C.green }} />
                         <div>
@@ -245,16 +255,16 @@ export default function PartnerPage() {
                         </div>
                       </div>
                       <span className="rounded-full h-2 w-2" style={{ background: C.green }} />
-                    </div>
+                    </button>
                   ))}
                 </div>
-                <a href="#" onClick={(e) => e.preventDefault()}
+                <button onClick={() => setBookOpen(true)}
                   className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-all hover:opacity-90"
                   style={{ background: C.navy }}>
-                  <Video className="h-4 w-4" /> Book the meeting <ArrowRight className="h-4 w-4" />
-                </a>
+                  <Video className="h-4 w-4" /> Book a CA meeting <ArrowRight className="h-4 w-4" />
+                </button>
                 <p className="mt-2 text-center text-[10px]" style={{ color: C.muted }}>
-                  <Calendar className="inline h-3 w-3 mr-0.5" /> Calendly link — placeholder for the live booking flow
+                  <Calendar className="inline h-3 w-3 mr-0.5" /> Opens the booking flow · video link sent on confirm (placeholder)
                 </p>
               </div>
             </div>
@@ -271,6 +281,152 @@ export default function PartnerPage() {
             </p>
           </div>
         </div>
+      </div>
+
+      {bookOpen && <BookingModal client={client} onClose={() => setBookOpen(false)} />}
+    </div>
+  );
+}
+
+/* ════════════════ CA booking modal ════════════════ */
+function BookingModal({ client, onClose }: { client: Client; onClose: () => void }) {
+  const [caId, setCaId] = useState<string | null>(null);
+  const [slot, setSlot] = useState<string | null>(null);
+  const [mode, setMode] = useState<"video" | "phone">("video");
+  const [booked, setBooked] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [onClose]);
+
+  const ca = CAS.find((x) => x.id === caId);
+  const confirm = () => {
+    setLoading(true);
+    setTimeout(() => { setLoading(false); setBooked(true); }, 900); // placeholder
+  };
+
+  return (
+    <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+      <div className="relative w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl animate-fade-up"
+        style={{ background: "#fff" }}>
+
+        {/* Header */}
+        <div className="sticky top-0 z-10 flex items-center justify-between px-5 sm:px-6 py-4 border-b"
+          style={{ background: "#fff", borderColor: C.border }}>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-extrabold italic" style={{ fontFamily: "var(--font-bricolage)", color: C.orange }}>Voguestock</span>
+              <span className="text-xs text-gray-400">×</span>
+              <span className="text-sm font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: C.green }}>Valura</span>
+              <span className="text-sm font-bold" style={{ color: C.navy }}>· CA Desk</span>
+            </div>
+            <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>Booking a consultation for <b style={{ color: C.navy }}>{client.name}</b></p>
+          </div>
+          <button onClick={onClose} aria-label="Close" className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100" style={{ color: C.muted }}>
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {booked ? (
+          <div className="px-6 py-10 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: C.greenBg }}>
+              <PartyPopper className="h-7 w-7" style={{ color: C.green }} />
+            </div>
+            <p className="text-xl font-extrabold" style={{ color: C.navy, fontFamily: "var(--font-bricolage)" }}>Meeting booked!</p>
+            <p className="mt-2 text-sm max-w-sm mx-auto" style={{ color: C.muted }}>
+              <b style={{ color: C.navy }}>{ca?.name}</b> · {slot} · {mode === "video" ? "Video call" : "Phone call"} (30 min).
+              A calendar invite{mode === "video" ? " with a video link" : ""} has been sent to <b style={{ color: C.navy }}>{client.email}</b>.
+            </p>
+            <div className="mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold" style={{ background: C.greenBg, color: C.green }}>
+              <Check className="h-3.5 w-3.5" /> The 6 tax documents will be shared with your CA automatically
+            </div>
+            <div className="mt-6 flex justify-center gap-2">
+              <button onClick={onClose} className="rounded-xl px-5 py-2.5 text-sm font-bold text-white" style={{ background: C.navy }}>Done</button>
+              <button onClick={() => { setBooked(false); setCaId(null); setSlot(null); }} className="rounded-xl px-5 py-2.5 text-sm font-semibold" style={{ color: C.navy, border: `1px solid ${C.border}` }}>Book another</button>
+            </div>
+            <p className="mt-4 text-[10px]" style={{ color: C.muted }}>Demo placeholder — wire this to Calendly / Cal.com / Google Calendar for the live flow.</p>
+          </div>
+        ) : (
+          <>
+            <div className="px-5 sm:px-6 py-5 space-y-3">
+              <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: C.muted }}>1 · Pick your chartered accountant</p>
+              {CAS.map((c) => {
+                const active = c.id === caId;
+                return (
+                  <button key={c.id} onClick={() => { setCaId(c.id); setSlot(null); }}
+                    className="w-full rounded-2xl border p-4 text-left transition-all"
+                    style={active ? { borderColor: C.green, boxShadow: "0 0 0 3px rgba(5,160,73,0.12)" } : { borderColor: C.border }}>
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold"
+                        style={{ background: active ? C.green : "#F1F5F9", color: active ? "#fff" : C.navy }}>{c.initials}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-bold" style={{ color: C.navy }}>{c.name}</p>
+                          <span className="flex items-center gap-1 text-[11px] font-bold flex-shrink-0" style={{ color: C.navy }}>
+                            <Star className="h-3.5 w-3.5" style={{ color: "#F5C451", fill: "#F5C451" }} /> {c.rating}
+                            <span className="font-normal" style={{ color: C.muted }}>({c.reviews})</span>
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                          {c.specialty.map((s) => (
+                            <span key={s} className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: C.greenBg, color: "#047857" }}>{s}</span>
+                          ))}
+                        </div>
+                        <p className="flex items-center gap-1.5 text-[11px] mt-1.5" style={{ color: C.muted }}>
+                          <Languages className="h-3 w-3" /> {c.langs} · {c.exp} experience
+                        </p>
+                      </div>
+                    </div>
+
+                    {active && (
+                      <div className="mt-3 pt-3 border-t animate-fade-in" style={{ borderColor: C.border }}>
+                        <p className="text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: C.muted }}>2 · Pick a time slot</p>
+                        <div className="flex flex-wrap gap-2">
+                          {c.slots.map((sl) => {
+                            const on = sl === slot;
+                            return (
+                              <span key={sl} onClick={(e) => { e.stopPropagation(); setSlot(sl); }}
+                                className="cursor-pointer rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
+                                style={on ? { background: C.navy, color: "#fff" } : { background: "#F9FAFB", color: C.navy, border: `1px solid ${C.border}` }}>
+                                {sl}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Footer */}
+            <div className="sticky bottom-0 px-5 sm:px-6 py-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              style={{ background: "#fff", borderColor: C.border }}>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-semibold" style={{ color: C.muted }}>Mode:</span>
+                {([["video", Video, "Video"], ["phone", Phone, "Phone"]] as const).map(([m, Icon, label]) => (
+                  <button key={m} onClick={() => setMode(m)}
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all"
+                    style={mode === m ? { background: C.navy, color: "#fff" } : { background: "#F9FAFB", color: C.navy, border: `1px solid ${C.border}` }}>
+                    <Icon className="h-3.5 w-3.5" /> {label}
+                  </button>
+                ))}
+              </div>
+              <button onClick={confirm} disabled={!caId || !slot || loading}
+                className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white transition-all disabled:opacity-40"
+                style={{ background: `linear-gradient(135deg, ${C.green}, #028037)` }}>
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                {ca && slot ? `Confirm · ${slot}` : "Confirm booking"}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
