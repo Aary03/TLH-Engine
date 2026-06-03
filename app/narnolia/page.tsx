@@ -251,11 +251,13 @@ function ReportsFocus() {
           );
         })}
       </div>
-      <button onClick={dl} disabled={busy} className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-all hover:opacity-95 disabled:opacity-60" style={{ background: `linear-gradient(135deg, ${C.red}, #B82820)` }}>
-        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-        Download the full report pack (.xlsx)
+      <a href="/narnolia/report" className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-all hover:opacity-95" style={{ background: `linear-gradient(135deg, ${C.red}, #B82820)` }}>
+        <FileText className="h-4 w-4" /> Open the beautiful report →
+      </a>
+      <button onClick={dl} disabled={busy} className="mt-2 w-full inline-flex items-center justify-center gap-1.5 text-[11px] font-semibold disabled:opacity-60" style={{ color: C.muted }}>
+        {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+        or download as Excel
       </button>
-      <p className="mt-2 text-[10px]" style={{ color: C.muted }}>Co-branded Narnolia × Valura · Summary · Capital Gains · Schedule FA · Schedule FSI · Checklist</p>
     </Card>
   );
 }

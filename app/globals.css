@@ -134,6 +134,18 @@ input[type=range] { accent-color: #05A049; }
 .magic-stagger > *:nth-child(3) { animation-delay: 0.45s; }
 .magic-stagger > *:nth-child(4) { animation-delay: 0.60s; }
 
+/* ── Print: export the report as a clean PDF ── */
+@media print {
+  @page { size: A4; margin: 10mm; }
+  body { background: #fff !important; }
+  aside, .no-print { display: none !important; }
+  main { margin: 0 !important; padding: 0 !important; overflow: visible !important; height: auto !important; }
+  html, body { height: auto !important; overflow: visible !important; }
+  .print-sheet { box-shadow: none !important; border: none !important; margin: 0 !important; border-radius: 0 !important; max-width: 100% !important; }
+  .print-avoid-break { break-inside: avoid; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+
 /* ── Tooltip ── */
 [data-tooltip] { position: relative; cursor: help; }
 [data-tooltip]:hover::after {
