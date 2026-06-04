@@ -8,8 +8,8 @@ import {
 import { generateShowcaseReport } from "@/lib/partner/showcaseReport";
 
 const C = {
-  red: "#E0342A", green: "#05A049", navy: "#00111B", muted: "#6b7280",
-  border: "#E8EBE9", page: "#F4F6F5", greenBg: "#EDFAF3", redBg: "#FDECEA",
+  red: "#E0822E", green: "#05A049", navy: "#00111B", muted: "#6b7280",
+  border: "#E8EBE9", page: "#F4F6F5", greenBg: "#EDFAF3", redBg: "#FCEFE0",
 };
 
 const m = computeShow();
@@ -36,7 +36,7 @@ function growthPath(w: number, h: number) {
   return { line: d, area, last: { x: w, y: y(vals[n - 1]) } };
 }
 
-export default function NarnoliaReport() {
+export default function VoguestockReport() {
   const W = 380, H = 120;
   const g = growthPath(W, H);
 
@@ -44,10 +44,10 @@ export default function NarnoliaReport() {
     <div className="min-h-screen py-6 sm:py-10 px-3" style={{ background: C.page }}>
       {/* Floating actions (hidden in print) */}
       <div className="no-print fixed top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
-        <Link href="/narnolia" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold bg-white shadow-md" style={{ color: C.navy, border: `1px solid ${C.border}` }}>
+        <Link href="/voguestock" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold bg-white shadow-md" style={{ color: C.navy, border: `1px solid ${C.border}` }}>
           <ArrowLeft className="h-3.5 w-3.5" /> Back
         </Link>
-        <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-full px-5 py-2 text-xs font-bold text-white shadow-md" style={{ background: `linear-gradient(135deg, ${C.red}, #B82820)` }}>
+        <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-full px-5 py-2 text-xs font-bold text-white shadow-md" style={{ background: `linear-gradient(135deg, ${C.red}, #C26A1E)` }}>
           <Download className="h-3.5 w-3.5" /> Download PDF
         </button>
         <button onClick={() => generateShowcaseReport()} className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold bg-white shadow-md" style={{ color: C.navy, border: `1px solid ${C.border}` }}>
@@ -64,7 +64,7 @@ export default function NarnoliaReport() {
           {/* header */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-2.5">
-              <span className="text-xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: C.red }}>Narnolia</span>
+              <span className="text-xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: C.red }}>Voguestock</span>
               <span className="text-base text-gray-300">×</span>
               <span className="text-xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: C.green }}>Valura</span>
             </div>
@@ -178,7 +178,7 @@ export default function NarnoliaReport() {
               Illustrative co-branded report · USD→INR at the SBI TT buying rate · Tax rules per Finance Act 2025 (FY 2025-26) · Confirm with your CA before filing.
             </p>
             <p className="text-[10px] font-semibold flex-shrink-0" style={{ color: C.navy }}>
-              Prepared by <span style={{ color: C.red }}>Narnolia</span> × <span style={{ color: C.green }}>Valura</span>
+              Prepared by <span style={{ color: C.red }}>Voguestock</span> × <span style={{ color: C.green }}>Valura</span>
             </p>
           </div>
         </div>

@@ -1,5 +1,5 @@
 /**
- * Narnolia × Valura showcase — demo client buys a Narnolia UCITS fund,
+ * Voguestock × Valura showcase — demo client buys a Voguestock UCITS fund,
  * holds, redeems, and every resident-Indian tax filing is solved.
  * All figures illustrative. Tax rules per Finance Act 2025 (FY 2025-26).
  */
@@ -14,8 +14,8 @@ export const SHOW_CLIENT = {
 };
 
 export const SHOW_FUND = {
-  name: "Narnolia Global Equity UCITS Fund",
-  short: "Narnolia Global Equity",
+  name: "Voguestock Global Equity UCITS Fund",
+  short: "Voguestock Global Equity",
   isin: "IE00BNAR0L12",
   domicile: "Ireland (UCITS)",
   structure: "Accumulating",

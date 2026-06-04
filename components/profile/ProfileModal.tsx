@@ -7,7 +7,7 @@ import { DEFAULT_PROFILE, ValuraProfile, BRACKET_LABELS, saveProfile } from "@/l
 import { useState } from "react";
 
 /** Routes where the onboarding modal must never interrupt (presentation/demo). */
-const SUPPRESS_ON = ["/magic", "/demo", "/narnolia"];
+const SUPPRESS_ON = ["/magic", "/demo", "/voguestock"];
 
 const BRACKETS: ValuraProfile["incomeBracket"][] = [
   "up_to_50L",

@@ -1,5 +1,5 @@
 /**
- * Dummy client portfolios for the Narnolia × Valura partner demo.
+ * Dummy client portfolios for the Voguestock × Valura partner demo.
  * Extensive mix of US stocks, ETFs and funds. All figures illustrative.
  */
 export const USD_INR = 83.5;

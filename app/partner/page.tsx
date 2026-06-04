@@ -12,7 +12,7 @@ import { generateDoc, generateAll, type DocType } from "@/lib/partner/generateDo
 
 const C = {
   navy: "#00111B", green: "#05A049", greenBg: "#EDFAF3", greenBorder: "#B4E3C8",
-  orange: "#E0342A", orangeBg: "#FDECEA", orangeBorder: "#F4C2BD",
+  orange: "#E0822E", orangeBg: "#FCEFE0", orangeBorder: "#F0C99A",
   border: "#E5E7EB", muted: "#6b7280", page: "#FFFFFC",
 };
 
@@ -115,7 +115,7 @@ export default function PartnerPage() {
       <section style={{ background: C.navy }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 pt-9 pb-10">
           <div className="flex items-center gap-3 mb-5">
-            <span className="text-2xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: C.orange }}>Narnolia<sup className="text-xs">®</sup></span>
+            <span className="text-2xl font-extrabold italic" style={{ fontFamily: "var(--font-bricolage)", color: C.orange }}>Voguestock</span>
             <span className="text-xl font-light text-white/40">×</span>
             <span className="text-2xl font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: C.green }}>Valura</span>
             <span className="ml-2 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest" style={{ background: "rgba(5,160,73,0.18)", color: "#7BE2A8" }}>Partner tax suite</span>
@@ -198,7 +198,7 @@ export default function PartnerPage() {
             ))}
           </div>
           <p className="mt-3 flex items-center gap-1.5 text-[11px]" style={{ color: C.muted }}>
-            <Sparkles className="h-3.5 w-3.5" style={{ color: C.green }} /> Generated live for <b style={{ color: C.navy }}>&nbsp;{client.name}</b> — co-branded Narnolia × Valura, ITR-formatted, illustrative.
+            <Sparkles className="h-3.5 w-3.5" style={{ color: C.green }} /> Generated live for <b style={{ color: C.navy }}>&nbsp;{client.name}</b> — co-branded Voguestock × Valura, ITR-formatted, illustrative.
           </p>
         </div>
 
@@ -230,7 +230,7 @@ export default function PartnerPage() {
                 </div>
                 <p className="text-[13px] leading-relaxed mb-4" style={{ color: "#33514a" }}>
                   A vetted chartered accountant reviews these exact documents, files Form 67, and signs off the return.
-                  Narnolia clients get priority slots.
+                  Voguestock clients get priority slots.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {["Schedule FA review", "Form 67 filing", "ITR-2 / ITR-3", "Estate-tax planning"].map((x) => (
@@ -277,7 +277,7 @@ export default function PartnerPage() {
           <div className="flex items-center gap-3">
             <Sparkles className="h-5 w-5 flex-shrink-0" style={{ color: C.orange }} />
             <p className="text-sm" style={{ color: C.navy }}>
-              <b>End-to-end:</b> Narnolia gives your clients the trades — Valura turns them into filed, CA-signed tax returns.
+              <b>End-to-end:</b> Voguestock gives your clients the trades — Valura turns them into filed, CA-signed tax returns.
             </p>
           </div>
         </div>
@@ -320,7 +320,7 @@ function BookingModal({ client, onClose }: { client: Client; onClose: () => void
           style={{ background: "#fff", borderColor: C.border }}>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: C.orange }}>Narnolia</span>
+              <span className="text-sm font-extrabold italic" style={{ fontFamily: "var(--font-bricolage)", color: C.orange }}>Voguestock</span>
               <span className="text-xs text-gray-400">×</span>
               <span className="text-sm font-extrabold" style={{ fontFamily: "var(--font-bricolage)", color: C.green }}>Valura</span>
               <span className="text-sm font-bold" style={{ color: C.navy }}>· CA Desk</span>

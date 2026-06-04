@@ -1,5 +1,5 @@
 /**
- * Narnolia × Valura — comprehensive co-branded "Foreign Income & Tax Report".
+ * Voguestock × Valura — comprehensive co-branded "Foreign Income & Tax Report".
  * One workbook, many tabs: Summary, Capital Gains, Schedule FA, Schedule FSI,
  * and a Filing Checklist. Generated client-side via exceljs.
  */
@@ -8,11 +8,11 @@ import {
   SHOW, SHOW_CLIENT, SHOW_FUND, computeShow, inrShort, FILING_CHECKLIST, USD_INR,
 } from "@/lib/showcase-data";
 
-const RED = "FFE0342A";       // Narnolia
+const RED = "FFE0822E";       // Voguestock (orange)
 const GREEN = "FF05A049";     // Valura
 const NAVY = "FF00111B";
 const GREEN_SOFT = "FFEDFAF3";
-const RED_SOFT = "FFFDECEA";
+const RED_SOFT = "FFFCEFE0";
 const GREY = "FF6B7280";
 const BORDER = "FFE5E7EB";
 const WHITE = "FFFFFFFF";
@@ -30,7 +30,7 @@ function banner(ws: Worksheet, last: number, title: string, sub: string) {
   const b = ws.getCell("A1");
   b.value = {
     richText: [
-      { text: "Narnolia", font: { bold: true, size: 18, color: { argb: RED } } },
+      { text: "Voguestock", font: { bold: true, size: 18, color: { argb: RED } } },
       { text: "  ×  ", font: { bold: true, size: 16, color: { argb: WHITE } } },
       { text: "Valura", font: { bold: true, size: 18, color: { argb: GREEN } } },
     ],
@@ -109,7 +109,7 @@ function row(ws: Worksheet, r: number, vals: (string | number)[], opts?: { alt?:
 function disclaimer(ws: Worksheet, start: number, last: number) {
   const L = ws.getColumn(last).letter;
   const lines = [
-    "Illustrative co-branded report — Narnolia × Valura.",
+    "Illustrative co-branded report — Voguestock × Valura.",
     "USD→INR at the SBI TT buying rate. Tax rules per Finance Act 2025 (FY 2025-26). Confirm with your CA before filing.",
   ];
   lines.forEach((l, i) => {
@@ -166,7 +166,7 @@ function tabCapitalGains(wb: Workbook) {
   const m = computeShow();
   const ws = wb.addWorksheet("Capital Gains");
   ws.columns = [{ width: 30 }, { width: 14 }, { width: 14 }, { width: 12 }, { width: 14 }, { width: 16 }, { width: 16 }, { width: 16 }];
-  banner(ws, 8, "Capital Gains — Tax P&L", "Realised gain on the Narnolia UCITS redemption · LTCG > 24 months at 12.5%");
+  banner(ws, 8, "Capital Gains — Tax P&L", "Realised gain on the Voguestock UCITS redemption · LTCG > 24 months at 12.5%");
   head(ws, 6, ["Security", "Buy date", "Sell date", "Units", "Cost ₹", "Proceeds ₹", "Gain ₹", "Type"]);
   row(ws, 7, [SHOW_FUND.short, SHOW.buyDate, SHOW.sellDate, m.units, SHOW.investINR, m.proceedsINR, m.gainINR, "LTCG"], { money: [4, 5, 6] });
   section(ws, 9, 8, "Tax computation");
@@ -231,7 +231,7 @@ function tabChecklist(wb: Workbook) {
 export async function generateShowcaseReport() {
   const ExcelJS = (await import("exceljs")).default;
   const wb = new ExcelJS.Workbook();
-  wb.creator = "Narnolia × Valura";
+  wb.creator = "Voguestock × Valura";
   tabSummary(wb);
   tabCapitalGains(wb);
   tabScheduleFA(wb);
@@ -242,7 +242,7 @@ export async function generateShowcaseReport() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `Narnolia-Valura_Foreign-Income-Tax-Report_${SHOW_CLIENT.name.replace(/\s+/g, "-")}_FY25-26.xlsx`;
+  a.download = `Voguestock-Valura_Foreign-Income-Tax-Report_${SHOW_CLIENT.name.replace(/\s+/g, "-")}_FY25-26.xlsx`;
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
 }

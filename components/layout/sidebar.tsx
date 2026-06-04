@@ -36,7 +36,7 @@ const NAV_SECTIONS = [
     items: [
       { href: "/",        label: "Overview", icon: Home,        desc: "Calculators & guides" },
       { href: "/magic",   label: "Magic Demo", icon: Sparkles,  desc: "Cinematic walkthrough", badge: "New" },
-      { href: "/narnolia", label: "Narnolia Show", icon: Sparkles, desc: "UCITS → tax-solved demo", badge: "Live" },
+      { href: "/voguestock", label: "Voguestock Show", icon: Sparkles, desc: "UCITS → tax-solved demo", badge: "Live" },
       { href: "/answers", label: "Answers",  icon: BookOpen,    desc: "Plain-English tax guide", badge: "New" },
       { href: "/blog",    label: "Blog",     icon: Newspaper,   desc: "GIFT City knowledge base" },
     ],
@@ -58,7 +58,7 @@ const NAV_SECTIONS = [
     label: "Tools",
     items: [
       { href: "/funds", label: "Fund Tracker", icon: Layers,        desc: "Feeder & GIFT City funds", badge: "New" },
-      { href: "/partner", label: "Partner Suite", icon: FileText,   desc: "Narnolia × Valura docs", badge: "New" },
+      { href: "/partner", label: "Partner Suite", icon: FileText,   desc: "Voguestock × Valura docs", badge: "New" },
       { href: "/lrs",  label: "LRS Tracker",  icon: Globe,          desc: "Family remittance tracker" },
       { href: "/tlh",  label: "TLH Engine",   icon: Scissors,       desc: "Tax-loss harvesting", badge: "4 found" },
       { href: "/chat", label: "AI Advisor",   icon: MessageSquare,  desc: "GPT-4o + 6 tools" },
