@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useProfile } from "@/components/profile/ProfileContext";
 import { BRACKET_LABELS } from "@/lib/user-profile";
+import { usePartner } from "@/lib/partner-brand";
 
 const NAV_SECTIONS = [
   {
@@ -36,7 +37,7 @@ const NAV_SECTIONS = [
     items: [
       { href: "/",        label: "Overview", icon: Home,        desc: "Calculators & guides" },
       { href: "/magic",   label: "Magic Demo", icon: Sparkles,  desc: "Cinematic walkthrough", badge: "New" },
-      { href: "/voguestock", label: "Voguestock Show", icon: Sparkles, desc: "UCITS → tax-solved demo", badge: "Live" },
+      { href: "/voguestock", label: "{brand} Show", icon: Sparkles, desc: "UCITS → tax-solved demo", badge: "Live" },
       { href: "/answers", label: "Answers",  icon: BookOpen,    desc: "Plain-English tax guide", badge: "New" },
       { href: "/blog",    label: "Blog",     icon: Newspaper,   desc: "GIFT City knowledge base" },
     ],
@@ -58,7 +59,7 @@ const NAV_SECTIONS = [
     label: "Tools",
     items: [
       { href: "/funds", label: "Fund Tracker", icon: Layers,        desc: "Feeder & GIFT City funds", badge: "New" },
-      { href: "/partner", label: "Partner Suite", icon: FileText,   desc: "Voguestock × Valura docs", badge: "New" },
+      { href: "/partner", label: "Partner Suite", icon: FileText,   desc: "{brand} × Valura docs", badge: "New" },
       { href: "/lrs",  label: "LRS Tracker",  icon: Globe,          desc: "Family remittance tracker" },
       { href: "/tlh",  label: "TLH Engine",   icon: Scissors,       desc: "Tax-loss harvesting", badge: "4 found" },
       { href: "/chat", label: "AI Advisor",   icon: MessageSquare,  desc: "GPT-4o + 6 tools" },
@@ -70,6 +71,8 @@ export function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { profile, setShowPanel } = useProfile();
+  const partner = usePartner();
+  const brand = (s: string) => s.replace("{brand}", partner.name);
 
   // Close drawer on route change
   useEffect(() => { setMobileOpen(false); }, [pathname]);
@@ -132,10 +135,10 @@ export function Sidebar() {
                       style={{ color: isActive ? "#05A049" : "rgba(255,255,255,0.4)" }} />
                     <div className="flex-1 min-w-0">
                       <p className={cn("font-medium leading-none text-[13px]", isActive ? "text-white" : "text-white/60")}>
-                        {item.label}
+                        {brand(item.label)}
                       </p>
                       <p className="mt-0.5 truncate text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>
-                        {item.desc}
+                        {item.desc ? brand(item.desc) : ""}
                       </p>
                     </div>
                     {item.badge && (
